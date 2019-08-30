@@ -52,7 +52,7 @@ cp files/repositories.yaml %{helm_home}/repository/repositories.yaml
 cp files/index.yaml %{helm_home}/repository/local/index.yaml
 
 # Stage helm-toolkit in the local repo
-cp  %{helm_folder}/helm-toolkit-%{toolkit_version}.tgz .
+cp  %{helm_folder}/helm-toolkit-%{toolkit_version}.tgz helm-charts/
 
 # Host a server for the charts
 helm serve --repo-path . &
@@ -60,9 +60,11 @@ helm repo rm local
 helm repo add local http://localhost:8879/charts
 
 # Make the charts. These produce a tgz file
+cd helm-charts
 make rbd-provisioner
 make ceph-pools-audit
 make node-feature-discovery 
+cd -
 
 # Terminate helm server (the last backgrounded task)
 kill %1
@@ -76,7 +78,7 @@ mkdir -p %{app_staging}
 cp files/metadata.yaml %{app_staging}
 cp manifests/manifest.yaml %{app_staging}
 mkdir -p %{app_staging}/charts
-cp *.tgz %{app_staging}/charts
+cp helm-charts/*.tgz %{app_staging}/charts
 cd %{app_staging}
 
 # Populate metadata
@@ -95,7 +97,7 @@ rm -fr %{app_staging}
 install -d -m 755 %{buildroot}/%{app_folder}
 install -p -D -m 755 %{_builddir}/%{app_tarball} %{buildroot}/%{app_folder}
 install -d -m 755 ${RPM_BUILD_ROOT}/opt/extracharts
-install -p -D -m 755 node-feature-discovery-*.tgz ${RPM_BUILD_ROOT}/opt/extracharts
+install -p -D -m 755 helm-charts/node-feature-discovery-*.tgz ${RPM_BUILD_ROOT}/opt/extracharts
 
 %files
 %defattr(-,root,root,-)
