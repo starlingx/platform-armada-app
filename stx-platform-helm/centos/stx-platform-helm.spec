@@ -9,7 +9,7 @@
 %global helm_folder /usr/lib/helm
 %global toolkit_version 0.1.0
 
-Summary: StarlingX Platform Helm charts
+Summary: StarlingX K8S application: Platform Integration
 Name: stx-platform-helm
 Version: 1.0
 Release: %{tis_patch_ver}%{?_tis_dist}
@@ -24,9 +24,11 @@ BuildArch: noarch
 
 BuildRequires: helm
 BuildRequires: openstack-helm-infra
+BuildRequires: python-k8sapp-platform
+BuildRequires: python-k8sapp-platform-wheels
 
 %description
-StarlingX Platform Helm charts
+The StarlingX K8S application for platform integration
 
 %prep
 %setup
@@ -63,7 +65,8 @@ helm repo add local http://localhost:8879/charts
 cd helm-charts
 make rbd-provisioner
 make ceph-pools-audit
-make node-feature-discovery 
+# TODO (rchurch): remove
+make node-feature-discovery
 cd -
 
 # Terminate helm server (the last backgrounded task)
@@ -86,6 +89,10 @@ sed -i 's/@APP_NAME@/%{app_name}/g' %{app_staging}/metadata.yaml
 sed -i 's/@APP_VERSION@/%{version}-%{tis_patch_ver}/g' %{app_staging}/metadata.yaml
 sed -i 's/@HELM_REPO@/%{helm_repo}/g' %{app_staging}/metadata.yaml
 
+# Copy the plugins: installed in the buildroot
+mkdir -p %{app_staging}/plugins
+cp /plugins/*.whl %{app_staging}/plugins
+
 # package it up
 find . -type f ! -name '*.md5' -print0 | xargs -0 md5sum > checksum.md5
 tar -zcf %{_builddir}/%{app_tarball} -C %{app_staging}/ .
@@ -97,6 +104,7 @@ rm -fr %{app_staging}
 install -d -m 755 %{buildroot}/%{app_folder}
 install -p -D -m 755 %{_builddir}/%{app_tarball} %{buildroot}/%{app_folder}
 install -d -m 755 ${RPM_BUILD_ROOT}/opt/extracharts
+# TODO (rchurch): remove
 install -p -D -m 755 helm-charts/node-feature-discovery-*.tgz ${RPM_BUILD_ROOT}/opt/extracharts
 
 %files
