@@ -4,4 +4,4 @@ COPY_LIST_TO_TAR="\
     $STX_BASE/helm-charts/node-feature-discovery/node-feature-discovery/helm-charts \
 "
 
-TIS_PATCH_VER=7
+TIS_PATCH_VER=8

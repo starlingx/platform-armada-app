@@ -7,7 +7,7 @@
 */}}
 
 {{- if eq .Values.global.deployAs "DaemonSet" }}
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: {{ .Values.global.name }}

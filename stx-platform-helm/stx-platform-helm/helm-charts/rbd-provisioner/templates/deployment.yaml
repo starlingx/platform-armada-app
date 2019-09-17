@@ -7,13 +7,16 @@
 */}}
 
 {{- if eq .Values.global.deployAs "Deployment" }}
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Values.global.name }}
   namespace: {{ .Release.Namespace }}
 spec:
   replicas: {{ .Values.global.replicas }}
+  selector:
+    matchLabels:
+      app:  {{ .Values.global.name }}
   strategy:
     type: Recreate
   template:
