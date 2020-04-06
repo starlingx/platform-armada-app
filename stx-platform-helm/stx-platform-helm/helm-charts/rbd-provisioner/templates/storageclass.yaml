@@ -31,6 +31,8 @@ parameters:
     userSecretName: {{ $classConfig.userSecretName }}
     imageFormat: {{ or $classConfig.imageFormat $defaults.imageFormat | quote }}
     imageFeatures: {{ or $classConfig.imageFeatures $defaults.imageFeatures}}
+mountOptions:
+- discard
 ---
 {{- end }}
 {{- end }}
