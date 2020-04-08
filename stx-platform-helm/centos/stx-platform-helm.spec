@@ -24,6 +24,7 @@ BuildArch: noarch
 
 BuildRequires: helm
 BuildRequires: openstack-helm-infra
+BuildRequires: chartmuseum
 BuildRequires: python-k8sapp-platform
 BuildRequires: python-k8sapp-platform-wheels
 
@@ -34,31 +35,12 @@ The StarlingX K8S application for platform integration
 %setup
 
 %build
-# initialize helm and build the toolkit
-# helm init --client-only does not work if there is no networking
-# The following commands do essentially the same as: helm init
-%define helm_home  %{getenv:HOME}/.helm
-mkdir  %{helm_home}
-mkdir  %{helm_home}/repository
-mkdir  %{helm_home}/repository/cache
-mkdir  %{helm_home}/repository/local
-mkdir  %{helm_home}/plugins
-mkdir  %{helm_home}/starters
-mkdir  %{helm_home}/cache
-mkdir  %{helm_home}/cache/archive
-
-# Stage a repository file that only has a local repo
-cp files/repositories.yaml %{helm_home}/repository/repositories.yaml
-
-# Stage a local repo index that can be updated by the build
-cp files/index.yaml %{helm_home}/repository/local/index.yaml
-
 # Stage helm-toolkit in the local repo
-cp  %{helm_folder}/helm-toolkit-%{toolkit_version}.tgz helm-charts/
+cp %{helm_folder}/helm-toolkit-%{toolkit_version}.tgz helm-charts/
 
-# Host a server for the charts
-helm serve --repo-path . &
-helm repo rm local
+# Host a server for the charts.
+chartmuseum --debug --port=8879 --context-path='/charts' --storage="local" --storage-local-rootdir="./helm-charts" &
+sleep 2
 helm repo add local http://localhost:8879/charts
 
 # Make the charts. These produce a tgz file
