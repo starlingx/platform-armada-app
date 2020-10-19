@@ -47,6 +47,7 @@ helm repo add local http://localhost:8879/charts
 cd helm-charts
 make rbd-provisioner
 make ceph-pools-audit
+make cephfs-provisioner
 # TODO (rchurch): remove
 make node-feature-discovery
 cd -

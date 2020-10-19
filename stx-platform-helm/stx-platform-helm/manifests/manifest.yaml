@@ -47,6 +47,35 @@ data:
 schema: armada/Chart/v1
 metadata:
   schema: metadata/Document/v1
+  name: kube-system-cephfs-provisioner
+data:
+  chart_name: cephfs-provisioner
+  release: cephfs-provisioner
+  namespace: kube-system
+  wait:
+    timeout: 1800
+    labels:
+      app: cephfs-provisioner
+  install:
+    no_hooks: false
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+        - type: job
+          labels:
+            app: cephfs-provisioner
+  source:
+    type: tar
+    location: http://172.17.0.1:8080/helm_charts/stx-platform/cephfs-provisioner-0.1.0.tgz
+    subpath: cephfs-provisioner
+    reference: master
+  dependencies:
+    - helm-toolkit
+---
+schema: armada/Chart/v1
+metadata:
+  schema: metadata/Document/v1
   name: kube-system-ceph-pools-audit
 data:
   chart_name: ceph-pools-audit
@@ -83,6 +112,7 @@ data:
   chart_group:
   - kube-system-rbd-provisioner
   - kube-system-ceph-pools-audit
+  - kube-system-cephfs-provisioner
 ---
 schema: armada/Manifest/v1
 metadata:
