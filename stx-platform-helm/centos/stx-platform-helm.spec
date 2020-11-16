@@ -9,7 +9,7 @@
 %global helm_folder /usr/lib/helm
 %global toolkit_version 0.1.0
 
-Summary: StarlingX Platform Helm charts
+Summary: StarlingX K8S application: Platform Integration
 Name: stx-platform-helm
 Version: 1.0
 Release: %{tis_patch_ver}%{?_tis_dist}
@@ -24,46 +24,31 @@ BuildArch: noarch
 
 BuildRequires: helm
 BuildRequires: openstack-helm-infra
+BuildRequires: chartmuseum
+BuildRequires: python-k8sapp-platform
+BuildRequires: python-k8sapp-platform-wheels
 
 %description
-StarlingX Platform Helm charts
+The StarlingX K8S application for platform integration
 
 %prep
 %setup
 
 %build
-# initialize helm and build the toolkit
-# helm init --client-only does not work if there is no networking
-# The following commands do essentially the same as: helm init
-%define helm_home  %{getenv:HOME}/.helm
-mkdir  %{helm_home}
-mkdir  %{helm_home}/repository
-mkdir  %{helm_home}/repository/cache
-mkdir  %{helm_home}/repository/local
-mkdir  %{helm_home}/plugins
-mkdir  %{helm_home}/starters
-mkdir  %{helm_home}/cache
-mkdir  %{helm_home}/cache/archive
-
-# Stage a repository file that only has a local repo
-cp files/repositories.yaml %{helm_home}/repository/repositories.yaml
-
-# Stage a local repo index that can be updated by the build
-cp files/index.yaml %{helm_home}/repository/local/index.yaml
-
 # Stage helm-toolkit in the local repo
-cp  %{helm_folder}/helm-toolkit-%{toolkit_version}.tgz helm-charts/
+cp %{helm_folder}/helm-toolkit-%{toolkit_version}.tgz helm-charts/
 
-# Host a server for the charts
-helm serve --repo-path . &
-helm repo rm local
+# Host a server for the charts.
+chartmuseum --debug --port=8879 --context-path='/charts' --storage="local" --storage-local-rootdir="./helm-charts" &
+sleep 2
 helm repo add local http://localhost:8879/charts
 
 # Make the charts. These produce a tgz file
 cd helm-charts
 make rbd-provisioner
 make ceph-pools-audit
-make node-feature-discovery 
+# TODO (rchurch): remove
+make node-feature-discovery
 cd -
 
 # Terminate helm server (the last backgrounded task)
@@ -86,6 +71,10 @@ sed -i 's/@APP_NAME@/%{app_name}/g' %{app_staging}/metadata.yaml
 sed -i 's/@APP_VERSION@/%{version}-%{tis_patch_ver}/g' %{app_staging}/metadata.yaml
 sed -i 's/@HELM_REPO@/%{helm_repo}/g' %{app_staging}/metadata.yaml
 
+# Copy the plugins: installed in the buildroot
+mkdir -p %{app_staging}/plugins
+cp /plugins/*.whl %{app_staging}/plugins
+
 # package it up
 find . -type f ! -name '*.md5' -print0 | xargs -0 md5sum > checksum.md5
 tar -zcf %{_builddir}/%{app_tarball} -C %{app_staging}/ .
@@ -97,6 +86,7 @@ rm -fr %{app_staging}
 install -d -m 755 %{buildroot}/%{app_folder}
 install -p -D -m 755 %{_builddir}/%{app_tarball} %{buildroot}/%{app_folder}
 install -d -m 755 ${RPM_BUILD_ROOT}/opt/extracharts
+# TODO (rchurch): remove
 install -p -D -m 755 helm-charts/node-feature-discovery-*.tgz ${RPM_BUILD_ROOT}/opt/extracharts
 
 %files

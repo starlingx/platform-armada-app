@@ -29,6 +29,8 @@ init-%:
 
 lint-%: init-%
 	if [ -d $* ]; then helm lint $*; fi
+	@echo "Clobber dependencies from packaging"
+	rm -v -f $*/requirements.lock $*/requirements.yaml
 
 build-%: lint-%
 	if [ -d $* ]; then helm package $*; fi
