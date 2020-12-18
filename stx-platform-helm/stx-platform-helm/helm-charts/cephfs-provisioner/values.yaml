@@ -17,6 +17,10 @@ global:
   #
   provisioner_name: "ceph.com/cephfs"
   #
+  # Enable this storage class as the system default storage class
+  #
+  defaultStorageClass: fast-cephfs-disabled
+  #
   # If configured, tolerations will add a toleration field to the Pod.
   #
   # Node tolerations for cephfs-provisioner scheduling to nodes with taints.
