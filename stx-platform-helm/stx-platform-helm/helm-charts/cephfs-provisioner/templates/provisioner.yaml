@@ -1,0 +1,67 @@
+{{/*
+#
+# Copyright (c) 2020 Wind River Systems, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+*/}}
+
+{{- $defaults := .Values.classdefaults }}
+{{- $cephfs_provisioner_image := .Values.images.tags.cephfs_provisioner }}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $defaults.provisionerConfigName }}
+  namespace: {{ $defaults.cephFSNamespace }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: {{ $defaults.provisionerConfigName }}
+  template:
+    metadata:
+      labels:
+        app: {{ $defaults.provisionerConfigName }}
+    spec:
+    {{- if (.Values.global.rbac) or (.Values.global.reuseRbac)}}
+      serviceAccount: {{ .Values.rbac.serviceAccount }}
+    {{- end }}
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - {{ .Values.global.name }}
+            topologyKey: kubernetes.io/hostname
+      containers:
+      - name: {{ $defaults.provisionerConfigName }}
+        image: {{ $cephfs_provisioner_image | quote }}
+        env:
+        - name: PROVISIONER_NAME
+          value: {{ $defaults.provisionerName }}
+        - name: PROVISIONER_SECRET_NAMESPACE
+          value: {{ $defaults.cephFSNamespace }}
+        command:
+        - "/usr/local/bin/{{ $defaults.provisionerConfigName }}"
+        args:
+        - "-id={{ $defaults.provisionerConfigName }}-1"
+      serviceAccount: {{ $defaults.provisionerConfigName }}
+{{- if .Values.global.nodeSelector }}
+      nodeSelector:
+{{ .Values.global.nodeSelector | toYaml | trim | indent 8 }}
+{{- end }}
+{{- if .Values.global.tolerations }}
+      tolerations:
+{{ .Values.global.tolerations | toYaml | trim | indent 8 }}
+{{- end}}
+{{- if .Values.global.resources }}
+      resources:
+{{ .Values.global.resources | toYaml | trim | indent 8 }}
+{{- end }}
