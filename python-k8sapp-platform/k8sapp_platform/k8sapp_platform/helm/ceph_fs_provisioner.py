@@ -171,7 +171,6 @@ class CephFSProvisionerHelm(base.BaseHelm):
 
         global_settings = {
             "replicas": self._num_provisioned_controllers(),
-            "defaultStorageClass": app_constants.K8S_CEPHFS_PROVISIONER_STOR_CLASS_NAME
         }
 
         overrides = {

@@ -16,7 +16,7 @@ metadata:
   name: {{ $defaults.provisionerConfigName }}
   namespace: {{ $defaults.cephFSNamespace }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.global.replicas }}
   strategy:
     type: Recreate
   selector:
