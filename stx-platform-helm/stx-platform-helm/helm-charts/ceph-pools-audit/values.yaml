@@ -52,6 +52,7 @@ dependencies:
 jobs:
   job_ceph_pools_audit:
     cron: "*/5 * * * *"
+    startingDeadlineSeconds: 200
     history:
       success: 3
       failed: 1
