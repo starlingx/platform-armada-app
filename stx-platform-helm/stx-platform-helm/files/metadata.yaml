@@ -1,3 +1,15 @@
 app_name: @APP_NAME@
 app_version: @APP_VERSION@
 helm_repo: @HELM_REPO@
+behavior:
+  platform_managed_app: yes
+  desired_state: applied
+  evaluate_reapply:
+    triggers:
+      - type: runtime-apply-puppet # TODO(dvoicule): optimize triggers
+      - type: host-availability-updated
+        filters:
+          - availability: services-enabled
+      - type: host-delete
+        filters:
+          - personality: controller
