@@ -27,9 +27,6 @@ spec:
       labels:
         app: {{ $defaults.provisionerConfigName }}
     spec:
-    {{- if (.Values.global.rbac) or (.Values.global.reuseRbac)}}
-      serviceAccount: {{ .Values.rbac.serviceAccount }}
-    {{- end }}
       affinity:
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:

@@ -55,30 +55,6 @@ global:
   # Node Selector
   #
   nodeSelector: { node-role.kubernetes.io/master: "" }
-#
-# RBAC options.
-# Defaults should be fine in most cases.
-rbac:
-  #
-  # Cluster Role name
-  #
-  clusterRole: cephfs-provisioner
-  #
-  # Cluster Role Binding name
-  #
-  clusterRoleBinding: cephfs-provisioner
-  #
-  # Role name
-  #
-  role: cephfs-provisioner
-  #
-  # Role Binding name
-  #
-  roleBinding: cephfs-provisioner
-  #
-  # Defines a name of the service account which Provisioner will use to communicate with API server.
-  #
-  serviceAccount: cephfs-provisioner
 
 #
 # Configure storage classes.

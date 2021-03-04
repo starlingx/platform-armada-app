@@ -36,9 +36,10 @@ metadata:
   name: cephfs-storage-init
   namespace: {{ $defaults.cephFSNamespace }}
 spec:
+  backoffLimit: 5
   template:
     spec:
-      serviceAccountName: {{ $defaults.rbacConfigName }}
+      serviceAccountName: {{ $defaults.provisionerConfigName }}
       volumes:
       - name: cephfs-storage-init
         configMap:
@@ -84,5 +85,8 @@ spec:
             subPath: ceph.conf
             readOnly: true
         {{- end }}
-      restartPolicy: Never
-  backoffLimit: 4
+      restartPolicy: OnFailure
+      {{- if .Values.global.nodeSelector }}
+      nodeSelector:
+      {{ .Values.global.nodeSelector | toYaml | trim | indent 8 }}
+      {{- end }}
