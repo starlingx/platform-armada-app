@@ -35,6 +35,9 @@ kind: Job
 metadata:
   name: cephfs-storage-init
   namespace: {{ $defaults.cephFSNamespace }}
+  annotations:
+    "helm.sh/hook": "post-install, pre-upgrade, pre-rollback"
+    "helm.sh/hook-delete-policy": "before-hook-creation"
 spec:
   backoffLimit: 5
   template:
