@@ -1,3 +1,4 @@
+%global app_name platform-integ-apps
 %global pypi_name k8sapp-platform
 %global sname k8sapp_platform
 
@@ -34,8 +35,8 @@ export PBR_VERSION=%{version}
 export PBR_VERSION=%{version}.%{tis_patch_ver}
 export SKIP_PIP_INSTALL=1
 %{__python2} setup.py install --skip-build --root %{buildroot}
-mkdir -p ${RPM_BUILD_ROOT}/plugins
-install -m 644 dist/*.whl ${RPM_BUILD_ROOT}/plugins/
+mkdir -p ${RPM_BUILD_ROOT}/plugins/%{app_name}
+install -m 644 dist/*.whl ${RPM_BUILD_ROOT}/plugins/%{app_name}/
 
 %files
 %{python2_sitelib}/%{sname}
