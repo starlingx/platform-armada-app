@@ -73,7 +73,6 @@ classdefaults:
   - 192.168.204.2:6789
   provisionerConfigName: cephfs-provisioner
   provisionerName: ceph.com/cephfs
-  rbacConfigName: cephfs-provisioner-keyring
 
 # Configure storage classes.
 # This section should be tailored to your setup. It allows you to define multiple storage
