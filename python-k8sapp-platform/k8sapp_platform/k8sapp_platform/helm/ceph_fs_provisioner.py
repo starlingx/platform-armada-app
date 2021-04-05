@@ -170,7 +170,7 @@ class CephFSProvisionerHelm(base.BaseHelm):
             classes.append(cls)
 
         global_settings = {
-            "replicas": self._num_provisioned_controllers(),
+            "replicas": self._num_replicas_for_platform_app(),
         }
 
         overrides = {
