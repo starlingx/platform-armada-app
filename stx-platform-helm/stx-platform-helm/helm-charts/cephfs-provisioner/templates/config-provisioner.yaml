@@ -1,6 +1,6 @@
 {{/*
 #
-# Copyright (c) 2020 Wind River Systems, Inc.
+# Copyright (c) 2020-2021 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -15,6 +15,9 @@ kind: ConfigMap
 metadata:
   name: ceph-config-file
   namespace: {{ $defaults.cephFSNamespace }}
+  annotations:
+    "helm.sh/hook": "pre-upgrade, pre-install"
+    "helm.sh/hook-delete-policy": "before-hook-creation"
 data:
   ceph.conf: |
 {{ tuple "conf/_ceph-conf.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}

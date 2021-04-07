@@ -1,0 +1,30 @@
+{{/*
+#
+# Copyright (c) 2021 Wind River Systems, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+*/}}
+
+{{- if .Values.manifests.configmap_ceph_conf }}
+{{- $envAll := . }}
+{{- $ceph := $envAll.Values.conf.ceph }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $envAll.Values.ceph_client.configmap }}
+  namespace: {{ $envAll.Release.namespace }}
+  labels:
+    app: ceph-pools-audit
+  annotations:
+    "helm.sh/hook": "pre-upgrade, pre-install"
+    "helm.sh/hook-delete-policy": "before-hook-creation"
+data:
+  ceph.conf: |
+    [global]
+    auth_supported = none
+    {{ $monitors := $ceph.monitors }}{{ range $index, $element := $monitors}}
+    [mon.{{- $index }}]
+    mon_addr = {{ $element }}
+    {{- end }}
+{{- end }}
