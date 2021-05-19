@@ -3,12 +3,94 @@
     check:
       jobs:
         - openstack-tox-linters
+        - k8sapp-platform-tox-py27
+        - k8sapp-platform-tox-py36
+        - k8sapp-platform-tox-flake8
+        - k8sapp-platform-tox-pylint
+        - k8sapp-platform-tox-bandit
     gate:
       jobs:
         - openstack-tox-linters
+        - k8sapp-platform-tox-py27
+        - k8sapp-platform-tox-py36
+        - k8sapp-platform-tox-flake8
+        - k8sapp-platform-tox-pylint
+        - k8sapp-platform-tox-bandit
     post:
       jobs:
         - stx-platform-armada-app-upload-git-mirror
+
+- job:
+    name: k8sapp-platform-tox-py27
+    parent: tox
+    description: |
+      Run py27 test for k8sapp_platform
+    nodeset: ubuntu-xenial
+    required-projects:
+      - starlingx/config
+      - starlingx/fault
+      - starlingx/update
+      - starlingx/utilities
+    files:
+      - python-k8sapp-platform/*
+    vars:
+      tox_envlist: py27
+      tox_extra_args: -c python-k8sapp-platform/k8sapp_platform/tox.ini
+
+- job:
+    name: k8sapp-platform-tox-py36
+    parent: tox
+    description: |
+      Run py36 test for k8sapp_platform
+    nodeset: ubuntu-bionic
+    required-projects:
+      - starlingx/config
+      - starlingx/fault
+      - starlingx/update
+      - starlingx/utilities
+    files:
+      - python-k8sapp-platform/*
+    vars:
+      tox_envlist: py36
+      tox_extra_args: -c python-k8sapp-platform/k8sapp_platform/tox.ini
+
+- job:
+    name: k8sapp-platform-tox-flake8
+    parent: tox
+    description: |
+      Run flake8 test for k8sapp_platform
+    files:
+      - python-k8sapp-platform/*
+    vars:
+      tox_envlist: flake8
+      tox_extra_args: -c python-k8sapp-platform/k8sapp_platform/tox.ini
+
+- job:
+    name: k8sapp-platform-tox-pylint
+    parent: tox
+    description: |
+      Run pylint test for k8sapp_platform
+    required-projects:
+      - starlingx/config
+      - starlingx/fault
+      - starlingx/update
+      - starlingx/utilities
+    files:
+      - python-k8sapp-platform/*
+    vars:
+      tox_envlist: pylint
+      tox_extra_args: -c python-k8sapp-platform/k8sapp_platform/tox.ini
+
+- job:
+    name: k8sapp-platform-tox-bandit
+    parent: tox
+    description: |
+      Run bandit test for k8sapp_platform
+    files:
+      - python-k8sapp-platform/*
+    vars:
+      tox_envlist: bandit
+      tox_extra_args: -c python-k8sapp-platform/k8sapp_platform/tox.ini
 
 - job:
     name: stx-platform-armada-app-upload-git-mirror

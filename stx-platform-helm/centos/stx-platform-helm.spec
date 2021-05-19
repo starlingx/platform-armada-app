@@ -47,6 +47,7 @@ helm repo add local http://localhost:8879/charts
 cd helm-charts
 make rbd-provisioner
 make ceph-pools-audit
+make cephfs-provisioner
 # TODO (rchurch): remove
 make node-feature-discovery
 cd -
@@ -73,7 +74,7 @@ sed -i 's/@HELM_REPO@/%{helm_repo}/g' %{app_staging}/metadata.yaml
 
 # Copy the plugins: installed in the buildroot
 mkdir -p %{app_staging}/plugins
-cp /plugins/*.whl %{app_staging}/plugins
+cp /plugins/%{app_name}/*.whl %{app_staging}/plugins
 
 # package it up
 find . -type f ! -name '*.md5' -print0 | xargs -0 md5sum > checksum.md5

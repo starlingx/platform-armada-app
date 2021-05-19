@@ -1,0 +1,121 @@
+#
+# Copyright (c) 2020 Wind River Systems, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+#
+# Global options.
+# Defaults should be fine in most cases.
+global:
+  #
+  # Defines the application name of the provisioner.
+  #
+  name: "cephfs-provisioner"
+  #
+  # Defines the name of the provisioner associated with a set of storage classes
+  #
+  provisioner_name: "ceph.com/cephfs"
+  #
+  # Enable this storage class as the system default storage class
+  #
+  defaultStorageClass: fast-cephfs-disabled
+  #
+  # If configured, tolerations will add a toleration field to the Pod.
+  #
+  # Node tolerations for cephfs-provisioner scheduling to nodes with taints.
+  # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  # Example:
+  #  [
+  #    {
+  #      "key": "node-role.kubernetes.io/master",
+  #      "operator": "Exists"
+  #    }
+  #  ]
+  #
+  tolerations: []
+  # If configured, resources will set the requests/limits field to the Pod.
+  # Ref: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  # Example:
+  #  {
+  #    "limits": {
+  #      "memory": "200Mi"
+  #    },
+  #    "requests": {
+  #      "cpu": "100m",
+  #      "memory": "200Mi"
+  #    }
+  #  }
+  resources: {}
+  #
+  # Number of replicas to start when configured as deployment
+  #
+  replicas: 1
+  #
+  # Node Selector
+  #
+  nodeSelector: { node-role.kubernetes.io/master: "" }
+
+#
+# Configure storage classes.
+# Defaults for storage classes. Update this if you have a single Ceph storage cluster.
+# No need to add them to each class.
+#
+classdefaults:
+  # Ceph admin account
+  adminId: admin
+  # K8 secret name for the admin context
+  adminSecretName: ceph-secret-admin
+  adminSecretNamespace: kube-system
+  cephFSNamespace: kube-system
+  # Define ip addresses of Ceph Monitors
+  monitors:
+  - 192.168.204.2:6789
+  provisionerConfigName: cephfs-provisioner
+  provisionerName: ceph.com/cephfs
+
+# Configure storage classes.
+# This section should be tailored to your setup. It allows you to define multiple storage
+# classes for the same cluster (e.g. if you have tiers of drives with different speeds).
+# If you have multiple Ceph clusters take attributes from classdefaults and add them here.
+classes:
+- name: fast-cephfs # Name of storage class.
+  # Ceph pools name
+  data_pool_name: kube-cephfs-data
+  metadata_pool_name: kube-cephfs-metadata
+  # CephFS name
+  fs_name: kube-cephfs
+  # Ceph user name to access this pool
+  userId: ceph-pool-kube-cephfs-data
+  # K8 secret name with key for accessing the Ceph pool
+  userSecretName: ceph-pool-kube-cephfs-data
+  # Pool replication
+  replication: 1
+  # Pool crush rule name
+  crush_rule_name: storage_tier_ruleset
+  # Pool chunk size / PG_NUM
+  chunk_size: 64
+  # Additional namespace to allow storage class access (other than where
+  # installed)
+  claim_root: "/pvc-volumes"
+  additionalNamespaces:
+  - default
+  - kube-public
+
+# Defines:
+# - Provisioner's image name including container registry.
+# - CEPH helper image
+#
+images:
+  tags:
+    cephfs_provisioner: quay.io/external_storage/cephfs-provisioner:v2.1.0-k8s1.11
+    cephfs_provisioner_storage_init: docker.io/starlingx/ceph-config-helper:v1.15.0
+  pull_policy: "IfNotPresent"
+  local_registry:
+    active: false
+    exclude:
+      - dep_check
+      - image_repo_sync
+manifests:
+  configmap_bin: true
+

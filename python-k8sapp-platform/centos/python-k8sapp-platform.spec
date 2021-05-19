@@ -1,3 +1,4 @@
+%global app_name platform-integ-apps
 %global pypi_name k8sapp-platform
 %global sname k8sapp_platform
 
@@ -19,15 +20,6 @@ BuildRequires: python3-wheel
 %description
 StarlingX sysinv extensions: Platform Integration K8S app
 
-%package -n     python3-%{pypi_name}
-Summary:        StarlingX sysinv extensions: Platform Integration K8S app
-
-Requires:       python3-pbr >= 2.0.0
-Requires:       sysinv >= 1.0
-
-%description -n python3-%{pypi_name}
-StarlingX sysinv extensions: Platform Integration K8S app
-
 %prep
 %setup
 # Remove bundled egg-info
@@ -42,8 +34,8 @@ export PBR_VERSION=%{version}
 export PBR_VERSION=%{version}.%{tis_patch_ver}
 export SKIP_PIP_INSTALL=1
 %{__python3} setup.py install --skip-build --root %{buildroot}
-mkdir -p ${RPM_BUILD_ROOT}/plugins
-install -m 644 dist/*.whl ${RPM_BUILD_ROOT}/plugins/
+mkdir -p ${RPM_BUILD_ROOT}/plugins/%{app_name}
+install -m 644 dist/*.whl ${RPM_BUILD_ROOT}/plugins/%{app_name}/
 
 %files
 %{python3_sitelib}/%{sname}

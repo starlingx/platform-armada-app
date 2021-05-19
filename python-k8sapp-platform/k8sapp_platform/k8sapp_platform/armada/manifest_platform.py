@@ -10,6 +10,7 @@
 
 from k8sapp_platform.helm.ceph_pools_audit import CephPoolsAuditHelm
 from k8sapp_platform.helm.rbd_provisioner import RbdProvisionerHelm
+from k8sapp_platform.helm.ceph_fs_provisioner import CephFSProvisionerHelm
 
 from sysinv.common import constants
 from sysinv.helm import manifest_base as base
@@ -23,12 +24,14 @@ class PlatformArmadaManifestOperator(base.ArmadaManifestOperator):
     CHART_GROUP_CEPH = 'starlingx-ceph-charts'
     CHART_GROUPS_LUT = {
         CephPoolsAuditHelm.CHART: CHART_GROUP_CEPH,
-        RbdProvisionerHelm.CHART: CHART_GROUP_CEPH
+        RbdProvisionerHelm.CHART: CHART_GROUP_CEPH,
+        CephFSProvisionerHelm.CHART: CHART_GROUP_CEPH
     }
 
     CHARTS_LUT = {
         CephPoolsAuditHelm.CHART: 'kube-system-ceph-pools-audit',
-        RbdProvisionerHelm.CHART: 'kube-system-rbd-provisioner'
+        RbdProvisionerHelm.CHART: 'kube-system-rbd-provisioner',
+        CephFSProvisionerHelm.CHART: 'kube-system-cephfs-provisioner'
     }
 
     def platform_mode_manifest_updates(self, dbapi, mode):
