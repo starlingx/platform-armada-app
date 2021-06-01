@@ -23,9 +23,9 @@ spec:
       labels:
         app: {{ .Values.global.name }}
     spec:
-{{- if (.Values.global.rbac) or (.Values.global.reuseRbac)}}
-      serviceAccountName: {{.Values.rbac.serviceAccount}}
-{{- end}}
+{{- if or .Values.global.rbac .Values.global.reuseRbac }}
+      serviceAccountName: {{ .Values.rbac.serviceAccount }}
+{{- end }}
 {{- if .Values.global.tolerations }}
       tolerations:
 {{ .Values.global.tolerations | toYaml | trim | indent 8 }}
@@ -44,4 +44,4 @@ spec:
           env:
           - name: PROVISIONER_NAME
             value: {{ .Values.global.provisioner_name }}
-{{- end}}
+{{- end }}

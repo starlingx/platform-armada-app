@@ -24,7 +24,7 @@ spec:
       labels:
         app: {{ .Values.global.name }}
     spec:
-    {{- if (.Values.global.rbac) or (.Values.global.reuseRbac)}}
+    {{- if or .Values.global.rbac .Values.global.reuseRbac }}
       serviceAccount: {{ .Values.rbac.serviceAccount }}
     {{- end }}
       affinity:
