@@ -7,7 +7,7 @@
 
 # Build variables
 %global helm_folder /usr/lib/helm
-%global toolkit_version 0.1.0
+%global toolkit_version 0.2.19
 
 Summary: StarlingX K8S application: Platform Integration
 Name: stx-platform-helm
