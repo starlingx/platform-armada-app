@@ -4,7 +4,6 @@
       jobs:
         - openstack-tox-linters
         - k8sapp-platform-tox-py27
-        - k8sapp-platform-tox-py36
         - k8sapp-platform-tox-py39
         - k8sapp-platform-tox-flake8
         - k8sapp-platform-tox-pylint
@@ -13,7 +12,6 @@
       jobs:
         - openstack-tox-linters
         - k8sapp-platform-tox-py27
-        - k8sapp-platform-tox-py36
         - k8sapp-platform-tox-py39
         - k8sapp-platform-tox-flake8
         - k8sapp-platform-tox-pylint
@@ -37,23 +35,6 @@
       - python-k8sapp-platform/*
     vars:
       tox_envlist: py27
-      tox_extra_args: -c python-k8sapp-platform/k8sapp_platform/tox.ini
-
-- job:
-    name: k8sapp-platform-tox-py36
-    parent: tox
-    description: |
-      Run py36 test for k8sapp_platform
-    nodeset: ubuntu-bionic
-    required-projects:
-      - starlingx/config
-      - starlingx/fault
-      - starlingx/update
-      - starlingx/utilities
-    files:
-      - python-k8sapp-platform/*
-    vars:
-      tox_envlist: py36
       tox_extra_args: -c python-k8sapp-platform/k8sapp_platform/tox.ini
 
 - job:
