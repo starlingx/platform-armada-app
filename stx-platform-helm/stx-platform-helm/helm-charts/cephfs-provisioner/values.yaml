@@ -25,13 +25,20 @@ global:
   #
   # Node tolerations for cephfs-provisioner scheduling to nodes with taints.
   # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-  # Example:
-  #  [
-  #    {
-  #      "key": "node-role.kubernetes.io/master",
-  #      "operator": "Exists"
-  #    }
-  #  ]
+  # Examples :
+  # tolerations:
+  #   [
+  #     {
+  #       key: "node-role.kubernetes.io/master",
+  #       operator: "Exists",
+  #       effect: "NoSchedule"
+  #     }
+  #   ]
+  #
+  # tolerations:
+  # - key: "node-role.kubernetes.io/master"
+  #   operator: "Exists"
+  #   effect: "NoSchedule"
   #
   tolerations: []
   # If configured, resources will set the requests/limits field to the Pod.

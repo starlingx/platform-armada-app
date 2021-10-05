@@ -92,7 +92,11 @@ spec:
             readOnly: true
         {{- end }}
       restartPolicy: OnFailure
-      {{- if .Values.global.nodeSelector }}
+{{- if .Values.global.nodeSelector }}
       nodeSelector:
-      {{ .Values.global.nodeSelector | toYaml | trim | indent 8 }}
-      {{- end }}
+{{ .Values.global.nodeSelector | toYaml | trim | indent 8 }}
+{{- end }}
+{{- with .Values.global.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+{{- end}}
