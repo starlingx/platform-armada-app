@@ -47,10 +47,10 @@ spec:
       nodeSelector:
 {{ .Values.global.nodeSelector | toYaml | trim | indent 8 }}
 {{- end }}
-{{- if .Values.global.tolerations }}
+{{- with .Values.global.tolerations }}
       tolerations:
-{{ .Values.global.tolerations | toYaml | trim | indent 8 }}
-{{- end}}
+{{ toYaml . | indent 8 }}
+{{- end }}
 {{- if .Values.global.resources }}
       resources:
 {{ .Values.global.resources | toYaml | trim | indent 8 }}

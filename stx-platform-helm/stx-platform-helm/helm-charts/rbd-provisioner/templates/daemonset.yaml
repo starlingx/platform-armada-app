@@ -26,9 +26,9 @@ spec:
 {{- if or .Values.global.rbac .Values.global.reuseRbac }}
       serviceAccountName: {{ .Values.rbac.serviceAccount }}
 {{- end }}
-{{- if .Values.global.tolerations }}
+{{- with .Values.global.tolerations }}
       tolerations:
-{{ .Values.global.tolerations | toYaml | trim | indent 8 }}
+{{ toYaml . | indent 8 }}
 {{- end }}
 {{- if .Values.global.nodeSelector }}
       nodeSelector:
