@@ -10,7 +10,7 @@ data:
   values: {}
   source:
     type: tar
-    location: http://172.17.0.1:8080/helm_charts/stx-platform/helm-toolkit-0.1.0.tgz
+    location: http://172.17.0.1:8080/helm_charts/stx-platform/helm-toolkit-0.2.19.tgz
     subpath: helm-toolkit
     reference: master
   dependencies: []
