@@ -1,0 +1,22 @@
+#!/bin/bash
+set -x
+
+PKG_BUILD_NAME=$1
+PKG_BUILD_ROOT=$(realpath `pwd`/${PKG_BUILD_NAME})
+PKG_DIR="stx-platform-helm"
+
+STX_BASE=$(realpath ${MY_REPO}/stx)
+SRC=$(realpath ${STX_BASE}/platform-armada-app/${PKG_DIR}/${PKG_DIR})
+
+CHART_PKG="node-feature-discovery"
+NFD_HELM_CHARTS=$(realpath ${STX_BASE}/helm-charts/${CHART_PKG}/${CHART_PKG}/helm-charts)
+
+mkdir -p ${PKG_BUILD_ROOT}
+
+# Copy node-feature-discovery helm charts to the build directory.
+cp -pr ${NFD_HELM_CHARTS} ${PKG_BUILD_ROOT}
+
+# Copy source files to the build directory.
+cp -pr ${SRC}/files ${PKG_BUILD_ROOT}
+cp -pr ${SRC}/helm-charts/* ${PKG_BUILD_ROOT}/helm-charts
+cp -pr ${SRC}/manifests ${PKG_BUILD_ROOT}

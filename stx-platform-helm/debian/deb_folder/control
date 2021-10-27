@@ -1,0 +1,21 @@
+Source: stx-platform-helm
+Section: libs
+Priority: optional
+Maintainer: StarlingX Developers <starlingx-discuss@lists.starlingx.io>
+Build-Depends: debhelper-compat (= 13),
+ chartmuseum,
+ helm,
+ openstack-helm-infra,
+ procps,
+ python3-k8sapp-platform,
+ python3-k8sapp-platform-wheels
+Standards-Version: 4.5.1
+Homepage: https://www.starlingx.io
+
+Package: stx-platform-helm
+Section: libs
+Architecture: any
+Depends: ${misc:Depends}
+Description: StarlingX Platform Armada Helm Charts
+ This package contains Armada helm charts for the platform armada
+ application.
