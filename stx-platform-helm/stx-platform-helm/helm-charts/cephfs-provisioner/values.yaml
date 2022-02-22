@@ -116,7 +116,7 @@ classes:
 images:
   tags:
     cephfs_provisioner: quay.io/external_storage/cephfs-provisioner:v2.1.0-k8s1.11
-    cephfs_provisioner_storage_init: docker.io/starlingx/ceph-config-helper:v1.15.0
+    cephfs_provisioner_storage_init: docker.io/openstackhelm/ceph-config-helper:ubuntu_bionic-20201223
   pull_policy: "IfNotPresent"
   local_registry:
     active: false

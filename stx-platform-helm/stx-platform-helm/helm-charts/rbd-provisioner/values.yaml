@@ -173,7 +173,7 @@ ephemeral_pools:
 images:
   tags:
     rbd_provisioner: quay.io/external_storage/rbd-provisioner:v2.1.1-k8s1.11
-    rbd_provisioner_storage_init: docker.io/starlingx/ceph-config-helper:v1.15.0
+    rbd_provisioner_storage_init: docker.io/openstackhelm/ceph-config-helper:ubuntu_bionic-20201223
   pull_policy: "IfNotPresent"
   local_registry:
     active: false
