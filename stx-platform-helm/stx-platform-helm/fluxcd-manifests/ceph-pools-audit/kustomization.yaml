@@ -1,0 +1,18 @@
+#
+# Copyright (c) 2022 Wind River Systems, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+namespace: kube-system
+resources:
+  - helmrelease.yaml
+secretGenerator:
+  - name: ceph-pools-audit-static-overrides
+    files:
+      - ceph-pools-audit-static-overrides.yaml
+  - name: ceph-pools-audit-system-overrides
+    files:
+      - ceph-pools-audit-system-overrides.yaml
+generatorOptions:
+  disableNameSuffixHash: true

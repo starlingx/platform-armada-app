@@ -47,7 +47,7 @@ spec:
           serviceAccountName: {{ $serviceAccountName }}
           restartPolicy: OnFailure
           nodeSelector:
-            {{ .Values.labels.job.node_selector_key }}: {{ .Values.labels.job.node_selector_value }}
+            {{ .Values.labels.job.node_selector_key }}: {{ .Values.labels.job.node_selector_value | toString | quote }}
 {{- with .Values.tolerations }}
           tolerations:
 {{ toYaml . | indent 12 }}

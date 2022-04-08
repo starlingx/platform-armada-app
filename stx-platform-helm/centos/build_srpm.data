@@ -1,5 +1,8 @@
 SRC_DIR="stx-platform-helm"
 
+COPY_LIST="$PKG_BASE/$SRC_DIR/files/*"
+
+
 COPY_LIST_TO_TAR="\
     $STX_BASE/helm-charts/node-feature-discovery/node-feature-discovery/helm-charts \
 "

@@ -1,0 +1,18 @@
+#
+# Copyright (c) 2022 Wind River Systems, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+namespace: kube-system
+resources:
+  - helmrelease.yaml
+secretGenerator:
+  - name: cephfs-provisioner-static-overrides
+    files:
+      - cephfs-provisioner-static-overrides.yaml
+  - name: cephfs-provisioner-system-overrides
+    files:
+      - cephfs-provisioner-system-overrides.yaml
+generatorOptions:
+  disableNameSuffixHash: true

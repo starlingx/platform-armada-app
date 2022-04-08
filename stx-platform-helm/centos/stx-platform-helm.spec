@@ -31,6 +31,14 @@ BuildRequires: python-k8sapp-platform-wheels
 %description
 The StarlingX K8S application for platform integration
 
+%package fluxcd
+Summary: The StarlingX K8S Fluxcd application for platform integration
+Group: base
+License: Apache-2.0
+
+%description fluxcd
+The StarlingX K8S Fluxcd application for platform integration
+
 %prep
 %setup
 
@@ -57,7 +65,10 @@ kill %1
 
 # Create a chart tarball compliant with sysinv kube-app.py
 %define app_staging %{_builddir}/staging
-%define app_tarball %{app_name}-%{version}-%{tis_patch_ver}.tgz
+%define app_tarball_armada %{app_name}-%{version}-%{tis_patch_ver}.tgz
+%define app_tarball_fluxcd %{app_name}-fluxcd-%{version}-%{tis_patch_ver}.tgz
+%define armada_app_path %{_builddir}/%{app_tarball_armada}
+%define fluxcd_app_path %{_builddir}/%{app_tarball_fluxcd}
 
 # Setup staging
 mkdir -p %{app_staging}
@@ -76,21 +87,45 @@ sed -i 's/@HELM_REPO@/%{helm_repo}/g' %{app_staging}/metadata.yaml
 mkdir -p %{app_staging}/plugins
 cp /plugins/%{app_name}/*.whl %{app_staging}/plugins
 
-# package it up
+# calculate checksum
 find . -type f ! -name '*.md5' -print0 | xargs -0 md5sum > checksum.md5
-tar -zcf %{_builddir}/%{app_tarball} -C %{app_staging}/ .
+
+# package armada app
+tar -zcf %armada_app_path -C %{app_staging}/ .
+
+# switch back to source root
+cd -
+
+# Prepare app_staging for fluxcd package
+rm -f %{app_staging}/manifest.yaml
+
+cp -R fluxcd-manifests %{app_staging}/
+
+# calculate checksum of all files in app_staging
+cd %{app_staging}
+find . -type f ! -name '*.md5' -print0 | xargs -0 md5sum > checksum.md5
+# package fluxcd app
+tar -zcf %fluxcd_app_path -C %{app_staging}/ .
+
+# switch back to source root
+cd -
 
 # Cleanup staging
 rm -fr %{app_staging}
 
 %install
 install -d -m 755 %{buildroot}/%{app_folder}
-install -p -D -m 755 %{_builddir}/%{app_tarball} %{buildroot}/%{app_folder}
+install -p -D -m 755 %armada_app_path %{buildroot}/%{app_folder}
+install -p -D -m 755 %fluxcd_app_path %{buildroot}/%{app_folder}
 install -d -m 755 ${RPM_BUILD_ROOT}/opt/extracharts
 # TODO (rchurch): remove
 install -p -D -m 755 helm-charts/node-feature-discovery-*.tgz ${RPM_BUILD_ROOT}/opt/extracharts
 
 %files
 %defattr(-,root,root,-)
-%{app_folder}/*
+%{app_folder}/%{app_tarball_armada}
 /opt/extracharts/*
+
+%files fluxcd
+%defattr(-,root,root,-)
+%{app_folder}/%{app_tarball_fluxcd}

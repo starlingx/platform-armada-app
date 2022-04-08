@@ -1,0 +1,36 @@
+#
+# Copyright (c) 2022 Wind River Systems, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+apiVersion: "helm.toolkit.fluxcd.io/v2beta1"
+kind: HelmRelease
+metadata:
+  name: cephfs-provisioner
+  labels:
+    chart_group: starlingx-ceph-charts
+spec:
+  releaseName: stx-cephfs-provisioner
+  chart:
+    spec:
+      chart: cephfs-provisioner
+      version: 0.1.0
+      sourceRef:
+        kind: HelmRepository
+        name: stx-platform
+  interval: 5m
+  timeout: 30m
+  test:
+    enable: false
+  install:
+    disableHooks: false
+  upgrade:
+    disableHooks: false
+  valuesFrom:
+    - kind: Secret
+      name: cephfs-provisioner-static-overrides
+      valuesKey: cephfs-provisioner-static-overrides.yaml
+    - kind: Secret
+      name: cephfs-provisioner-system-overrides
+      valuesKey: cephfs-provisioner-system-overrides.yaml
