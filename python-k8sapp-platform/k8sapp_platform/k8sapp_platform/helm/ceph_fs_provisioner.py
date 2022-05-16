@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2020 Wind River Systems, Inc.
+# Copyright (c) 2020-2022 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -119,6 +119,13 @@ class CephFSProvisionerHelm(base.BaseHelm):
             operator.chart_group_chart_delete(
                 operator.CHART_GROUPS_LUT[self.CHART],
                 operator.CHARTS_LUT[self.CHART])
+
+    def execute_kustomize_updates(self, operator):
+        # On application load this chart is enabled. Only disable if specified
+        # by the user
+        if not self._is_enabled(operator.APP, self.CHART,
+                                app_constants.HELM_NS_CEPH_FS_PROVISIONER):
+            operator.helm_release_resource_delete(self.CHART)
 
     def get_overrides(self, namespace=None):
 
