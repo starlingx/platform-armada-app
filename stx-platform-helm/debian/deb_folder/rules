@@ -11,8 +11,8 @@ export MINOR_PATCH = $(shell echo $(DEB_VERSION) | cut -f 2 -d '.')
 
 export APP_NAME = platform-integ-apps
 export APP_VERSION = $(MAJOR).$(MINOR_PATCH)
-export APP_TARBALL_ARMADA = $(APP_NAME)-$(APP_VERSION).tgz
-export APP_TARBALL_FLUXCD = $(APP_NAME)-fluxcd-$(APP_VERSION).tgz
+export APP_TARBALL_ARMADA = $(APP_NAME)-armada-$(APP_VERSION).tgz
+export APP_TARBALL_FLUXCD = $(APP_NAME)-$(APP_VERSION).tgz
 export HELM_FOLDER = /usr/lib/helm
 export HELM_REPO = stx-platform
 export STAGING_ARMADA = staging-armada

@@ -9,7 +9,7 @@
 %global helm_folder /usr/lib/helm
 %global toolkit_version 0.2.19
 
-Summary: StarlingX K8S application: Platform Integration
+Summary: StarlingX K8S FluxCD application: Platform Integration
 Name: stx-platform-helm
 Version: 1.0
 Release: %{tis_patch_ver}%{?_tis_dist}
@@ -29,15 +29,15 @@ BuildRequires: python-k8sapp-platform
 BuildRequires: python-k8sapp-platform-wheels
 
 %description
-The StarlingX K8S application for platform integration
+The StarlingX K8S FluxCD application for platform integration
 
-%package fluxcd
-Summary: The StarlingX K8S Fluxcd application for platform integration
+%package armada
+Summary: The StarlingX K8S Armada application for platform integration
 Group: base
 License: Apache-2.0
 
-%description fluxcd
-The StarlingX K8S Fluxcd application for platform integration
+%description armada
+The StarlingX K8S Armada application for platform integration
 
 %prep
 %setup
@@ -65,8 +65,8 @@ kill %1
 
 # Create a chart tarball compliant with sysinv kube-app.py
 %define app_staging %{_builddir}/staging
-%define app_tarball_armada %{app_name}-%{version}-%{tis_patch_ver}.tgz
-%define app_tarball_fluxcd %{app_name}-fluxcd-%{version}-%{tis_patch_ver}.tgz
+%define app_tarball_armada %{app_name}-armada-%{version}-%{tis_patch_ver}.tgz
+%define app_tarball_fluxcd %{app_name}-%{version}-%{tis_patch_ver}.tgz
 %define armada_app_path %{_builddir}/%{app_tarball_armada}
 %define fluxcd_app_path %{_builddir}/%{app_tarball_fluxcd}
 
@@ -121,11 +121,11 @@ install -d -m 755 ${RPM_BUILD_ROOT}/opt/extracharts
 # TODO (rchurch): remove
 install -p -D -m 755 helm-charts/node-feature-discovery-*.tgz ${RPM_BUILD_ROOT}/opt/extracharts
 
-%files
+%files armada
 %defattr(-,root,root,-)
 %{app_folder}/%{app_tarball_armada}
 /opt/extracharts/*
 
-%files fluxcd
+%files
 %defattr(-,root,root,-)
 %{app_folder}/%{app_tarball_fluxcd}
