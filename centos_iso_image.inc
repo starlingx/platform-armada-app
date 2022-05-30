@@ -1,3 +1,3 @@
 stx-platform-helm
-stx-platform-helm-fluxcd
+stx-platform-helm-armada
 
