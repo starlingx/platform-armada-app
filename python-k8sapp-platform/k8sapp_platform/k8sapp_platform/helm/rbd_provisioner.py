@@ -14,10 +14,11 @@ from sysinv.helm import base
 from sysinv.helm import common
 
 
-class RbdProvisionerHelm(base.BaseHelm):
+class RbdProvisionerHelm(base.FluxCDBaseHelm):
     """Class to encapsulate helm operations for the rbd-provisioner chart"""
 
     CHART = app_constants.HELM_CHART_RBD_PROVISIONER
+    HELM_RELEASE = app_constants.FLUXCD_HELMRELEASE_RBD_PROVISIONER
     SUPPORTED_NAMESPACES = base.BaseHelm.SUPPORTED_NAMESPACES + \
         [common.HELM_NS_RBD_PROVISIONER]
     SUPPORTED_APP_NAMESPACES = {
@@ -42,7 +43,7 @@ class RbdProvisionerHelm(base.BaseHelm):
         # by the user
         if not self._is_enabled(operator.APP, self.CHART,
                                 common.HELM_NS_RBD_PROVISIONER):
-            operator.helm_release_resource_delete(self.CHART)
+            operator.helm_release_resource_delete(self.HELM_RELEASE)
 
     def get_overrides(self, namespace=None):
 

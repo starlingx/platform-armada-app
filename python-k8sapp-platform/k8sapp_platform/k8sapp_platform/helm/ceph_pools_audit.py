@@ -13,10 +13,11 @@ from sysinv.helm import base
 from sysinv.helm import common
 
 
-class CephPoolsAuditHelm(base.BaseHelm):
+class CephPoolsAuditHelm(base.FluxCDBaseHelm):
     """Class to encapsulate helm operations for the ceph-pools-audit chart"""
 
     CHART = app_constants.HELM_CHART_CEPH_POOLS_AUDIT
+    HELM_RELEASE = app_constants.FLUXCD_HELMRELEASE_CEPH_POOLS_AUDIT
     SUPPORTED_NAMESPACES = base.BaseHelm.SUPPORTED_NAMESPACES + \
         [common.HELM_NS_RBD_PROVISIONER]
     SUPPORTED_APP_NAMESPACES = {
@@ -40,7 +41,7 @@ class CephPoolsAuditHelm(base.BaseHelm):
         # by the user
         if not self._is_enabled(operator.APP, self.CHART,
                                 common.HELM_NS_RBD_PROVISIONER):
-            operator.helm_release_resource_delete(self.CHART)
+            operator.helm_release_resource_delete(self.HELM_RELEASE)
 
     def get_namespaces(self):
         return self.SUPPORTED_NAMESPACES

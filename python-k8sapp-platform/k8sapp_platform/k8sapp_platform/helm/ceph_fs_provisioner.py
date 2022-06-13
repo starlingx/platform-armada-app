@@ -97,10 +97,11 @@ class K8CephFSProvisioner(object):
         return str(base_name + '-' + name)
 
 
-class CephFSProvisionerHelm(base.BaseHelm):
+class CephFSProvisionerHelm(base.FluxCDBaseHelm):
     """Class to encapsulate helm operations for the cephfs-provisioner chart"""
 
     CHART = app_constants.HELM_CHART_CEPH_FS_PROVISIONER
+    HELM_RELEASE = app_constants.FLUXCD_HELMRELEASE_CEPH_FS_PROVISIONER
     SUPPORTED_NAMESPACES = base.BaseHelm.SUPPORTED_NAMESPACES + \
         [app_constants.HELM_NS_CEPH_FS_PROVISIONER]
     SUPPORTED_APP_NAMESPACES = {
@@ -125,7 +126,7 @@ class CephFSProvisionerHelm(base.BaseHelm):
         # by the user
         if not self._is_enabled(operator.APP, self.CHART,
                                 app_constants.HELM_NS_CEPH_FS_PROVISIONER):
-            operator.helm_release_resource_delete(self.CHART)
+            operator.helm_release_resource_delete(self.HELM_RELEASE)
 
     def get_overrides(self, namespace=None):
 
