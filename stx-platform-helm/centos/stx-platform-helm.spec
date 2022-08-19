@@ -31,14 +31,6 @@ BuildRequires: python-k8sapp-platform-wheels
 %description
 The StarlingX K8S FluxCD application for platform integration
 
-%package armada
-Summary: The StarlingX K8S Armada application for platform integration
-Group: base
-License: Apache-2.0
-
-%description armada
-The StarlingX K8S Armada application for platform integration
-
 %prep
 %setup
 
@@ -65,18 +57,14 @@ kill %1
 
 # Create a chart tarball compliant with sysinv kube-app.py
 %define app_staging %{_builddir}/staging
-%define app_tarball_armada %{app_name}-armada-%{version}-%{tis_patch_ver}.tgz
 %define app_tarball_fluxcd %{app_name}-%{version}-%{tis_patch_ver}.tgz
-%define armada_app_path %{_builddir}/%{app_tarball_armada}
 %define fluxcd_app_path %{_builddir}/%{app_tarball_fluxcd}
 
 # Setup staging
 mkdir -p %{app_staging}
 cp files/metadata.yaml %{app_staging}
-cp manifests/manifest.yaml %{app_staging}
 mkdir -p %{app_staging}/charts
 cp helm-charts/*.tgz %{app_staging}/charts
-cd %{app_staging}
 
 # Populate metadata
 sed -i 's/@APP_NAME@/%{app_name}/g' %{app_staging}/metadata.yaml
@@ -86,18 +74,6 @@ sed -i 's/@HELM_REPO@/%{helm_repo}/g' %{app_staging}/metadata.yaml
 # Copy the plugins: installed in the buildroot
 mkdir -p %{app_staging}/plugins
 cp /plugins/%{app_name}/*.whl %{app_staging}/plugins
-
-# calculate checksum
-find . -type f ! -name '*.md5' -print0 | xargs -0 md5sum > checksum.md5
-
-# package armada app
-tar -zcf %armada_app_path -C %{app_staging}/ .
-
-# switch back to source root
-cd -
-
-# Prepare app_staging for fluxcd package
-rm -f %{app_staging}/manifest.yaml
 
 cp -R fluxcd-manifests %{app_staging}/
 
@@ -115,17 +91,12 @@ rm -fr %{app_staging}
 
 %install
 install -d -m 755 %{buildroot}/%{app_folder}
-install -p -D -m 755 %armada_app_path %{buildroot}/%{app_folder}
 install -p -D -m 755 %fluxcd_app_path %{buildroot}/%{app_folder}
 install -d -m 755 ${RPM_BUILD_ROOT}/opt/extracharts
 # TODO (rchurch): remove
 install -p -D -m 755 helm-charts/node-feature-discovery-*.tgz ${RPM_BUILD_ROOT}/opt/extracharts
 
-%files armada
-%defattr(-,root,root,-)
-%{app_folder}/%{app_tarball_armada}
-/opt/extracharts/*
-
 %files
 %defattr(-,root,root,-)
+/opt/extracharts/*
 %{app_folder}/%{app_tarball_fluxcd}

@@ -16,6 +16,6 @@ Package: stx-platform-helm
 Section: libs
 Architecture: any
 Depends: ${misc:Depends}
-Description: StarlingX Platform Armada Helm Charts
- This package contains Armada helm charts for the platform armada
+Description: StarlingX Platform FluxCD Helm Charts
+ This package contains FluxCD helm charts for the platform armada
  application.
