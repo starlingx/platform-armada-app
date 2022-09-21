@@ -1,6 +1,6 @@
 {{/*
 #
-# Copyright (c) 2020 Wind River Systems, Inc.
+# Copyright (c) 2020-2022 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -10,7 +10,17 @@
 {{- $envAll := . }}
 
 {{- $serviceAccountName := "ceph-pools-audit" }}
-{{ tuple $envAll "job_ceph_pools_audit" $serviceAccountName | include "helm-toolkit.snippets.kubernetes_pod_rbac_serviceaccount" }}
+
+---
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ $serviceAccountName }}
+  namespace: {{ $envAll.Release.namespace }}
+imagePullSecrets:
+  - name: default-registry-key
+
 ---
 #
 # The CronJob makes sure all the Ceph pools have the right replication,

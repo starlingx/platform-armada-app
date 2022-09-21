@@ -1,2 +1,0 @@
-stx-platform-helm
-

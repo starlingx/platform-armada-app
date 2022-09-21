@@ -6,6 +6,8 @@
 
 from k8sapp_platform.common import constants as app_constants
 
+import subprocess
+
 from sysinv.common import constants
 from sysinv.common import exception
 from sysinv.common.storage_backend_conf import K8RbdProvisioner
@@ -56,50 +58,67 @@ class RbdProvisionerHelm(base.FluxCDBaseHelm):
         def _skip_ceph_mon_2(name):
             return name != constants.CEPH_MON_2
 
-        classdefaults = {
+        def _get_ceph_fsid():
+            process = subprocess.Popen(['timeout', '30', 'ceph', 'fsid'],
+                stdout=subprocess.PIPE)
+            stdout, stderr = process.communicate()
+            return stdout.strip()
+
+        bk = ceph_bks[0]
+
+        # Get tier info.
+        tiers = self.dbapi.storage_tier_get_list()
+
+        # Get the ruleset for the new kube-rbd pool.
+        tier = next((t for t in tiers if t.forbackendid == bk.id), None)
+        if not tier:
+            raise Exception("No tier present for backend %s" % bk.name)
+
+        rule_name = "{0}{1}{2}".format(
+            tier.name,
+            constants.CEPH_CRUSH_TIER_SUFFIX,
+            "-ruleset").replace('-', '_')
+
+        cluster_id = _get_ceph_fsid()
+        user_secret_name = K8RbdProvisioner.get_user_secret_name(bk)
+
+        class_defaults = {
             "monitors": self._get_formatted_ceph_monitor_ips(
                 name_filter=_skip_ceph_mon_2),
             "adminId": constants.K8S_RBD_PROV_USER_NAME,
             "adminSecretName": constants.K8S_RBD_PROV_ADMIN_SECRET_NAME
         }
 
-        # Get tier info.
-        tiers = self.dbapi.storage_tier_get_list()
-
-        classes = []
-        for bk in ceph_bks:
-            # Get the ruleset for the new kube-rbd pool.
-            tier = next((t for t in tiers if t.forbackendid == bk.id), None)
-            if not tier:
-                raise Exception("No tier present for backend %s" % bk.name)
-
-            rule_name = "{0}{1}{2}".format(
-                tier.name,
-                constants.CEPH_CRUSH_TIER_SUFFIX,
-                "-ruleset").replace('-', '_')
-
-            cls = {
-                "name": K8RbdProvisioner.get_storage_class_name(bk),
-                "pool_name": K8RbdProvisioner.get_pool(bk),
-                "replication": int(bk.capabilities.get("replication")),
-                "crush_rule_name": rule_name,
-                "chunk_size": 64,
-                "userId": K8RbdProvisioner.get_user_id(bk),
-                "userSecretName": K8RbdProvisioner.get_user_secret_name(bk),
-                "additionalNamespaces": ['default', 'kube-public'],
-            }
-            classes.append(cls)
-
-        global_settings = {
-            "replicas": self._num_replicas_for_platform_app(),
-            "defaultStorageClass": constants.K8S_RBD_PROV_STOR_CLASS_NAME
+        storage_class = {
+            "clusterID": cluster_id,
+            "name": K8RbdProvisioner.get_storage_class_name(bk),
+            "pool": K8RbdProvisioner.get_pool(bk),
+            "provisionerSecret": user_secret_name or class_defaults["adminSecretName"],
+            "controllerExpandSecret": user_secret_name or class_defaults["adminSecretName"],
+            "nodeStageSecret": user_secret_name or class_defaults["adminSecretName"],
+            "userId": K8RbdProvisioner.get_user_id(bk),
+            "userSecretName": user_secret_name,
+            "chunk_size": 64,
+            "replication": int(bk.capabilities.get("replication")),
+            "crush_rule_name": rule_name,
+            "additionalNamespaces": ['default', 'kube-public']
         }
+
+        provisioner = {
+            "replicaCount": self._num_replicas_for_platform_app()
+        }
+
+        csi_config = [{
+            "clusterID": cluster_id,
+            "monitors": [monitor for monitor in class_defaults["monitors"]]
+        }]
 
         overrides = {
             common.HELM_NS_RBD_PROVISIONER: {
-                "classdefaults": classdefaults,
-                "classes": classes,
-                "global": global_settings
+                "storageClass": storage_class,
+                "provisioner": provisioner,
+                "csiConfig": csi_config,
+                "classDefaults": class_defaults
             }
         }
 

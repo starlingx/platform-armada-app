@@ -1,0 +1,28 @@
+#!/usr/bin/make -f
+export DH_VERBOSE = 1
+
+export ROOT = debian/tmp
+export APP_FOLDER = $(ROOT)/usr/lib/helm
+
+%:
+	dh $@
+
+override_dh_auto_build:
+
+	mkdir -p ceph-csi
+
+	# Copy ceph-csi charts
+	cp -r charts/* ceph-csi
+
+	cp Makefile ceph-csi
+
+	cd ceph-csi && make ceph-csi-rbd
+	cd ceph-csi && make ceph-csi-cephfs
+
+override_dh_auto_install:
+	# Install the app tar file.
+	install -d -m 755 $(APP_FOLDER)
+	install -p -D -m 755 ceph-csi/ceph-csi-rbd*.tgz $(APP_FOLDER)
+	install -p -D -m 755 ceph-csi/ceph-csi-cephfs*.tgz $(APP_FOLDER)
+
+override_dh_auto_test:

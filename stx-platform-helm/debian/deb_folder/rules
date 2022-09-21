@@ -6,52 +6,31 @@ export APP_FOLDER = $(ROOT)/usr/local/share/applications/helm
 export EXTRA_CHARTS = $(ROOT)/opt/extracharts
 
 export DEB_VERSION = $(shell dpkg-parsechangelog | egrep '^Version:' | cut -f 2 -d ' ')
-export MAJOR = $(shell echo $(DEB_VERSION) | cut -f 1 -d '.')
-export MINOR_PATCH = $(shell echo $(DEB_VERSION) | cut -f 2 -d '.')
+export MAJOR = $(shell echo $(DEB_VERSION) | cut -f 1 -d '-')
+export MINOR_PATCH = $(shell echo $(DEB_VERSION) | cut -f 4 -d '.')
 
 export APP_NAME = platform-integ-apps
-export APP_VERSION = $(MAJOR).$(MINOR_PATCH)
+export APP_VERSION = $(MAJOR)-$(MINOR_PATCH)
 export APP_TARBALL_FLUXCD = $(APP_NAME)-$(APP_VERSION).tgz
 export HELM_FOLDER = /usr/lib/helm
 export HELM_REPO = stx-platform
 export STAGING_FLUXCD = staging-fluxcd
-export TOOLKIT_VERSION = 0.2.19
 
 %:
 	dh $@
 
 override_dh_auto_build:
-
-	############
-	#  COMMON  #
-	############
-	# Stage helm-toolkit in the local repo.
-	cp $(HELM_FOLDER)/helm-toolkit-$(TOOLKIT_VERSION).tgz helm-charts/
-
-	# Host a server for the helm charts.
-	chartmuseum --debug --port=8879 --context-path='/charts' --storage="local" \
-		--storage-local-rootdir="./helm-charts" &
-	sleep 2
-	helm repo add local http://localhost:8879/charts
-
 	# Create the TGZ file.
-	cd helm-charts && make rbd-provisioner
 	cd helm-charts && make ceph-pools-audit
-	cd helm-charts && make cephfs-provisioner
 	cd helm-charts && make node-feature-discovery
 
-	# Terminate the helm chart server.
-	pkill chartmuseum
-
-	############
-	#  FLUXCD  #
-	############
 	# Setup the staging directory.
 	mkdir -p $(STAGING_FLUXCD)
 	cp files/metadata.yaml $(STAGING_FLUXCD)
 	cp -Rv fluxcd-manifests $(STAGING_FLUXCD)
 	mkdir -p $(STAGING_FLUXCD)/charts
 	cp helm-charts/*.tgz $(STAGING_FLUXCD)/charts
+	cp /usr/lib/helm/ceph-csi-*.tgz $(STAGING_FLUXCD)/charts
 
 	# Populate metadata.
 	sed -i 's/@APP_NAME@/$(APP_NAME)/g' $(STAGING_FLUXCD)/metadata.yaml

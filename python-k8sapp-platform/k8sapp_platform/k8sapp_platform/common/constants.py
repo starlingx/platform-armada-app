@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2020 Wind River Systems, Inc.
+# Copyright (c) 2020-2022 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -10,14 +10,13 @@ from sysinv.helm import common
 
 HELM_CHART_RBD_PROVISIONER = 'rbd-provisioner'
 HELM_CHART_CEPH_POOLS_AUDIT = 'ceph-pools-audit'
-HELM_CHART_HELM_TOOLKIT = 'helm-toolkit'
 HELM_CHART_CEPH_FS_PROVISIONER = 'cephfs-provisioner'
 HELM_NS_CEPH_FS_PROVISIONER = common.HELM_NS_KUBE_SYSTEM
 FLUXCD_HELMRELEASE_RBD_PROVISIONER = 'rbd-provisioner'
 FLUXCD_HELMRELEASE_CEPH_POOLS_AUDIT = 'ceph-pools-audit'
 FLUXCD_HELMRELEASE_CEPH_FS_PROVISIONER = 'cephfs-provisioner'
 
-HELM_CEPH_FS_PROVISIONER_CLAIM_ROOT = '/pvc-volumes'
+HELM_CEPH_FS_PROVISIONER_VOLUME_NAME_PREFIX = 'pvc-volumes-'
 HELM_CHART_CEPH_FS_PROVISIONER_NAME = 'ceph.com/cephfs'
 K8S_CEPHFS_PROVISIONER_ADMIN_SECRET_NAME = 'ceph-secret-admin'
 K8S_CEPHFS_PROVISIONER_ADMIN_SECRET_NAMESPACE = 'kube-system'

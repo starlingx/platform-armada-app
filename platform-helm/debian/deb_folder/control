@@ -1,18 +1,15 @@
-Source: stx-platform-helm
+Source: platform-helm
 Section: libs
 Priority: optional
 Maintainer: StarlingX Developers <starlingx-discuss@lists.starlingx.io>
 Build-Depends: debhelper-compat (= 13),
- helm,
- python3-k8sapp-platform,
- python3-k8sapp-platform-wheels,
- platform-helm
+ helm
 Standards-Version: 4.5.1
 Homepage: https://www.starlingx.io
 
-Package: stx-platform-helm
+Package: platform-helm
 Section: libs
 Architecture: any
 Depends: ${misc:Depends}
-Description: StarlingX Platform FluxCD Helm Charts
- This package contains FluxCD helm charts for the platform applications.
+Description: StarlingX Ceph CSI Helm Charts
+ This package contains helm charts for the Ceph CSI application.

@@ -1,0 +1,12 @@
+---
+debname: platform-helm
+debver: 1.0-1
+dl_path:
+  name: ceph-csi-3.6.2.tar.gz
+  url: https://github.com/ceph/ceph-csi/archive/v3.6.2.tar.gz
+  md5sum: a5fd6785c521faf0cb7df008a1012381
+src_files:
+  - platform-helm/files/Makefile
+revision:
+  dist: $STX_DIST
+  PKG_GITREVCOUNT: true

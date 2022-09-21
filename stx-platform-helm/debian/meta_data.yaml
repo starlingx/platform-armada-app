@@ -6,4 +6,6 @@ src_files:
   - ${MY_REPO}/stx/helm-charts/node-feature-discovery/node-feature-discovery/helm-charts
 revision:
   dist: $STX_DIST
-  PKG_GITREVCOUNT: true
+  GITREVCOUNT:
+    BASE_SRCREV: c608f2aaa92064b712e7076e4141a162b78fe995
+    SRC_DIR: ${MY_REPO}/stx/platform-armada-app

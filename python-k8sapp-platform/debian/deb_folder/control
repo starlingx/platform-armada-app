@@ -16,13 +16,13 @@ Section: libs
 Architecture: any
 Depends: ${misc:Depends}, ${python3:Depends}
 Description: StarlingX Sysinv Platform Extensions
- This package contains sysinv plugins for the platform armada
- K8S app.
+ This package contains sysinv plugins for the platform K8S
+ apps.
 
 Package: python3-k8sapp-platform-wheels
 Section: libs
 Architecture: any
 Depends: ${misc:Depends}, ${python3:Depends}, python3-wheel
 Description: StarlingX Sysinv Platform Extension Wheels
- This package contains python wheels for the platform armada
- K8S app plugins.
+ This package contains python wheels for the platform K8S
+ app plugins.

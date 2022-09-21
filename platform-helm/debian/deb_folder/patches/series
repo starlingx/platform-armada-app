@@ -1,0 +1,10 @@
+0001-ceph-csi-cephfs-replace-appVersion-version.patch
+0002-ceph-csi-cephfs-add-default-fields-to-values.yaml.patch
+0003-ceph-csi-cephfs-add-storage-init.yaml.patch
+0004-ceph-csi-cephfs-add-imagePullSecrets-to-ServiceAccount.patch
+0005-ceph-csi-cephfs-add-annotations-to-provisioner-deployment.patch
+0006-ceph-csi-rbd-replace-appVersion-version.patch
+0007-ceph-csi-rbd-add-default-fields-to-values.yaml.patch
+0008-ceph-csi-rbd-add-storage-init.yaml.patch
+0009-ceph-csi-rbd-add-imagePullSecrets-to-ServiceAccount.patch
+0010-ceph-csi-rbd-add-annotations-to-provisioner-deployment.patch
