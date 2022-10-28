@@ -60,6 +60,7 @@
     parent: tox
     description: |
       Run flake8 test for k8sapp_platform
+    nodeset: ubuntu-focal
     files:
       - python-k8sapp-platform/*
     vars:
@@ -88,6 +89,7 @@
     parent: tox
     description: |
       Run bandit test for k8sapp_platform
+    nodeset: ubuntu-focal
     files:
       - python-k8sapp-platform/*
     vars:
