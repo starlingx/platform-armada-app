@@ -8,3 +8,5 @@
 0008-ceph-csi-rbd-add-storage-init.yaml.patch
 0009-ceph-csi-rbd-add-imagePullSecrets-to-ServiceAccount.patch
 0010-ceph-csi-rbd-add-annotations-to-provisioner-deployment.patch
+0011-ceph-csi-rbd-update-storageclass.patch
+0012-ceph-csi-cephfs-update-storageclass.patch

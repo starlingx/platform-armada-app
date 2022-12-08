@@ -1,0 +1,192 @@
+From d428ff944c757f46c0f4aa756ccfac83f55c2c72 Mon Sep 17 00:00:00 2001
+From: Hediberto Cavalcante da Silva
+ <hediberto.cavalcantedasilva@windriver.com>
+Date: Wed, 14 Dec 2022 18:51:01 -0300
+Subject: [PATCH] ceph-csi-rbd: update storageclass
+
+Signed-off-by: Hediberto Cavalcante da Silva <hediberto.cavalcantedasilva@windriver.com>
+---
+ .../ceph-csi-rbd/templates/storageclass.yaml  | 161 ++++++++++--------
+ 1 file changed, 93 insertions(+), 68 deletions(-)
+
+diff --git a/charts/ceph-csi-rbd/templates/storageclass.yaml b/charts/ceph-csi-rbd/templates/storageclass.yaml
+index fda713a..d246776 100644
+--- a/charts/ceph-csi-rbd/templates/storageclass.yaml
++++ b/charts/ceph-csi-rbd/templates/storageclass.yaml
+@@ -1,81 +1,106 @@
+ {{- if .Values.storageClass.create -}}
++{{- $cephCsiDefault := .Values.storageClass }}
++{{- $defaults := .Values.classdefaults }}
++{{- range $sc := .Values.classes }}
+ apiVersion: storage.k8s.io/v1
+ kind: StorageClass
+ metadata:
+-  name: {{ .Values.storageClass.name }}
+-{{- if .Values.storageClass.annotations }}
++  name: {{ $sc.name }}
+   annotations:
+-{{ toYaml .Values.storageClass.annotations | indent 4 }}
+-{{- end }}
++  {{- if eq $defaults.storageClass $sc.name }}
++    "storageclass.kubernetes.io/is-default-class": "true"
++  {{- end }}
++{{ toYaml $cephCsiDefault.annotations | indent 4 }}
+   labels:
+-    app: {{ include "ceph-csi-rbd.name" . }}
+-    chart: {{ include "ceph-csi-rbd.chart" . }}
+-    release: {{ .Release.Name }}
+-    heritage: {{ .Release.Service }}
+-provisioner: {{ .Values.driverName }}
++    app: {{ include "ceph-csi-rbd.name" $ }}
++    chart: {{ include "ceph-csi-rbd.chart" $ }}
++    release: {{ $.Release.Name }}
++    heritage: {{ $.Release.Service }}
++    {{- with $.Values.commonLabels }}{{ toYaml . | trim | nindent 4 }}{{- end }}
++provisioner: {{ $.Values.driverName }}
+ parameters:
+-  clusterID: {{ .Values.storageClass.clusterID }}
+-  pool: {{ .Values.storageClass.pool }}
+-  imageFeatures: {{ .Values.storageClass.imageFeatures }}
+-{{- if .Values.storageClass.tryOtherMounters }}
+-  tryOtherMounters: {{ .Values.storageClass.tryOtherMounters | quote}}
+-{{- end }}
+-{{- if .Values.storageClass.mounter }}
+-  mounter: {{ .Values.storageClass.mounter }}
+-{{- end }}
+-{{- if .Values.storageClass.cephLogDir }}
+-  cephLogDir: {{ .Values.storageClass.cephLogDir }}
+-{{- end }}
+-{{- if .Values.storageClass.cephLogStrategy }}
+-  cephLogStrategy: {{ .Values.storageClass.cephLogStrategy }}
+-{{- end }}
+-{{- if .Values.storageClass.dataPool }}
+-  dataPool: {{ .Values.storageClass.dataPool }}
+-{{- end }}
+-{{- if .Values.storageClass.volumeNamePrefix }}
+-  volumeNamePrefix: "{{ .Values.storageClass.volumeNamePrefix }}"
+-{{- end }}
+-{{- if .Values.storageClass.encrypted }}
+-  encrypted: "{{ .Values.storageClass.encrypted }}"
+-{{- end }}
+-{{- if .Values.storageClass.encryptionKMSID }}
+-  encryptionKMSID: {{ .Values.storageClass.encryptionKMSID }}
+-{{- end }}
+-{{- if .Values.storageClass.topologyConstrainedPools }}
++{{- with (first $.Values.csiConfig) }}
++  clusterID: {{ or $sc.clusterID .clusterID }}
++{{- end}}
++  pool: {{ $sc.pool_name }}
++  imageFeatures: {{ or $sc.imageFeatures $cephCsiDefault.imageFeatures }}
++{{- if $sc.tryOtherMounters }}
++  tryOtherMounters: {{ $sc.tryOtherMounters | quote}}
++{{- else if $cephCsiDefault.tryOtherMounters }}
++  tryOtherMounters: {{ $cephCsiDefault.tryOtherMounters | quote}}
++{{- end }}
++{{- if $sc.mounter }}
++  mounter: {{ $sc.mounter }}
++{{- else if $cephCsiDefault.mounter }}
++  mounter: {{ $cephCsiDefault.mounter }}
++{{- end }}
++{{- if $sc.cephLogDir }}
++  cephLogDir: {{ $sc.cephLogDir }}
++{{- else if $cephCsiDefault.cephLogDir }}
++  cephLogDir: {{ $cephCsiDefault.cephLogDir }}
++{{- end }}
++{{- if $sc.cephLogStrategy }}
++  cephLogStrategy: {{ $sc.cephLogStrategy }}
++{{- else if $cephCsiDefault.cephLogStrategy }}
++  cephLogStrategy: {{ $cephCsiDefault.cephLogStrategy }}
++{{- end }}
++{{- if $sc.dataPool }}
++  dataPool: {{ $sc.dataPool }}
++{{- else if $cephCsiDefault.dataPool }}
++  dataPool: {{ $cephCsiDefault.dataPool }}
++{{- end }}
++{{- if $sc.volumeNamePrefix }}
++  volumeNamePrefix: "{{ $sc.volumeNamePrefix }}"
++{{- else if $cephCsiDefault.volumeNamePrefix }}
++  volumeNamePrefix: "{{ $cephCsiDefault.volumeNamePrefix }}"
++{{- end }}
++{{- if $sc.encrypted }}
++  encrypted: "{{ $sc.encrypted }}"
++{{- else if $cephCsiDefault.encrypted }}
++  encrypted: "{{ $cephCsiDefault.encrypted }}"
++{{- end }}
++{{- if $sc.encryptionKMSID }}
++  encryptionKMSID: {{ $sc.encryptionKMSID }}
++{{- else if $cephCsiDefault.encryptionKMSID }}
++  encryptionKMSID: {{ $cephCsiDefault.encryptionKMSID }}
++{{- end }}
++{{- if $sc.topologyConstrainedPools }}
+   topologyConstrainedPools:
+-  {{ toYaml .Values.storageClass.topologyConstrainedPools | indent 4 -}}
+-{{- end }}
+-{{- if .Values.storageClass.mapOptions }}
+-  mapOptions: {{ .Values.storageClass.mapOptions }}
+-{{- end }}
+-{{- if .Values.storageClass.unmapOptions }}
+-  unmapOptions: {{ .Values.storageClass.unmapOptions }}
+-{{- end }}
+-  csi.storage.k8s.io/provisioner-secret-name: {{ .Values.storageClass.provisionerSecret }}
+-{{- if .Values.storageClass.provisionerSecretNamespace }}
+-  csi.storage.k8s.io/provisioner-secret-namespace: {{ .Values.storageClass.provisionerSecretNamespace }}
+-{{ else }}
+-  csi.storage.k8s.io/provisioner-secret-namespace: {{ .Release.Namespace }}
+-{{- end }}
+-  csi.storage.k8s.io/controller-expand-secret-name: {{ .Values.storageClass.controllerExpandSecret }}
+-{{- if .Values.storageClass.controllerExpandSecretNamespace }}
+-  csi.storage.k8s.io/controller-expand-secret-namespace: {{ .Values.storageClass.controllerExpandSecretNamespace }}
+-{{ else }}
+-  csi.storage.k8s.io/controller-expand-secret-namespace: {{ .Release.Namespace }}
+-{{- end }}
+-  csi.storage.k8s.io/node-stage-secret-name: {{ .Values.storageClass.nodeStageSecret }}
+-{{- if .Values.storageClass.nodeStageSecretNamespace }}
+-  csi.storage.k8s.io/node-stage-secret-namespace: {{ .Values.storageClass.nodeStageSecretNamespace }}
+-{{ else }}
+-  csi.storage.k8s.io/node-stage-secret-namespace: {{ .Release.Namespace }}
+-{{- end }}
+-  csi.storage.k8s.io/fstype: {{ .Values.storageClass.fstype }}
+-reclaimPolicy: {{ .Values.storageClass.reclaimPolicy }}
+-allowVolumeExpansion: {{ .Values.storageClass.allowVolumeExpansion }}
+-{{- if .Values.storageClass.mountOptions }}
++  {{ toYaml $sc.topologyConstrainedPools | indent 4 -}}
++{{- else if $cephCsiDefault.topologyConstrainedPools }}
++  topologyConstrainedPools:
++  {{ toYaml $cephCsiDefault.topologyConstrainedPools | indent 4 -}}
++{{- end }}
++{{- if $sc.mapOptions }}
++  mapOptions: {{ $sc.mapOptions }}
++{{- else if $cephCsiDefault.mapOptions }}
++  mapOptions: {{ $cephCsiDefault.mapOptions }}
++{{- end }}
++{{- if $sc.unmapOptions }}
++  unmapOptions: {{ $sc.unmapOptions }}
++{{- else if $cephCsiDefault.unmapOptions }}
++  unmapOptions: {{ $cephCsiDefault.unmapOptions }}
++{{- end }}
++  csi.storage.k8s.io/provisioner-secret-name: {{ or $sc.provisionerSecret $defaults.adminSecretName }}
++  csi.storage.k8s.io/provisioner-secret-namespace: {{ or $sc.provisionerSecretNamespace $.Release.Namespace }}
++  csi.storage.k8s.io/controller-expand-secret-name: {{ or $sc.controllerExpandSecret $defaults.adminSecretName }}
++  csi.storage.k8s.io/controller-expand-secret-namespace: {{ or $sc.controllerExpandSecretNamespace $.Release.Namespace }}
++  csi.storage.k8s.io/node-stage-secret-name: {{ or $sc.nodeStageSecret $defaults.adminSecretName }}
++  csi.storage.k8s.io/node-stage-secret-namespace: {{ or $sc.nodeStageSecretNamespace $.Release.Namespace }}
++  csi.storage.k8s.io/fstype: {{ or $sc.fstype $cephCsiDefault.fstype }}
++reclaimPolicy: {{ or $sc.reclaimPolicy $cephCsiDefault.reclaimPolicy }}
++allowVolumeExpansion: {{ or $sc.allowVolumeExpansion $cephCsiDefault.allowVolumeExpansion }}
++{{- if $sc.mountOptions }}
+ mountOptions:
+-  {{- range .Values.storageClass.mountOptions }}
++  {{- range $sc.mountOptions }}
+   - {{ . }}
+   {{- end }}
++{{- else if $cephCsiDefault.mountOptions }}
++mountOptions:
++  {{- range $cephCsiDefault.mountOptions }}
++  - {{ . }}
++  {{- end }}
++{{- end }}
++---
+ {{- end }}
+ {{- end -}}
+--
+2.17.1

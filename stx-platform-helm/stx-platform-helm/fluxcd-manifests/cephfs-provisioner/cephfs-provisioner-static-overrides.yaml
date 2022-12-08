@@ -49,7 +49,7 @@ serviceAccounts:
     create: true
     name: cephfs-provisioner
 
-classDefaults:
+classdefaults:
   cephFSNamespace: kube-system
 
 storageClass:

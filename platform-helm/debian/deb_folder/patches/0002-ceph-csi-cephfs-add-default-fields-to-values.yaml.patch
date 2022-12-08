@@ -1,7 +1,7 @@
-From 068b81a7103994dfa0b7e7d14eead3d191733070 Mon Sep 17 00:00:00 2001
+From e62aec935061204fa6a65ae1fd4f9a0ec6e86da4 Mon Sep 17 00:00:00 2001
 From: Hediberto Cavalcante da Silva
  <hediberto.cavalcantedasilva@windriver.com>
-Date: Thu, 3 Nov 2022 20:03:05 -0300
+Date: Wed, 14 Dec 2022 18:28:47 -0300
 Subject: [PATCH] ceph-csi-cephfs: add default fields to values.yaml
 
 Signed-off-by: Hediberto Cavalcante da Silva <hediberto.cavalcantedasilva@windriver.com>
@@ -10,7 +10,7 @@ Signed-off-by: Hediberto Cavalcante da Silva <hediberto.cavalcantedasilva@windri
  1 file changed, 51 insertions(+)
 
 diff --git a/charts/ceph-csi-cephfs/values.yaml b/charts/ceph-csi-cephfs/values.yaml
-index 7375ea6..9507ffd 100644
+index 7375ea6..7762480 100644
 --- a/charts/ceph-csi-cephfs/values.yaml
 +++ b/charts/ceph-csi-cephfs/values.yaml
 @@ -276,6 +276,24 @@ storageClass:
@@ -46,7 +46,7 @@ index 7375ea6..9507ffd 100644
 +#
 +# Defaults for storage classes.
 +#
-+classDefaults:
++classdefaults:
 +  # Define ip addresses of Ceph Monitors
 +  monitors:
 +  - 192.168.204.2:6789

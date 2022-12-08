@@ -58,7 +58,6 @@ serviceAccounts:
 storageClass:
   create: true
   annotations: {
-    "storageclass.kubernetes.io/is-default-class": "true",
     "helm.sh/hook": "post-upgrade, post-install",
     "helm.sh/hook-delete-policy": "before-hook-creation"
   }

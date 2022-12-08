@@ -1,16 +1,16 @@
-From 6c0d74c0347ec9cff833f9bdf3ea14677e61ecc0 Mon Sep 17 00:00:00 2001
+From 61cb77334fea26559d1b4691adaaf829195f1fb2 Mon Sep 17 00:00:00 2001
 From: Hediberto Cavalcante da Silva
  <hediberto.cavalcantedasilva@windriver.com>
-Date: Thu, 3 Nov 2022 20:01:13 -0300
+Date: Wed, 14 Dec 2022 18:42:27 -0300
 Subject: [PATCH] ceph-csi-rbd: add default fields to values.yaml
 
 Signed-off-by: Hediberto Cavalcante da Silva <hediberto.cavalcantedasilva@windriver.com>
 ---
- charts/ceph-csi-rbd/values.yaml | 50 +++++++++++++++++++++++++++++++++
- 1 file changed, 50 insertions(+)
+ charts/ceph-csi-rbd/values.yaml | 51 +++++++++++++++++++++++++++++++++
+ 1 file changed, 51 insertions(+)
 
 diff --git a/charts/ceph-csi-rbd/values.yaml b/charts/ceph-csi-rbd/values.yaml
-index 42a06c4..2d9072b 100644
+index 42a06c4..26ba675 100644
 --- a/charts/ceph-csi-rbd/values.yaml
 +++ b/charts/ceph-csi-rbd/values.yaml
 @@ -406,6 +406,22 @@ storageClass:
@@ -36,7 +36,7 @@ index 42a06c4..2d9072b 100644
  # Mount the host /etc/selinux inside pods to support
  # selinux-enabled filesystems
  selinuxMount: true
-@@ -458,3 +474,37 @@ externallyManagedConfigmap: false
+@@ -458,3 +474,38 @@ externallyManagedConfigmap: false
  cephConfConfigMapName: ceph-config
  # Name of the configmap used for encryption kms configuration
  kmsConfigMapName: ceph-csi-encryption-kms-config
@@ -44,7 +44,7 @@ index 42a06c4..2d9072b 100644
 +#
 +# Defaults for storage classes.
 +#
-+classDefaults:
++classdefaults:
 +  # Define ip addresses of Ceph Monitors
 +  monitors:
 +    - 192.168.204.3:6789
@@ -53,6 +53,8 @@ index 42a06c4..2d9072b 100644
 +  # K8 secret name for the admin context
 +  adminId: admin
 +  adminSecretName: ceph-secret
++  # Default StorageClass name
++  storageClass: general
 +
 +#
 +# Defines:
@@ -73,6 +75,5 @@ index 42a06c4..2d9072b 100644
 +    active: false
 +    exclude:
 +      - dep_check
-+      - image_repo_sync
 --
 2.17.1

@@ -1,21 +1,21 @@
-From d58e048aea5ec70f830f1703245b811d1ee54a7b Mon Sep 17 00:00:00 2001
+From 9693c42e11ac1834e8ef733e03980710628932f9 Mon Sep 17 00:00:00 2001
 From: Hediberto Cavalcante da Silva
  <hediberto.cavalcantedasilva@windriver.com>
-Date: Thu, 3 Nov 2022 19:54:49 -0300
+Date: Wed, 14 Dec 2022 21:09:50 -0300
 Subject: [PATCH] ceph-csi-rbd: add storage-init.yaml
 
 Signed-off-by: Hediberto Cavalcante da Silva <hediberto.cavalcantedasilva@windriver.com>
 ---
- .../ceph-csi-rbd/templates/storage-init.yaml  | 279 ++++++++++++++++++
- 1 file changed, 279 insertions(+)
+ .../ceph-csi-rbd/templates/storage-init.yaml  | 284 ++++++++++++++++++
+ 1 file changed, 284 insertions(+)
  create mode 100644 charts/ceph-csi-rbd/templates/storage-init.yaml
 
 diff --git a/charts/ceph-csi-rbd/templates/storage-init.yaml b/charts/ceph-csi-rbd/templates/storage-init.yaml
 new file mode 100644
-index 0000000..8e8c4de
+index 0000000..b8a2e9b
 --- /dev/null
 +++ b/charts/ceph-csi-rbd/templates/storage-init.yaml
-@@ -0,0 +1,279 @@
+@@ -0,0 +1,284 @@
 +{{/*
 +#
 +# Copyright (c) 2020-2022 Wind River Systems, Inc.
@@ -106,7 +106,7 @@ index 0000000..8e8c4de
 +      auth_service_required = none
 +      auth_client_required = none
 +
-+    {{ $monitors := .Values.classDefaults.monitors }}
++    {{ $monitors := .Values.classdefaults.monitors }}
 +    {{ range $index, $monitor := $monitors}}
 +    [mon.{{- $index }}]
 +    mon_addr = {{ $monitor }}
@@ -124,19 +124,22 @@ index 0000000..8e8c4de
 +    # Copy from read only mount to Ceph config folder
 +    cp /tmp/ceph.conf /etc/ceph/
 +
++    touch /etc/ceph/ceph.client.admin.keyring
++
 +    if [ -n "${CEPH_ADMIN_SECRET}" ]; then
-+        kubectl get secret -n ${NAMESPACE} | grep ${CEPH_ADMIN_SECRET}
-+        if [ $? -ne 0 ]; then
-+        echo "Create ${CEPH_ADMIN_SECRET} secret"
-+        kubectl create secret generic ${CEPH_ADMIN_SECRET} --type="kubernetes.io/rbd" --from-literal=key= --namespace=${NAMESPACE}
-+        if [ $? -ne 0 ]; then
-+            echo "Error creating secret ${CEPH_ADMIN_SECRET}, exit"
-+            exit 1
-+        fi
++        bytesKey=$(kubectl describe secrets -n ${NAMESPACE} ${CEPH_ADMIN_SECRET} 2>/dev/null | grep -E "^key" | grep -P "\d+" -o)
++        # check if secret exists or is valid, if not create a new one.
++        if [ $? -ne 0 ] || [ $bytesKey -eq 0 ]; then
++            kubectl delete secret -n ${NAMESPACE} ${CEPH_ADMIN_SECRET} 2>/dev/null
++            echo "Create ${CEPH_ADMIN_SECRET} secret"
++            ADMIN_KEYRING=$(echo NoPassword | base64)
++            kubectl create secret generic -n ${NAMESPACE} ${CEPH_ADMIN_SECRET} --type="kubernetes.io/rbd" --from-literal=key=$ADMIN_KEYRING
++            if [ $? -ne 0 ]; then
++                echo "Error creating secret ${CEPH_ADMIN_SECRET}, exit"
++                exit 1
++            fi
 +        fi
 +    fi
-+
-+    touch /etc/ceph/ceph.client.admin.keyring
 +
 +    # Check if ceph is accessible
 +    echo "===================================="
@@ -262,31 +265,33 @@ index 0000000..8e8c4de
 +          configMap:
 +            name: rbd-storage-init
 +      containers:
-+        - name: storage-init-{{- .Values.storageClass.name }}
-+          image: {{ .Values.images.tags.rbd_provisioner_storage_init | quote }}
++        {{- range $sc := .Values.classes }}
++        - name: storage-init-{{- $sc.name }}
++          image: {{ $.Values.images.tags.rbd_provisioner_storage_init | quote }}
 +          command: [ "/bin/bash", "/tmp/storage-init.sh" ]
 +          env:
 +            - name: NAMESPACE
-+              value: {{ .Release.Namespace }}
++              value: {{ $.Release.Namespace }}
 +            - name: ADDITIONAL_NAMESPACES
-+              value: {{ join "," .Values.storageClass.additionalNamespaces | quote }}
++              value: {{ join "," $sc.additionalNamespaces | quote }}
 +            - name: CEPH_ADMIN_SECRET
-+              value: {{ .Values.classDefaults.adminSecretName }}
++              value: {{ $.Values.classdefaults.adminSecretName }}
 +            - name: CEPH_USER_SECRET
-+              value: {{ .Values.storageClass.userSecretName }}
++              value: {{ $sc.userSecretName }}
 +            - name: USER_ID
-+              value: {{ .Values.storageClass.userId }}
++              value: {{ $sc.userId }}
 +            - name: POOL_NAME
-+              value: {{ .Values.storageClass.pool }}
++              value: {{ $sc.pool_name }}
 +            - name: POOL_REPLICATION
-+              value: {{ .Values.storageClass.replication | quote }}
++              value: {{ $sc.replication | quote }}
 +            - name: POOL_CRUSH_RULE_NAME
-+              value: {{ .Values.storageClass.crush_rule_name | quote }}
++              value: {{ $sc.crush_rule_name | quote }}
 +            - name: POOL_CHUNK_SIZE
-+              value: {{ .Values.storageClass.chunk_size | quote }}
++              value: {{ $sc.chunk_size | quote }}
 +          volumeMounts:
 +            - name: rbd-storage-init-configmap-volume
 +              mountPath: /tmp
++        {{- end }}
 +{{- if .Values.provisioner.nodeSelector }}
 +      nodeSelector:
 +{{ .Values.provisioner.nodeSelector | toYaml | trim | indent 8 }}

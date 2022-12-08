@@ -1,21 +1,21 @@
-From 30a69b72f9367802b4ebeb2667db921420328de0 Mon Sep 17 00:00:00 2001
+From c4d2b2c912921a03519bc9ed3f62877ff8da4762 Mon Sep 17 00:00:00 2001
 From: Hediberto Cavalcante da Silva
  <hediberto.cavalcantedasilva@windriver.com>
-Date: Thu, 3 Nov 2022 19:56:35 -0300
+Date: Wed, 14 Dec 2022 18:37:16 -0300
 Subject: [PATCH] ceph-csi-cephfs: add storage-init.yaml
 
 Signed-off-by: Hediberto Cavalcante da Silva <hediberto.cavalcantedasilva@windriver.com>
 ---
- .../templates/storage-init.yaml               | 254 ++++++++++++++++++
- 1 file changed, 254 insertions(+)
+ .../templates/storage-init.yaml               | 256 ++++++++++++++++++
+ 1 file changed, 256 insertions(+)
  create mode 100644 charts/ceph-csi-cephfs/templates/storage-init.yaml
 
 diff --git a/charts/ceph-csi-cephfs/templates/storage-init.yaml b/charts/ceph-csi-cephfs/templates/storage-init.yaml
 new file mode 100644
-index 0000000..5c0f00d
+index 0000000..97df6d8
 --- /dev/null
 +++ b/charts/ceph-csi-cephfs/templates/storage-init.yaml
-@@ -0,0 +1,254 @@
+@@ -0,0 +1,256 @@
 +{{/*
 +#
 +# Copyright (c) 2020-2022 Wind River Systems, Inc.
@@ -67,7 +67,7 @@ index 0000000..5c0f00d
 +subjects:
 +  - kind: ServiceAccount
 +    name: {{ include "ceph-csi-cephfs.serviceAccountName.provisioner" . }}
-+    namespace: {{ .Values.classDefaults.cephFSNamespace }}
++    namespace: {{ .Values.classdefaults.cephFSNamespace }}
 +roleRef:
 +  kind: ClusterRole
 +  name: cephfs-rbac-secrets-namespaces
@@ -79,7 +79,7 @@ index 0000000..5c0f00d
 +kind: ConfigMap
 +metadata:
 +  name: cephfs-storage-init
-+  namespace: {{ .Values.classDefaults.cephFSNamespace }}
++  namespace: {{ .Values.classdefaults.cephFSNamespace }}
 +  labels:
 +    app: {{ include "ceph-csi-cephfs.name" . }}
 +    chart: {{ include "ceph-csi-cephfs.chart" . }}
@@ -106,7 +106,7 @@ index 0000000..5c0f00d
 +      auth_service_required = none
 +      auth_client_required = none
 +
-+    {{ $monitors := .Values.classDefaults.monitors }}
++    {{ $monitors := .Values.classdefaults.monitors }}
 +    {{ range $index, $monitor := $monitors}}
 +    [mon.{{- $index }}]
 +    mon_addr = {{ $monitor }}
@@ -209,7 +209,7 @@ index 0000000..5c0f00d
 +kind: Job
 +metadata:
 +  name: cephfs-storage-init
-+  namespace: {{ .Values.classDefaults.cephFSNamespace }}
++  namespace: {{ .Values.classdefaults.cephFSNamespace }}
 +  labels:
 +    app: {{ include "ceph-csi-cephfs.name" . }}
 +    chart: {{ include "ceph-csi-cephfs.chart" . }}
@@ -232,35 +232,37 @@ index 0000000..5c0f00d
 +          name: cephfs-storage-init
 +          defaultMode: 0555
 +      containers:
-+        - name: storage-init-{{- .Values.storageClass.name }}
-+          image: {{ .Values.images.tags.cephfs_provisioner_storage_init | quote }}
++        {{- range $sc := .Values.classes }}
++        - name: storage-init-{{- $sc.name }}
++          image: {{ $.Values.images.tags.cephfs_provisioner_storage_init | quote }}
 +          command: ["/bin/bash", "/tmp/storage-init.sh"]
 +          env:
 +            - name: NAMESPACE
-+              value: {{ .Values.classDefaults.cephFSNamespace }}
++              value: {{ $.Values.classdefaults.cephFSNamespace }}
 +            - name: ADDITIONAL_NAMESPACES
-+              value: {{ join "," .Values.storageClass.additionalNamespaces | quote }}
++              value: {{ join "," $sc.additionalNamespaces | quote }}
 +            - name: CEPH_USER_SECRET
-+              value: {{ .Values.storageClass.userSecretName }}
++              value: {{ $sc.userSecretName }}
 +            - name: USER_ID
-+              value: {{ .Values.storageClass.userId }}
++              value: {{ $sc.userId }}
 +            - name: ADMIN_ID
-+              value: {{ .Values.classDefaults.adminId }}
++              value: {{ $.Values.classdefaults.adminId }}
 +            - name: POOL_NAME
-+              value: {{ .Values.storageClass.pool }}
++              value: {{ $sc.data_pool_name }}
 +            - name: METADATA_POOL_NAME
-+              value: {{ .Values.storageClass.metadata_pool }}
++              value: {{ $sc.metadata_pool_name }}
 +            - name: FS_NAME
-+              value: {{ .Values.storageClass.fsName }}
++              value: {{ $sc.fs_name }}
 +            - name: CHUNK_SIZE
-+              value: {{ .Values.storageClass.chunk_size | quote }}
++              value: {{ $sc.chunk_size | quote }}
 +            - name: POOL_REPLICATION
-+              value: {{ .Values.storageClass.replication | quote }}
++              value: {{ $sc.replication | quote }}
 +            - name: POOL_CRUSH_RULE_NAME
-+              value: {{ .Values.storageClass.crush_rule_name | quote }}
++              value: {{ $sc.crush_rule_name | quote }}
 +          volumeMounts:
 +          - name: cephfs-storage-init-configmap-volume
 +            mountPath: /tmp
++        {{- end }}
 +      restartPolicy: OnFailure
 +{{- if .Values.provisioner.nodeSelector }}
 +      nodeSelector:

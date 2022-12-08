@@ -147,48 +147,50 @@ class CephFSProvisionerHelm(base.FluxCDBaseHelm):
             stdout, stderr = process.communicate()
             return stdout.strip()
 
-        bk = ceph_bks[0]
-
-        # Get tier info.
-        tiers = self.dbapi.storage_tier_get_list()
-
-        # Get the ruleset for the new kube-rbd pool.
-        tier = next((t for t in tiers if t.forbackendid == bk.id), None)
-        if not tier:
-            raise Exception("No tier present for backend %s" % bk.name)
-
-        rule_name = "{0}{1}{2}".format(
-            tier.name,
-            constants.CEPH_CRUSH_TIER_SUFFIX,
-            "-ruleset").replace('-', '_')
-
-        cluster_id = _get_ceph_fsid()
-        user_secret_name = K8CephFSProvisioner.get_user_secret_name(bk)
-
         class_defaults = {
             "monitors": self._get_formatted_ceph_monitor_ips(
                 name_filter=_skip_ceph_mon_2),
             "adminId": app_constants.K8S_CEPHFS_PROVISIONER_USER_NAME,
-            "adminSecretName": constants.K8S_RBD_PROV_ADMIN_SECRET_NAME
+            "adminSecretName": app_constants.K8S_CEPHFS_PROVISIONER_ADMIN_SECRET_NAME
         }
 
-        storage_class = {
-            "clusterID": cluster_id,
-            "name": K8CephFSProvisioner.get_storage_class_name(bk),
-            "fsName": K8CephFSProvisioner.get_fs(bk),
-            "pool": K8CephFSProvisioner.get_data_pool(bk),
-            "metadata_pool": K8CephFSProvisioner.get_metadata_pool(bk),
-            "volumeNamePrefix": app_constants.HELM_CEPH_FS_PROVISIONER_VOLUME_NAME_PREFIX,
-            "provisionerSecret": user_secret_name,
-            "controllerExpandSecret": user_secret_name,
-            "nodeStageSecret": user_secret_name,
-            "userId": K8CephFSProvisioner.get_user_id(bk),
-            "userSecretName": user_secret_name or class_defaults["adminSecretName"],
-            "chunk_size": 64,
-            "replication": int(bk.capabilities.get("replication")),
-            "crush_rule_name": rule_name,
-            "additionalNamespaces": ['default', 'kube-public']
-        }
+        # Get tier info.
+        tiers = self.dbapi.storage_tier_get_list()
+        cluster_id = _get_ceph_fsid()
+        storage_classes = []
+
+        for bk in ceph_bks:
+            # Search tier for backend.
+            tier = next((t for t in tiers if t.forbackendid == bk.id), None)
+            if not tier:
+                raise Exception("No tier present for backend %s" % bk.name)
+
+            rule_name = "{0}{1}{2}".format(
+                tier.name,
+                constants.CEPH_CRUSH_TIER_SUFFIX,
+                "-ruleset").replace('-', '_')
+
+            user_secret_name = K8CephFSProvisioner.get_user_secret_name(bk)
+
+            storage_class = {
+                "clusterID": cluster_id,
+                "name": K8CephFSProvisioner.get_storage_class_name(bk),
+                "fs_name": K8CephFSProvisioner.get_fs(bk),
+                "data_pool_name": K8CephFSProvisioner.get_data_pool(bk),
+                "metadata_pool_name": K8CephFSProvisioner.get_metadata_pool(bk),
+                "volumeNamePrefix": app_constants.HELM_CEPH_FS_PROVISIONER_VOLUME_NAME_PREFIX,
+                "provisionerSecret": user_secret_name,
+                "controllerExpandSecret": user_secret_name,
+                "nodeStageSecret": user_secret_name,
+                "userId": K8CephFSProvisioner.get_user_id(bk),
+                "userSecretName": user_secret_name or class_defaults["adminSecretName"],
+                "chunk_size": 64,
+                "replication": int(bk.capabilities.get("replication")),
+                "crush_rule_name": rule_name,
+                "additionalNamespaces": ['default', 'kube-public']
+            }
+
+            storage_classes.append(storage_class)
 
         provisioner = {
             "replicaCount": self._num_replicas_for_platform_app()
@@ -204,10 +206,10 @@ class CephFSProvisionerHelm(base.FluxCDBaseHelm):
 
         overrides = {
             app_constants.HELM_NS_CEPH_FS_PROVISIONER: {
-                "storageClass": storage_class,
+                "classes": storage_classes,
                 "provisioner": provisioner,
                 "csiConfig": csi_config,
-                "classDefaults": class_defaults
+                "classdefaults": class_defaults
             }
         }
 
