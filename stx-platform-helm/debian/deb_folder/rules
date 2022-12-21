@@ -39,7 +39,7 @@ override_dh_auto_build:
 
 	# Copy the plugins: installed in the buildroot
 	mkdir -p $(STAGING_FLUXCD)/plugins
-	cp /plugins/$(APP_NAME)/*.whl $(STAGING_FLUXCD)/plugins
+	cp /plugins/*.whl $(STAGING_FLUXCD)/plugins
 
 	# Create the app package.
 	cd $(STAGING_FLUXCD) && find . -type f ! -name '*.md5' -print0 | xargs -0 md5sum > checksum.md5

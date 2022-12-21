@@ -7,5 +7,5 @@ src_files:
 revision:
   dist: $STX_DIST
   GITREVCOUNT:
-    BASE_SRCREV: c608f2aaa92064b712e7076e4141a162b78fe995
     SRC_DIR: ${MY_REPO}/stx/platform-armada-app
+    BASE_SRCREV: 301e310b67f608c309a34c7431848f680e2ea827

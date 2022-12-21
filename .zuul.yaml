@@ -33,9 +33,9 @@
       - starlingx/utilities
       - starlingx/root
     files:
-      - python-k8sapp-platform/*
+      - python3-k8sapp-platform/*
     vars:
-      tox_extra_args: -c python-k8sapp-platform/k8sapp_platform/tox.ini
+      tox_extra_args: -c python3-k8sapp-platform/k8sapp_platform/tox.ini
       tox_constraints_file: '{{ ansible_user_dir }}/src/opendev.org/starlingx/root/build-tools/requirements/debian/upper-constraints.txt'
 
 - job:
@@ -45,10 +45,10 @@
       Run flake8 test for k8sapp_platform
     nodeset: debian-bullseye
     files:
-      - python-k8sapp-platform/*
+      - python3-k8sapp-platform/*
     vars:
       tox_envlist: flake8
-      tox_extra_args: -c python-k8sapp-platform/k8sapp_platform/tox.ini
+      tox_extra_args: -c python3-k8sapp-platform/k8sapp_platform/tox.ini
 
 - job:
     name: k8sapp-platform-tox-pylint
@@ -63,10 +63,10 @@
       - starlingx/utilities
       - starlingx/root
     files:
-      - python-k8sapp-platform/*
+      - python3-k8sapp-platform/*
     vars:
       tox_envlist: pylint
-      tox_extra_args: -c python-k8sapp-platform/k8sapp_platform/tox.ini
+      tox_extra_args: -c python3-k8sapp-platform/k8sapp_platform/tox.ini
       tox_constraints_file: '{{ ansible_user_dir }}/src/opendev.org/starlingx/root/build-tools/requirements/debian/upper-constraints.txt'
 
 - job:
@@ -76,10 +76,10 @@
       Run bandit test for k8sapp_platform
     nodeset: debian-bullseye
     files:
-      - python-k8sapp-platform/*
+      - python3-k8sapp-platform/*
     vars:
       tox_envlist: bandit
-      tox_extra_args: -c python-k8sapp-platform/k8sapp_platform/tox.ini
+      tox_extra_args: -c python3-k8sapp-platform/k8sapp_platform/tox.ini
 
 - job:
     name: stx-platform-armada-app-upload-git-mirror
