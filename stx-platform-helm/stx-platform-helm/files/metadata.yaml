@@ -1,6 +1,7 @@
 app_name: @APP_NAME@
 app_version: @APP_VERSION@
 helm_repo: @HELM_REPO@
+maintain_user_overrides: true
 behavior:
   platform_managed_app: yes
   desired_state: applied
