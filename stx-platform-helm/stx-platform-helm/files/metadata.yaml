@@ -9,6 +9,7 @@ behavior:
     triggers:
       - type: runtime-apply-puppet # TODO(dvoicule): optimize triggers
       - type: host-availability-updated
+      - type: kube-upgrade-complete
         filters:
           - availability: services-enabled
       - type: host-delete
