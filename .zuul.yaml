@@ -5,7 +5,6 @@
     check:
       jobs:
         - openstack-tox-linters
-        - k8sapp-platform-tox-py27
         - k8sapp-platform-tox-py39
         - k8sapp-platform-tox-flake8
         - k8sapp-platform-tox-pylint
@@ -13,7 +12,6 @@
     gate:
       jobs:
         - openstack-tox-linters
-        - k8sapp-platform-tox-py27
         - k8sapp-platform-tox-py39
         - k8sapp-platform-tox-flake8
         - k8sapp-platform-tox-pylint
@@ -23,25 +21,8 @@
         - stx-platform-armada-app-upload-git-mirror
 
 - job:
-    name: k8sapp-platform-tox-py27
-    parent: tox
-    description: |
-      Run py27 test for k8sapp_platform
-    nodeset: ubuntu-xenial
-    required-projects:
-      - starlingx/config
-      - starlingx/fault
-      - starlingx/update
-      - starlingx/utilities
-    files:
-      - python-k8sapp-platform/*
-    vars:
-      tox_envlist: py27
-      tox_extra_args: -c python-k8sapp-platform/k8sapp_platform/tox.ini
-
-- job:
     name: k8sapp-platform-tox-py39
-    parent: tox-py39
+    parent: openstack-tox-py39
     description: |
       Run py39 test for k8sapp_platform
     nodeset: debian-bullseye
@@ -50,19 +31,19 @@
       - starlingx/fault
       - starlingx/update
       - starlingx/utilities
+      - starlingx/root
     files:
       - python-k8sapp-platform/*
     vars:
-      tox_envlist: py39
-      python_version: 3.9
       tox_extra_args: -c python-k8sapp-platform/k8sapp_platform/tox.ini
+      tox_constraints_file: '{{ ansible_user_dir }}/src/opendev.org/starlingx/root/build-tools/requirements/debian/upper-constraints.txt'
 
 - job:
     name: k8sapp-platform-tox-flake8
     parent: tox
     description: |
       Run flake8 test for k8sapp_platform
-    nodeset: ubuntu-focal
+    nodeset: debian-bullseye
     files:
       - python-k8sapp-platform/*
     vars:
@@ -74,24 +55,26 @@
     parent: tox
     description: |
       Run pylint test for k8sapp_platform
-    nodeset: ubuntu-xenial
+    nodeset: debian-bullseye
     required-projects:
       - starlingx/config
       - starlingx/fault
       - starlingx/update
       - starlingx/utilities
+      - starlingx/root
     files:
       - python-k8sapp-platform/*
     vars:
       tox_envlist: pylint
       tox_extra_args: -c python-k8sapp-platform/k8sapp_platform/tox.ini
+      tox_constraints_file: '{{ ansible_user_dir }}/src/opendev.org/starlingx/root/build-tools/requirements/debian/upper-constraints.txt'
 
 - job:
     name: k8sapp-platform-tox-bandit
     parent: tox
     description: |
       Run bandit test for k8sapp_platform
-    nodeset: ubuntu-focal
+    nodeset: debian-bullseye
     files:
       - python-k8sapp-platform/*
     vars:
