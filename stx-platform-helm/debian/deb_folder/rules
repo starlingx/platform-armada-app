@@ -6,11 +6,11 @@ export APP_FOLDER = $(ROOT)/usr/local/share/applications/helm
 export EXTRA_CHARTS = $(ROOT)/opt/extracharts
 
 export DEB_VERSION = $(shell dpkg-parsechangelog | egrep '^Version:' | cut -f 2 -d ' ')
-export MAJOR = $(shell echo $(DEB_VERSION) | cut -f 1 -d '-')
-export MINOR_PATCH = $(shell echo $(DEB_VERSION) | cut -f 4 -d '.')
+export RELEASE = $(shell echo $(DEB_VERSION) | cut -f 1 -d '-')
+export REVISION = $(shell echo $(DEB_VERSION) | cut -f 4 -d '.')
 
 export APP_NAME = platform-integ-apps
-export APP_VERSION = $(MAJOR)-$(MINOR_PATCH)
+export APP_VERSION = $(RELEASE)-$(REVISION)
 export APP_TARBALL_FLUXCD = $(APP_NAME)-$(APP_VERSION).tgz
 export HELM_FOLDER = /usr/lib/helm
 export HELM_REPO = stx-platform
