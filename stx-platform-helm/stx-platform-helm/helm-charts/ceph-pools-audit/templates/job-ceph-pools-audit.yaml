@@ -32,7 +32,7 @@ imagePullSecrets:
 #   - when replication is changed and we don't want to reinstall all the
 #     charts that created Ceph pools
 #
-apiVersion: batch/v1beta1
+apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: ceph-pools-audit
