@@ -16,6 +16,8 @@ import os
 from oslo_log import log as logging
 from sysinv.common import constants
 from sysinv.common import exception
+from sysinv.common import kubernetes
+from sysinv.common import utils as cutils
 from sysinv.helm import lifecycle_base as base
 from sysinv.helm import lifecycle_utils as lifecycle_utils
 
@@ -48,6 +50,8 @@ class PlatformAppLifecycleOperator(base.AppLifecycleOperator):
             elif hook_info.operation == constants.APP_REMOVE_OP and \
                     hook_info.relative_timing == constants.APP_LIFECYCLE_TIMING_POST:
                 return lifecycle_utils.delete_rbd_provisioner_secrets(app_op, app, hook_info)
+            elif hook_info.operation == constants.APP_RECOVER_OP:
+                return self.delete_csi_drivers(app)
 
         # Resources
         elif hook_info.lifecycle_type == constants.APP_LIFECYCLE_TYPE_RESOURCE:
@@ -94,3 +98,18 @@ class PlatformAppLifecycleOperator(base.AppLifecycleOperator):
                 vim_progress_status=constants.VIM_SERVICES_ENABLED) < 1:
             raise exception.LifecycleSemanticCheckException(
                 "Not enough hosts in desired state")
+
+    def delete_csi_drivers(self, app):
+        """ Delete CSI drivers
+
+        This function is invoked when a recovery occurs,
+        deleting the drivers created during the update.
+
+        :param app: AppOperator.Application object
+
+        """
+        drivers = ["cephfs.csi.ceph.com", "rbd.csi.ceph.com"]
+        for driver in drivers:
+            cmd = ["kubectl", "--kubeconfig", kubernetes.KUBERNETES_ADMIN_CONF, "delete", "csidriver", driver]
+            stdout, stderr = cutils.trycmd(*cmd)
+            LOG.debug("{} app: cmd={} stdout={} stderr={}".format(app.name, cmd, stdout, stderr))

@@ -1,22 +1,22 @@
-From 74e705c1e18766f1e7492685c6068887c133e7a7 Mon Sep 17 00:00:00 2001
-From: Felipe Sanches Zanoni <Felipe.SanchesZanoni@windriver.com>
-Date: Mon, 10 Apr 2023 13:56:31 -0300
+From 239cfdde94db341aad0ccb15e420c4ecc3157d21 Mon Sep 17 00:00:00 2001
+From: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
+Date: Mon, 24 Apr 2023 16:57:46 -0300
 Subject: [PATCH] ceph-csi-cephfs: add storage-init.yaml
 
 Signed-off-by: Hediberto Cavalcante da Silva <hediberto.cavalcantedasilva@windriver.com>
 Signed-off-by: Felipe Sanches Zanoni <Felipe.SanchesZanoni@windriver.com>
-Signed-off-by: Erickson Silva <Erickson.SilvadeOliveira@windriver.com>
+Signed-off-by: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
 ---
- .../templates/storage-init.yaml               | 353 ++++++++++++++++++
- 1 file changed, 353 insertions(+)
+ .../templates/storage-init.yaml               | 369 ++++++++++++++++++
+ 1 file changed, 369 insertions(+)
  create mode 100644 charts/ceph-csi-cephfs/templates/storage-init.yaml
 
 diff --git a/charts/ceph-csi-cephfs/templates/storage-init.yaml b/charts/ceph-csi-cephfs/templates/storage-init.yaml
 new file mode 100644
-index 0000000..3e29fc7
+index 000000000..97052d7a9
 --- /dev/null
 +++ b/charts/ceph-csi-cephfs/templates/storage-init.yaml
-@@ -0,0 +1,353 @@
+@@ -0,0 +1,369 @@
 +{{/*
 +#
 +# Copyright (c) 2020-2023 Wind River Systems, Inc.
@@ -47,6 +47,9 @@ index 0000000..3e29fc7
 +  - apiGroups: [""]
 +    resources: ["namespaces"]
 +    verbs: ["get", "create", "list", "update"]
++  - apiGroups: ["storage.k8s.io"]
++    resources: ["csidrivers"]
++    verbs: ["get", "delete"]
 +
 +---
 +
@@ -162,6 +165,17 @@ index 0000000..3e29fc7
 +        exit ${RETURN_CODE}
 +      fi
 +    }
++
++    # Delete old driver if current fsGroupPolicy is different from "File"
++    # See: https://github.com/ceph/ceph-csi/issues/3397
++    CURRENT_FS_GROUP_POLICY=$(kubectl describe csidriver "${CSI_DRIVER_NAME}" 2>/dev/null | grep -oP 'Fs Group Policy:\K.*' | tr -d ' ')
++    if [ -n "${CURRENT_FS_GROUP_POLICY}" ] && [ "${CURRENT_FS_GROUP_POLICY}" != "File" ]; then
++       echo "Deleting old CSI driver"
++       kubectl delete csidriver "${CSI_DRIVER_NAME}"
++       if [ $? -ne 0 ]; then
++         echo "Error deleting csi driver ${CSI_DRIVER_NAME}"
++       fi
++    fi
 +
 +    # Copy from read only mount to Ceph config folder
 +    cp /tmp/ceph.conf /etc/ceph/
@@ -357,6 +371,8 @@ index 0000000..3e29fc7
 +              value: {{ $sc.replication | quote }}
 +            - name: POOL_CRUSH_RULE_NAME
 +              value: {{ $sc.crush_rule_name | quote }}
++            - name: CSI_DRIVER_NAME
++              value: {{ $.Values.driverName }}
 +          volumeMounts:
 +          - name: cephfs-storage-init-configmap-volume
 +            mountPath: /tmp
@@ -370,6 +386,5 @@ index 0000000..3e29fc7
 +      tolerations:
 +{{ toYaml . | indent 8 }}
 +{{- end}}
--- 
+--
 2.25.1
-

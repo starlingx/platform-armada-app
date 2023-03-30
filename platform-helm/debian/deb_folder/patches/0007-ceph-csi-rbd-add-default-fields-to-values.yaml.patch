@@ -1,22 +1,23 @@
-From 737ac21548a787c72f2c5a4d41b3116a3586b726 Mon Sep 17 00:00:00 2001
-From: Felipe Sanches Zanoni <Felipe.SanchesZanoni@windriver.com>
-Date: Mon, 10 Apr 2023 13:58:11 -0300
+From cb5f1ad019e4e186c6db8986c6dd12a44ad8e60f Mon Sep 17 00:00:00 2001
+From: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
+Date: Mon, 24 Apr 2023 17:11:36 -0300
 Subject: [PATCH] ceph-csi-rbd: add default fields to values.yaml
 
 Signed-off-by: Hediberto Cavalcante da Silva <hediberto.cavalcantedasilva@windriver.com>
 Signed-off-by: Felipe Sanches Zanoni <Felipe.SanchesZanoni@windriver.com>
+Signed-off-by: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
 ---
- charts/ceph-csi-rbd/values.yaml | 35 +++++++++++++++++++++++++++++++++
- 1 file changed, 35 insertions(+)
+ charts/ceph-csi-rbd/values.yaml | 36 +++++++++++++++++++++++++++++++++
+ 1 file changed, 36 insertions(+)
 
 diff --git a/charts/ceph-csi-rbd/values.yaml b/charts/ceph-csi-rbd/values.yaml
-index 42a06c4..b313a38 100644
+index 45f4a9073..d74652be1 100644
 --- a/charts/ceph-csi-rbd/values.yaml
 +++ b/charts/ceph-csi-rbd/values.yaml
-@@ -406,6 +406,22 @@ storageClass:
+@@ -419,6 +419,22 @@ storageClass:
    # mountOptions:
    #   - discard
- 
+
 +  # Ceph user name to access this pool
 +  userId: kube
 +  # K8 secret name with key for accessing the Ceph pool
@@ -36,7 +37,7 @@ index 42a06c4..b313a38 100644
  # Mount the host /etc/selinux inside pods to support
  # selinux-enabled filesystems
  selinuxMount: true
-@@ -458,3 +474,22 @@ externallyManagedConfigmap: false
+@@ -471,3 +487,23 @@ externallyManagedConfigmap: false
  cephConfConfigMapName: ceph-config
  # Name of the configmap used for encryption kms configuration
  kmsConfigMapName: ceph-csi-encryption-kms-config
@@ -59,6 +60,6 @@ index 42a06c4..b313a38 100644
 +storage_init:
 +  image:
 +    repository: docker.io/openstackhelm/ceph-config-helper
--- 
++    tag: ubuntu_focal-20230424
+--
 2.25.1
-
