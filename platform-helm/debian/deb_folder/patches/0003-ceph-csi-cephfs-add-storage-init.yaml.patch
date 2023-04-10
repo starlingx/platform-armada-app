@@ -1,10 +1,10 @@
-From c9e0b07973375966cd150a6926d7b6b1ef3686fb Mon Sep 17 00:00:00 2001
-From: Hediberto Cavalcante da Silva
- <hediberto.cavalcantedasilva@windriver.com>
-Date: Fri, 17 Feb 2023 20:22:16 -0300
+From 74e705c1e18766f1e7492685c6068887c133e7a7 Mon Sep 17 00:00:00 2001
+From: Felipe Sanches Zanoni <Felipe.SanchesZanoni@windriver.com>
+Date: Mon, 10 Apr 2023 13:56:31 -0300
 Subject: [PATCH] ceph-csi-cephfs: add storage-init.yaml
 
 Signed-off-by: Hediberto Cavalcante da Silva <hediberto.cavalcantedasilva@windriver.com>
+Signed-off-by: Felipe Sanches Zanoni <Felipe.SanchesZanoni@windriver.com>
 ---
  .../templates/storage-init.yaml               | 264 ++++++++++++++++++
  1 file changed, 264 insertions(+)
@@ -12,13 +12,13 @@ Signed-off-by: Hediberto Cavalcante da Silva <hediberto.cavalcantedasilva@windri
 
 diff --git a/charts/ceph-csi-cephfs/templates/storage-init.yaml b/charts/ceph-csi-cephfs/templates/storage-init.yaml
 new file mode 100644
-index 0000000..0839da7
+index 0000000..3e29fc7
 --- /dev/null
 +++ b/charts/ceph-csi-cephfs/templates/storage-init.yaml
 @@ -0,0 +1,264 @@
 +{{/*
 +#
-+# Copyright (c) 2020-2022 Wind River Systems, Inc.
++# Copyright (c) 2020-2023 Wind River Systems, Inc.
 +#
 +# SPDX-License-Identifier: Apache-2.0
 +#
@@ -242,7 +242,7 @@ index 0000000..0839da7
 +      containers:
 +        {{- range $sc := .Values.classes }}
 +        - name: storage-init-{{- $sc.name }}
-+          image: {{ $.Values.images.tags.cephfs_provisioner_storage_init | quote }}
++          image: "{{ $.Values.storage_init.image.repository }}:{{ $.Values.storage_init.image.tag }}"
 +          command: ["/bin/bash", "/tmp/storage-init.sh"]
 +          env:
 +            - name: NAMESPACE
@@ -280,5 +280,6 @@ index 0000000..0839da7
 +      tolerations:
 +{{ toYaml . | indent 8 }}
 +{{- end}}
---
-2.17.1
+-- 
+2.25.1
+

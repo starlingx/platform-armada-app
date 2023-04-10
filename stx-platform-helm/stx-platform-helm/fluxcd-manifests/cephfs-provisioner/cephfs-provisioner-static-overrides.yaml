@@ -28,6 +28,22 @@ provisioner:
     enabled: false
     service:
       enabled: false
+  provisioner:
+    image:
+      repository: k8s.gcr.io/sig-storage/csi-provisioner
+      tag: v3.1.0
+  attacher:
+    image:
+      repository: k8s.gcr.io/sig-storage/csi-attacher
+      tag: v3.4.0
+  resizer:
+    image:
+      repository: k8s.gcr.io/sig-storage/csi-resizer
+      tag: v1.4.0
+  snapshotter:
+    image:
+      repository: k8s.gcr.io/sig-storage/csi-snapshotter
+      tag: v4.2.0
 
 nodeplugin:
   name: cephfs-nodeplugin
@@ -40,6 +56,14 @@ nodeplugin:
     enabled: false
     service:
       enabled: false
+  registrar:
+    image:
+      repository: k8s.gcr.io/sig-storage/csi-node-driver-registrar
+      tag: v2.4.0
+  plugin:
+    image:
+      repository: quay.io/cephcsi/cephcsi
+      tag: v3.6.2
 
 serviceAccounts:
   nodeplugin:
@@ -85,23 +109,7 @@ cephconf: |-
     # see https://github.com/ceph/ceph-csi/issues/1928
     fuse_big_writes = true
 
-#
-# Defines:
-# - Provisioner's image name including container registry.
-# - CEPH helper image
-#
-images:
-  tags:
-    csi_provisioner: k8s.gcr.io/sig-storage/csi-provisioner:v3.1.0
-    csi_snapshotter: k8s.gcr.io/sig-storage/csi-snapshotter:v4.2.0
-    csi_attacher: k8s.gcr.io/sig-storage/csi-attacher:v3.4.0
-    csi_resizer: k8s.gcr.io/sig-storage/csi-resizer:v1.4.0
-    csi_cephcsi: quay.io/cephcsi/cephcsi:v3.6.2
-    csi_registrar: k8s.gcr.io/sig-storage/csi-node-driver-registrar:v2.4.0
-    cephfs_provisioner_storage_init: docker.io/openstackhelm/ceph-config-helper:ubuntu_bionic-20220802
-  pull_policy: "IfNotPresent"
-  local_registry:
-    active: false
-    exclude:
-      - dep_check
-      - image_repo_sync
+storage_init:
+  image:
+    repository: docker.io/openstackhelm/ceph-config-helper
+    tag: ubuntu_bionic-20220802

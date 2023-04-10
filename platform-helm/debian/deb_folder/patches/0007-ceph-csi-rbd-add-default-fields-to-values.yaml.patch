@@ -1,22 +1,22 @@
-From 61cb77334fea26559d1b4691adaaf829195f1fb2 Mon Sep 17 00:00:00 2001
-From: Hediberto Cavalcante da Silva
- <hediberto.cavalcantedasilva@windriver.com>
-Date: Wed, 14 Dec 2022 18:42:27 -0300
+From 737ac21548a787c72f2c5a4d41b3116a3586b726 Mon Sep 17 00:00:00 2001
+From: Felipe Sanches Zanoni <Felipe.SanchesZanoni@windriver.com>
+Date: Mon, 10 Apr 2023 13:58:11 -0300
 Subject: [PATCH] ceph-csi-rbd: add default fields to values.yaml
 
 Signed-off-by: Hediberto Cavalcante da Silva <hediberto.cavalcantedasilva@windriver.com>
+Signed-off-by: Felipe Sanches Zanoni <Felipe.SanchesZanoni@windriver.com>
 ---
- charts/ceph-csi-rbd/values.yaml | 51 +++++++++++++++++++++++++++++++++
- 1 file changed, 51 insertions(+)
+ charts/ceph-csi-rbd/values.yaml | 35 +++++++++++++++++++++++++++++++++
+ 1 file changed, 35 insertions(+)
 
 diff --git a/charts/ceph-csi-rbd/values.yaml b/charts/ceph-csi-rbd/values.yaml
-index 42a06c4..26ba675 100644
+index 42a06c4..b313a38 100644
 --- a/charts/ceph-csi-rbd/values.yaml
 +++ b/charts/ceph-csi-rbd/values.yaml
 @@ -406,6 +406,22 @@ storageClass:
    # mountOptions:
    #   - discard
-
+ 
 +  # Ceph user name to access this pool
 +  userId: kube
 +  # K8 secret name with key for accessing the Ceph pool
@@ -36,7 +36,7 @@ index 42a06c4..26ba675 100644
  # Mount the host /etc/selinux inside pods to support
  # selinux-enabled filesystems
  selinuxMount: true
-@@ -458,3 +474,38 @@ externallyManagedConfigmap: false
+@@ -458,3 +474,22 @@ externallyManagedConfigmap: false
  cephConfConfigMapName: ceph-config
  # Name of the configmap used for encryption kms configuration
  kmsConfigMapName: ceph-csi-encryption-kms-config
@@ -56,24 +56,9 @@ index 42a06c4..26ba675 100644
 +  # Default StorageClass name
 +  storageClass: general
 +
-+#
-+# Defines:
-+# - Provisioner's image name including container registry.
-+# - CEPH helper image
-+#
-+images:
-+  tags:
-+    csi_provisioner: k8s.gcr.io/sig-storage/csi-provisioner:v3.1.0
-+    csi_snapshotter: k8s.gcr.io/sig-storage/csi-snapshotter:v4.2.0
-+    csi_attacher: k8s.gcr.io/sig-storage/csi-attacher:v3.4.0
-+    csi_resizer: k8s.gcr.io/sig-storage/csi-resizer:v1.4.0
-+    csi_cephcsi: quay.io/cephcsi/cephcsi:v3.6.2
-+    csi_registrar: k8s.gcr.io/sig-storage/csi-node-driver-registrar:v2.4.0
-+    rbd_provisioner_storage_init: docker.io/openstackhelm/ceph-config-helper:ubuntu_bionic-20220802
-+  pull_policy: "IfNotPresent"
-+  local_registry:
-+    active: false
-+    exclude:
-+      - dep_check
---
-2.17.1
++storage_init:
++  image:
++    repository: docker.io/openstackhelm/ceph-config-helper
+-- 
+2.25.1
+
