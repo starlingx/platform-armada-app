@@ -5,9 +5,10 @@ Subject: [PATCH] ceph-csi-cephfs: add storage-init.yaml
 
 Signed-off-by: Hediberto Cavalcante da Silva <hediberto.cavalcantedasilva@windriver.com>
 Signed-off-by: Felipe Sanches Zanoni <Felipe.SanchesZanoni@windriver.com>
+Signed-off-by: Erickson Silva <Erickson.SilvadeOliveira@windriver.com>
 ---
- .../templates/storage-init.yaml               | 264 ++++++++++++++++++
- 1 file changed, 264 insertions(+)
+ .../templates/storage-init.yaml               | 353 ++++++++++++++++++
+ 1 file changed, 353 insertions(+)
  create mode 100644 charts/ceph-csi-cephfs/templates/storage-init.yaml
 
 diff --git a/charts/ceph-csi-cephfs/templates/storage-init.yaml b/charts/ceph-csi-cephfs/templates/storage-init.yaml
@@ -15,7 +16,7 @@ new file mode 100644
 index 0000000..3e29fc7
 --- /dev/null
 +++ b/charts/ceph-csi-cephfs/templates/storage-init.yaml
-@@ -0,0 +1,264 @@
+@@ -0,0 +1,353 @@
 +{{/*
 +#
 +# Copyright (c) 2020-2023 Wind River Systems, Inc.
@@ -113,53 +114,111 @@ index 0000000..3e29fc7
 +    {{- end }}
 +
 +  storage-init.sh: |
++    #! /bin/bash
++
 +    #
 +    # Copyright (c) 2020-2023 Wind River Systems, Inc.
 +    #
 +    # SPDX-License-Identifier: Apache-2.0
 +    #
 +
-+    #! /bin/bash
++    set_pool_config(){
++      local POOL=$1
++      echo "- Checking pool..."
++      ceph osd pool stats "${POOL}" &>/dev/null
++      if [ $? -ne 0 ]; then
++        echo "- Creating pool ${POOL}:"
++        ceph osd pool create "${POOL}" "${POOL_CHUNK_SIZE}"
++        RETURN_CODE=$?
++        if [ ${RETURN_CODE} -ne 0 ]; then
++          echo "Error creating pool ${POOL} (return code: ${RETURN_CODE})"
++          exit ${RETURN_CODE}
++        fi
++      else
++        echo "Pool ${POOL} already exists"
++      fi
++
++      echo "- Enabling pool ${POOL}:"
++      ceph osd pool application enable "${POOL}" cephfs
++      RETURN_CODE=$?
++      if [ ${RETURN_CODE} -ne 0 ]; then
++        echo "Error enabling pool ${POOL} (return code: ${RETURN_CODE})"
++        exit ${RETURN_CODE}
++      fi
++
++      echo "- Setting the number of replicas:"
++      ceph osd pool set "${POOL}" size "${POOL_REPLICATION}"
++      RETURN_CODE=$?
++      if [ ${RETURN_CODE} -ne 0 ]; then
++        echo "Error setting the number of pool replicas (return code: ${RETURN_CODE})"
++        exit ${RETURN_CODE}
++      fi
++
++      echo "- Assigning crush rule:"
++      ceph osd pool set "${POOL}" crush_rule "${POOL_CRUSH_RULE_NAME}"
++      RETURN_CODE=$?
++      if [ ${RETURN_CODE} -ne 0 ]; then
++        echo "Error assigning crush rule (return code: ${RETURN_CODE})"
++        exit ${RETURN_CODE}
++      fi
++    }
 +
 +    # Copy from read only mount to Ceph config folder
 +    cp /tmp/ceph.conf /etc/ceph/
 +
-+    set -x
-+
 +    touch /etc/ceph/ceph.client.admin.keyring
 +
 +    # Check if ceph is accessible
-+    echo "===================================="
++    echo "================================================="
++    echo "ceph -s"
++    echo "================================================="
 +    ceph -s
-+    if [ $? -ne 0 ]; then
-+      echo "Error: Ceph cluster is not accessible, check Pod logs for details."
-+      exit 1
++    RETURN_CODE=$?
++    if [ ${RETURN_CODE} -ne 0 ]; then
++      echo -e "Error: Ceph cluster is not accessible, check Pod logs for details. (return code: ${RETURN_CODE})"
++      exit ${RETURN_CODE}
 +    fi
 +
-+    set -ex
-+    KEYRING=$(ceph auth get-or-create client.${USER_ID} mon "allow r" osd "allow rwx pool=${POOL_NAME}" | sed -n 's/^[[:blank:]]*key[[:blank:]]\+=[[:blank:]]\(.*\)/\1/p')
++    echo "================================================="
++    echo "Creating keyring"
++    echo "================================================="
++    KEYRING=$(ceph auth get-or-create client."${USER_ID}" mon "allow r" osd "allow rwx pool=""${POOL_NAME}""" | sed -n 's/^[[:blank:]]*key[[:blank:]]\+=[[:blank:]]\(.*\)/\1/p')
 +    # Set up pool key in Ceph format
-+    CEPH_USER_KEYRING=/etc/ceph/ceph.client.${USER_ID}.keyring
-+    echo ${KEYRING} > ${CEPH_USER_KEYRING}
-+    set +ex
++    CEPH_USER_KEYRING=/etc/ceph/ceph.client."${USER_ID}".keyring
++    echo "${KEYRING}" > "${CEPH_USER_KEYRING}"
++    echo "Keyring ${CEPH_USER_KEYRING} created"
 +
++    echo -e "\n================================================="
++    echo "Creating user secret"
++    echo "================================================="
 +    if [ -n "${CEPH_USER_SECRET}" ]; then
 +      # check if the secret exists or is an old pattern, if not create a new one.
-+      kubectl describe secret -n ${NAMESPACE} ${CEPH_USER_SECRET} 2>/dev/null | grep -E "^userID"
++      kubectl describe secret -n "${NAMESPACE}" "${CEPH_USER_SECRET}" 2>/dev/null | grep -qE "^userID"
 +      if [ $? -ne 0 ]; then
-+        echo "Deleting old ${CEPH_USER_SECRET} secret for namespace ${NAMESPACE}"
-+        # Make sure the secret is gone. No need to check return code.
-+        kubectl delete secret -n ${NAMESPACE} ${CEPH_USER_SECRET}
-+        echo "Creating ${CEPH_USER_SECRET} secret for namespace ${NAMESPACE}"
-+        kubectl create secret generic -n ${NAMESPACE} ${CEPH_USER_SECRET} --type="kubernetes.io/cephfs" --from-literal=userKey=${KEYRING} --from-literal=userID=${USER_ID} --from-literal=adminKey=${KEYRING} --from-literal=adminID=${ADMIN_ID}
-+        if [ $? -ne 0 ]; then
-+          echo "Error creating secret ${CEPH_USER_SECRET} for namespace ${NAMESPACE}, exit"
-+          exit 1
++        kubectl get secret -n "${NAMESPACE}" "${CEPH_USER_SECRET}" &>/dev/null
++        if [ $? -eq 0 ]; then
++          echo "- Deleting old ${CEPH_USER_SECRET} secret for namespace ${NAMESPACE}:"
++          kubectl delete secret -n "${NAMESPACE}" "${CEPH_USER_SECRET}"
++          RETURN_CODE=$?
++          if [ ${RETURN_CODE} -ne 0 ]; then
++            echo "Error deleting secret ${CEPH_ADMIN_SECRET} for namespace ${NAMESPACE} (return code: ${RETURN_CODE})"
++            exit ${RETURN_CODE}
++          fi
++        fi
++        echo "- Creating ${CEPH_USER_SECRET} secret for namespace ${NAMESPACE}:"
++        kubectl create secret generic -n "${NAMESPACE}" "${CEPH_USER_SECRET}" --type="kubernetes.io/cephfs" --from-literal=userKey="${KEYRING}" --from-literal=userID="${USER_ID}" --from-literal=adminKey="${KEYRING}" --from-literal=adminID="${ADMIN_ID}"
++        RETURN_CODE=$?
++        if [ ${RETURN_CODE} -ne 0 ]; then
++          echo "Error creating secret ${CEPH_USER_SECRET} for namespace ${NAMESPACE} (return code: ${RETURN_CODE})"
++          exit ${RETURN_CODE}
 +        fi
 +      else
 +        echo "Secret ${CEPH_USER_SECRET} for namespace ${NAMESPACE} already exists"
 +      fi
 +
++      echo -e "\n================================================="
++      echo "Creating secrets for additional namespaces"
++      echo "================================================="
 +      # Support creating namespaces and Ceph user secrets for additional
 +      # namespaces other than that which the provisioner is installed. This
 +      # allows the provisioner to set up and provide PVs for multiple
@@ -169,25 +228,34 @@ index 0000000..3e29fc7
 +          IFS=,
 +          echo ${ADDITIONAL_NAMESPACES}
 +        ); do
-+          kubectl get namespace ${ns} 2>/dev/null
++          kubectl get namespace "${ns}" &>/dev/null
 +          if [ $? -ne 0 ]; then
-+            kubectl create namespace ${ns}
-+            if [ $? -ne 0 ]; then
-+              echo "Error creating namespace ${ns}, exit"
++            kubectl create namespace "${ns}"
++            RETURN_CODE=$?
++            if [ ${RETURN_CODE} -ne 0 ]; then
++              echo "Error creating namespace ${ns} but continuing anyway (return code: ${RETURN_CODE})"
 +              continue
 +            fi
 +          fi
 +
 +          # check if the secret exists or is an old pattern, if not create a new one.
-+          kubectl describe secret -n ${ns} ${CEPH_USER_SECRET} 2>/dev/null | grep -E "^userID"
++          kubectl describe secret -n "${ns}" "${CEPH_USER_SECRET}" 2>/dev/null | grep -qE "^userID"
 +          if [ $? -ne 0 ]; then
-+            echo "Deleting old ${CEPH_USER_SECRET} secret for namespace ${ns}"
-+            # Make sure the secret is gone. No need to check return code.
-+            kubectl delete secret -n ${ns} ${CEPH_USER_SECRET}
-+            echo "Creating secret ${CEPH_USER_SECRET} for namespace ${ns}"
-+            kubectl create secret generic -n ${ns} ${CEPH_USER_SECRET} --type="kubernetes.io/cephfs" --from-literal=userKey=${KEYRING} --from-literal=userID=${USER_ID} --from-literal=adminKey=${KEYRING} --from-literal=adminID=${ADMIN_ID}
-+            if [ $? -ne 0 ]; then
-+              echo "Error creating secret ${CEPH_USER_SECRET} for namespace ${ns}, exit"
++            kubectl get secret -n "${ns}" "${CEPH_USER_SECRET}" &>/dev/null
++            if [ $? -eq 0 ]; then
++              echo "- Deleting old ${CEPH_USER_SECRET} secret for namespace ${ns}:"
++              kubectl delete secret -n "${ns}" "${CEPH_USER_SECRET}"
++              RETURN_CODE=$?
++              if [ ${RETURN_CODE} -ne 0 ]; then
++                echo "Error deleting secret ${CEPH_USER_SECRET} for namespace ${ns} (return code: ${RETURN_CODE})"
++                exit ${RETURN_CODE}
++              fi
++            fi
++            echo "- Creating secret ${CEPH_USER_SECRET} for namespace ${ns}:"
++            kubectl create secret generic -n "${ns}" "${CEPH_USER_SECRET}" --type="kubernetes.io/cephfs" --from-literal=userKey="${KEYRING}" --from-literal=userID="${USER_ID}" --from-literal=adminKey="${KEYRING}" --from-literal=adminID="${ADMIN_ID}"
++            RETURN_CODE=$?
++            if [ ${RETURN_CODE} -ne 0 ]; then
++              echo "Error creating secret ${CEPH_USER_SECRET} for namespace ${ns} but continuing anyway (return code: ${RETURN_CODE})"
 +            fi
 +          else
 +            echo "Secret ${CEPH_USER_SECRET} for namespace ${ns} already exists"
@@ -196,20 +264,42 @@ index 0000000..3e29fc7
 +      fi
 +    fi
 +
-+    ceph osd pool stats ${POOL_NAME} || ceph osd pool create ${POOL_NAME} ${CHUNK_SIZE}
-+    ceph osd pool application enable ${POOL_NAME} cephfs
-+    ceph osd pool set ${POOL_NAME} size ${POOL_REPLICATION}
-+    ceph osd pool set ${POOL_NAME} crush_rule ${POOL_CRUSH_RULE_NAME}
 +
-+    ceph osd pool stats ${METADATA_POOL_NAME} || ceph osd pool create ${METADATA_POOL_NAME} ${CHUNK_SIZE}
-+    ceph osd pool application enable ${METADATA_POOL_NAME} cephfs
-+    ceph osd pool set ${METADATA_POOL_NAME} size ${POOL_REPLICATION}
-+    ceph osd pool set ${METADATA_POOL_NAME} crush_rule ${POOL_CRUSH_RULE_NAME}
++    echo -e "\n================================================="
++    echo "Setting pool configuration"
++    echo "================================================="
 +
-+    ceph fs ls | grep ${FS_NAME} || ceph fs new ${FS_NAME} ${METADATA_POOL_NAME} ${POOL_NAME}
++    set_pool_config ${POOL_NAME}
 +
++    echo -e "\n================================================="
++    echo "Setting metadata pool configuration"
++    echo "================================================="
++
++    set_pool_config ${METADATA_POOL_NAME}
++
++    echo "- Checking filesystem..."
++    ceph fs ls | grep "${FS_NAME}" &>/dev/null
++    if [ $? -ne 0 ]; then
++      echo "- Creating filesystem ${FS_NAME}:"
++      ceph fs new "${FS_NAME}" "${METADATA_POOL_NAME}" "${POOL_NAME}"
++      RETURN_CODE=$?
++      if [ ${RETURN_CODE} -ne 0 ]; then
++        echo "Error creating filesystem ${FS_NAME} (return code: ${RETURN_CODE})"
++        exit ${RETURN_CODE}
++      fi
++    else
++      echo "Filesystem ${FS_NAME} already exists"
++    fi
++
++    echo -e "\n================================================="
++    echo "ceph -s"
++    echo "================================================="
 +    ceph -s
-+
++    RETURN_CODE=$?
++    if [ ${RETURN_CODE} -ne 0 ]; then
++      echo -e "Error: Ceph cluster is not accessible, check Pod logs for details. (return code: ${RETURN_CODE})"
++      exit ${RETURN_CODE}
++    fi
 +
 +---
 +
@@ -261,7 +351,7 @@ index 0000000..3e29fc7
 +              value: {{ $sc.metadata_pool_name }}
 +            - name: FS_NAME
 +              value: {{ $sc.fs_name }}
-+            - name: CHUNK_SIZE
++            - name: POOL_CHUNK_SIZE
 +              value: {{ $sc.chunk_size | quote }}
 +            - name: POOL_REPLICATION
 +              value: {{ $sc.replication | quote }}

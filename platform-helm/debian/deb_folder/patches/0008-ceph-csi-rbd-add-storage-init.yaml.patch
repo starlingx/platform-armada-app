@@ -5,9 +5,10 @@ Subject: [PATCH] ceph-csi-rbd: add storage-init.yaml
 
 Signed-off-by: Hediberto Cavalcante da Silva <hediberto.cavalcantedasilva@windriver.com>
 Signed-off-by: Felipe Sanches Zanoni <Felipe.SanchesZanoni@windriver.com>
+Signed-off-by: Erickson Silva <Erickson.SilvadeOliveira@windriver.com>
 ---
- .../ceph-csi-rbd/templates/storage-init.yaml  | 296 ++++++++++++++++++
- 1 file changed, 296 insertions(+)
+ .../ceph-csi-rbd/templates/storage-init.yaml  | 379 ++++++++++++++++++
+ 1 file changed, 379 insertions(+)
  create mode 100644 charts/ceph-csi-rbd/templates/storage-init.yaml
 
 diff --git a/charts/ceph-csi-rbd/templates/storage-init.yaml b/charts/ceph-csi-rbd/templates/storage-init.yaml
@@ -15,7 +16,7 @@ new file mode 100644
 index 0000000..365b475
 --- /dev/null
 +++ b/charts/ceph-csi-rbd/templates/storage-init.yaml
-@@ -0,0 +1,296 @@
+@@ -0,0 +1,379 @@
 +{{/*
 +#
 +# Copyright (c) 2020-2023 Wind River Systems, Inc.
@@ -113,130 +114,213 @@ index 0000000..365b475
 +    {{- end }}
 +
 +  storage-init.sh: |
++    #! /bin/bash
++
 +    #
 +    # Copyright (c) 2020-2023 Wind River Systems, Inc.
 +    #
 +    # SPDX-License-Identifier: Apache-2.0
 +    #
 +
-+    #! /bin/bash
-+
 +    # Copy from read only mount to Ceph config folder
 +    cp /tmp/ceph.conf /etc/ceph/
 +
 +    touch /etc/ceph/ceph.client.admin.keyring
 +
-+    if [ -n "${CEPH_ADMIN_SECRET}" ]; then
-+        # check if the secret exists or is an old pattern, if not create a new one.
-+        kubectl describe secret -n ${NAMESPACE} ${CEPH_ADMIN_SECRET} 2>/dev/null | grep -E "^userID"
-+        if [ $? -ne 0 ]; then
-+            echo "Deleting old ${CEPH_ADMIN_SECRET} secret for namespace ${NAMESPACE}"
-+            # Make sure the secret is gone. No need to check return code.
-+            kubectl delete secret -n ${NAMESPACE} ${CEPH_ADMIN_SECRET}
-+            echo "Creating ${CEPH_ADMIN_SECRET} secret for namespace ${NAMESPACE}"
-+            ADMIN_KEYRING=$(echo NoPassword | base64)
-+            kubectl create secret generic -n ${NAMESPACE} ${CEPH_ADMIN_SECRET} --from-literal=userKey=${ADMIN_KEYRING} --from-literal=userID=${ADMIN_ID}
-+            if [ $? -ne 0 ]; then
-+                echo "Error creating secret ${CEPH_ADMIN_SECRET} for namespace ${NAMESPACE}, exit"
-+                exit 1
-+            fi
-+        fi
-+    fi
-+
 +    # Check if ceph is accessible
-+    echo "===================================="
++    echo "================================================="
++    echo "ceph -s"
++    echo "================================================="
 +    ceph -s
++    RETURN_CODE=$?
++    if [ ${RETURN_CODE} -ne 0 ]; then
++      echo -e "Error: Ceph cluster is not accessible, check Pod logs for details. (return code: ${RETURN_CODE})"
++      exit ${RETURN_CODE}
++    fi
++
++    echo -e "================================================="
++    echo "Creating admin secret"
++    echo "================================================="
++    if [ -n "${CEPH_ADMIN_SECRET}" ]; then
++      # check if the secret exists or is an old pattern, if not create a new one.
++      kubectl describe secret -n "${NAMESPACE}" "${CEPH_ADMIN_SECRET}" 2>/dev/null | grep -qE "^userID"
++      if [ $? -ne 0 ]; then
++        kubectl get secret -n "${NAMESPACE}" "${CEPH_ADMIN_SECRET}" &>/dev/null
++        if [ $? -eq 0 ]; then
++          echo "- Deleting old ${CEPH_ADMIN_SECRET} secret for namespace ${NAMESPACE} ${CEPH_ADMIN_SECRET}:"
++          kubectl delete secret -n "${NAMESPACE}" "${CEPH_ADMIN_SECRET}"
++          RETURN_CODE=$?
++          if [ ${RETURN_CODE} -ne 0 ]; then
++            echo "Error deleting secret ${CEPH_ADMIN_SECRET} for namespace ${NAMESPACE} (return code: ${RETURN_CODE})"
++            exit ${RETURN_CODE}
++          fi
++        fi
++        echo "- Creating ${CEPH_ADMIN_SECRET} secret for namespace ${NAMESPACE}:"
++        ADMIN_KEYRING=$(echo NoPassword | base64)
++        kubectl create secret generic -n "${NAMESPACE}" "${CEPH_ADMIN_SECRET}" --from-literal=userKey="${ADMIN_KEYRING}" --from-literal=userID="${ADMIN_ID}"
++        RETURN_CODE=$?
++        if [ ${RETURN_CODE} -ne 0 ]; then
++          echo "Error creating secret ${CEPH_ADMIN_SECRET} for namespace ${NAMESPACE} (return code: ${RETURN_CODE})"
++          exit ${RETURN_CODE}
++        fi
++      else
++        echo "Secret ${CEPH_ADMIN_SECRET} for namespace ${NAMESPACE} already exists"
++      fi
++    else
++      echo "Secret ${CEPH_ADMIN_SECRET} for namespace ${NAMESPACE} already exists"
++    fi
++
++    echo -e "\n================================================="
++    echo "Setting pool configuration"
++    echo "================================================="
++
++    echo "- Checking pool..."
++    ceph osd pool stats "${POOL_NAME}" &>/dev/null
 +    if [ $? -ne 0 ]; then
-+        echo "Error: Ceph cluster is not accessible, check Pod logs for details."
-+        exit 1
++      echo "- Creating pool ${POOL_NAME}:"
++      ceph osd pool create "${POOL_NAME}" "${POOL_CHUNK_SIZE}"
++      RETURN_CODE=$?
++      if [ ${RETURN_CODE} -ne 0 ]; then
++        echo "Error creating pool ${POOL_NAME} (return code: ${RETURN_CODE})"
++        exit ${RETURN_CODE}
++      fi
++    else
++      echo "Pool ${POOL_NAME} already exists"
 +    fi
 +
-+    set -ex
-+    # Make sure the pool exists.
-+    ceph osd pool stats ${POOL_NAME} || ceph osd pool create ${POOL_NAME} ${POOL_CHUNK_SIZE}
-+    # Set pool configuration.
-+    ceph osd pool application enable ${POOL_NAME} rbd
-+    ceph osd pool set ${POOL_NAME} size ${POOL_REPLICATION}
-+    ceph osd pool set ${POOL_NAME} crush_rule ${POOL_CRUSH_RULE_NAME}
-+    set +ex
-+
-+    if [[ -z "${USER_ID}" && -z "${CEPH_USER_SECRET}" ]]; then
-+        echo "No need to create secrets for pool ${POOL_NAME}"
-+        exit 0
++    echo "- Enabling pool ${POOL_NAME}:"
++    ceph osd pool application enable "${POOL_NAME}" rbd
++    RETURN_CODE=$?
++    if [ ${RETURN_CODE} -ne 0 ]; then
++      echo "Error enabling pool ${POOL_NAME} (return code: ${RETURN_CODE})"
++      exit ${RETURN_CODE}
 +    fi
 +
-+    set -ex
-+    KEYRING=$(ceph auth get-or-create client.${USER_ID} mon "allow r" osd "allow rwx pool=${POOL_NAME}" | sed -n 's/^[[:blank:]]*key[[:blank:]]\+=[[:blank:]]\(.*\)/\1/p')
-+    # Set up pool key in Ceph format
-+    CEPH_USER_KEYRING=/etc/ceph/ceph.client.${USER_ID}.keyring
-+    echo ${KEYRING} > ${CEPH_USER_KEYRING}
-+    set +ex
++    echo "- Setting the number of replicas:"
++    ceph osd pool set "${POOL_NAME}" size "${POOL_REPLICATION}"
++    RETURN_CODE=$?
++    if [ ${RETURN_CODE} -ne 0 ]; then
++      echo "Error setting the number of pool replicas (return code: ${RETURN_CODE})"
++      exit ${RETURN_CODE}
++    fi
++
++    echo "- Assigning crush rule:"
++    ceph osd pool set "${POOL_NAME}" crush_rule "${POOL_CRUSH_RULE_NAME}"
++    RETURN_CODE=$?
++    if [ ${RETURN_CODE} -ne 0 ]; then
++      echo "Error assigning crush rule (return code: ${RETURN_CODE})"
++      exit ${RETURN_CODE}
++    fi
++
++    if [ -n "${USER_ID}" ]; then
++      echo -e "\n================================================="
++      echo "Creating keyring"
++      echo "================================================="
++      KEYRING=$(ceph auth get-or-create client."${USER_ID}" mon "allow r" osd "allow rwx pool=""${POOL_NAME}""" | sed -n 's/^[[:blank:]]*key[[:blank:]]\+=[[:blank:]]\(.*\)/\1/p')
++      # Set up pool key in Ceph format
++      CEPH_USER_KEYRING=/etc/ceph/ceph.client."${USER_ID}".keyring
++      echo "${KEYRING}" > "${CEPH_USER_KEYRING}"
++      echo "Keyring ${CEPH_USER_KEYRING} created"
++    fi
 +
 +    if [ -n "${CEPH_USER_SECRET}" ]; then
-+        # check if the secret exists or is an old pattern, if not create a new one.
-+        kubectl describe secret -n ${NAMESPACE} ${CEPH_USER_SECRET} 2>/dev/null | grep -E "^userID"
-+        if [ $? -ne 0 ]; then
-+            echo "Deleting old ${CEPH_USER_SECRET} secret for namespace ${NAMESPACE}"
-+            # Make sure the secret is gone. No need to check return code.
-+            kubectl delete secret -n ${NAMESPACE} ${CEPH_USER_SECRET}
-+            echo "Creating ${CEPH_USER_SECRET} secret for namespace ${NAMESPACE}"
-+            kubectl create secret generic -n ${NAMESPACE} ${CEPH_USER_SECRET} --type="kubernetes.io/rbd" --from-literal=userKey=${KEYRING} --from-literal=userID=${USER_ID}
-+            if [ $? -ne 0 ]; then
-+                echo"Error creating secret ${CEPH_USER_SECRET} for namespace ${NAMESPACE}, exit"
-+                exit 1
++      echo -e "\n================================================="
++      echo "Creating user secret"
++      echo "================================================="
++      # check if the secret exists or is an old pattern, if not create a new one.
++      kubectl describe secret -n "${NAMESPACE}" "${CEPH_USER_SECRET}" 2>/dev/null | grep -qE "^userID"
++      if [ $? -ne 0 ]; then
++        kubectl get secret -n "${NAMESPACE}" "${CEPH_USER_SECRET}" &>/dev/null
++        if [ $? -eq 0 ]; then
++          echo "- Deleting old ${CEPH_USER_SECRET} secret for namespace ${NAMESPACE}:"
++          kubectl delete secret -n "${NAMESPACE}" "${CEPH_USER_SECRET}"
++          RETURN_CODE=$?
++          if [ ${RETURN_CODE} -ne 0 ]; then
++            echo "Error deleting secret ${CEPH_USER_SECRET} for namespace ${NAMESPACE} (return code: ${RETURN_CODE})"
++            exit ${RETURN_CODE}
++          fi
++        fi
++        echo "- Creating ${CEPH_USER_SECRET} secret for namespace ${NAMESPACE}:"
++        kubectl create secret generic -n "${NAMESPACE}" "${CEPH_USER_SECRET}" --type="kubernetes.io/rbd" --from-literal=userKey="${KEYRING}" --from-literal=userID="${USER_ID}"
++        RETURN_CODE=$?
++        if [ ${RETURN_CODE} -ne 0 ]; then
++          echo "Error creating secret ${CEPH_USER_SECRET} for namespace ${NAMESPACE} (return code: ${RETURN_CODE})"
++          exit ${RETURN_CODE}
++        fi
++      else
++        echo "Secret ${CEPH_USER_SECRET} for namespace ${NAMESPACE} already exists"
++      fi
++
++      echo -e "\n================================================="
++      echo "Creating secrets for additional namespaces"
++      echo "================================================="
++      # Support creating namespaces and Ceph user secrets for additional
++      # namespaces other than that which the provisioner is installed. This
++      # allows the provisioner to set up and provide PVs for multiple
++      # applications across many namespaces.
++      if [ -n "${ADDITIONAL_NAMESPACES}" ]; then
++        for ns in $(IFS=,; echo ${ADDITIONAL_NAMESPACES}); do
++          kubectl get namespace "${ns}" &>/dev/null
++          if [ $? -ne 0 ]; then
++            kubectl create namespace "${ns}"
++            RETURN_CODE=$?
++            if [ ${RETURN_CODE} -ne 0 ]; then
++              echo "Error creating namespace ${ns} but continuing anyway (return code: ${RETURN_CODE})"
++              continue
 +            fi
-+        else
-+            echo "Secret ${CEPH_USER_SECRET} for namespace ${NAMESPACE} already exists"
-+        fi
++          fi
 +
-+        # Support creating namespaces and Ceph user secrets for additional
-+        # namespaces other than that which the provisioner is installed. This
-+        # allows the provisioner to set up and provide PVs for multiple
-+        # applications across many namespaces.
-+        if [ -n "${ADDITIONAL_NAMESPACES}" ]; then
-+            for ns in $(IFS=,; echo ${ADDITIONAL_NAMESPACES}); do
-+                kubectl get namespace ${ns}  2>/dev/null
-+                if [ $? -ne 0 ]; then
-+                    kubectl create namespace ${ns}
-+                    if [ $? -ne 0 ]; then
-+                        echo "Error creating namespace ${ns}, exit"
-+                        continue
-+                    fi
-+                fi
-+
-+                # check if the secret exists or is an old pattern, if not create a new one.
-+                kubectl describe secret -n ${ns} ${CEPH_USER_SECRET} 2>/dev/null | grep -E "^userID"
-+                if [ $? -ne 0 ]; then
-+                    echo "Deleting old ${CEPH_USER_SECRET} secret for namespace ${ns}"
-+                    # Make sure the secret is gone. No need to check return code.
-+                    kubectl delete secret -n ${ns} ${CEPH_USER_SECRET}
-+                    echo "Creating secret ${CEPH_USER_SECRET} for namespace ${ns}"
-+                    kubectl create secret generic -n ${ns} ${CEPH_USER_SECRET} --type="kubernetes.io/rbd" --from-literal=userKey=${KEYRING} --from-literal=userID=${USER_ID}
-+                    if [ $? -ne 0 ]; then
-+                        echo "Error creating secret ${CEPH_USER_SECRET} for namespace ${ns}, exit"
-+                    fi
-+                else
-+                    echo "Secret ${CEPH_USER_SECRET} for namespace ${ns} already exists"
-+                fi
-+            done
-+        fi
++          # check if the secret exists or is an old pattern, if not create a new one.
++          kubectl describe secret -n "${ns}" "${CEPH_USER_SECRET}" 2>/dev/null | grep -qE "^userID"
++          if [ $? -ne 0 ]; then
++            kubectl get secret -n "${ns}" "${CEPH_USER_SECRET}" &>/dev/null
++            if [ $? -eq 0 ]; then
++              echo "- Deleting old ${CEPH_USER_SECRET} secret for namespace ${ns}:"
++              kubectl delete secret -n "${ns}" "${CEPH_USER_SECRET}"
++              RETURN_CODE=$?
++              if [ ${RETURN_CODE} -ne 0 ]; then
++                echo "Error deleting secret ${CEPH_USER_SECRET} for namespace ${ns} (return code: ${RETURN_CODE})"
++                exit ${RETURN_CODE}
++              fi
++            fi
++            echo "- Creating secret ${CEPH_USER_SECRET} for namespace ${ns}:"
++            kubectl create secret generic -n "${ns}" "${CEPH_USER_SECRET}" --type="kubernetes.io/rbd" --from-literal=userKey="${KEYRING}" --from-literal=userID="${USER_ID}"
++            RETURN_CODE=$?
++            if [ ${RETURN_CODE} -ne 0 ]; then
++              echo "Error creating secret ${CEPH_USER_SECRET} for namespace ${ns} but continuing anyway (return code: ${RETURN_CODE})"
++            fi
++          else
++            echo "Secret ${CEPH_USER_SECRET} for namespace ${ns} already exists"
++          fi
++        done
++      fi
 +    fi
 +
-+    # Check if pool is accessible using provided credentials
-+    echo "====================================="
-+    timeout --preserve-status 10  rbd -p ${POOL_NAME} --user ${USER_ID} ls -K ${CEPH_USER_KEYRING}
-+    if [ $? -ne 143 ]; then
-+        if [ $? -ne 0 ]; then
-+            echo "Error: Ceph pool ${POOL_NAME} is not accessible using credentials for user ${USER_ID}, check Pod logs for details."
-+            exit 1
-+        else
-+            echo "Pool ${POOL_NAME} accessible"
-+        fi
-+    else
-+        echo "rbd command timed out and was sent a SIGTERM.  Make sure OSDs have been provisioned."
++    if [ -n "${USER_ID}" ]; then
++      echo -e "\n================================================="
++      echo "Check if pool is accessible using provided credentials"
++      echo "================================================="
++      timeout --preserve-status 10  rbd -p "${POOL_NAME}" --id "${USER_ID}" ls -K "${CEPH_USER_KEYRING}" &>/dev/null
++      RETURN_CODE=$?
++      if [ ${RETURN_CODE} -eq 0 ]; then
++        echo -e "Pool ${POOL_NAME} is accessible"
++      elif [ ${RETURN_CODE} -eq 143 ]; then
++        echo -e "RBD command timed out. Make sure OSDs have been provisioned."
++      else
++        echo -e "Error: Ceph pool ${POOL_NAME} is not accessible using credentials for user ${USER_ID}. Check Pod logs for details. (return code: ${RETURN_CODE})"
++        exit ${RETURN_CODE}
++      fi
 +    fi
 +
++    echo -e "\n================================================="
++    echo "ceph -s"
++    echo "================================================="
 +    ceph -s
++    RETURN_CODE=$?
++    if [ ${RETURN_CODE} -ne 0 ]; then
++      echo -e "Error: Ceph cluster is not accessible, check Pod logs for details. (return code: ${RETURN_CODE})"
++      exit ${RETURN_CODE}
++    fi
 +
 +---
 +
