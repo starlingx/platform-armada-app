@@ -3,7 +3,6 @@
 
 export ROOT = debian/tmp
 export APP_FOLDER = $(ROOT)/usr/local/share/applications/helm
-export EXTRA_CHARTS = $(ROOT)/opt/extracharts
 
 export DEB_VERSION = $(shell dpkg-parsechangelog | egrep '^Version:' | cut -f 2 -d ' ')
 export RELEASE = $(shell echo $(DEB_VERSION) | cut -f 1 -d '-')
@@ -22,7 +21,6 @@ export STAGING_FLUXCD = staging-fluxcd
 override_dh_auto_build:
 	# Create the TGZ file.
 	cd helm-charts && make ceph-pools-audit
-	cd helm-charts && make node-feature-discovery
 
 	# Setup the staging directory.
 	mkdir -p $(STAGING_FLUXCD)
@@ -52,8 +50,6 @@ override_dh_auto_install:
 	# Install the app tar file.
 	install -d -m 755 $(APP_FOLDER)
 	install -p -D -m 755 $(APP_TARBALL_FLUXCD) $(APP_FOLDER)
-	install -d -m 755 $(EXTRA_CHARTS)
-	install -p -D -m 755 helm-charts/node-feature-discovery-*.tgz $(EXTRA_CHARTS)
 
 override_dh_auto_test:
 

@@ -2,8 +2,6 @@
 debname: stx-platform-helm
 debver: 1.1-0
 src_path: stx-platform-helm
-src_files:
-  - ${MY_REPO}/stx/helm-charts/node-feature-discovery/node-feature-discovery/helm-charts
 revision:
   dist: $STX_DIST
   GITREVCOUNT:
