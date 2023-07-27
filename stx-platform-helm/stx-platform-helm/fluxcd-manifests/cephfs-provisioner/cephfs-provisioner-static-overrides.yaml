@@ -30,16 +30,16 @@ provisioner:
       enabled: false
   provisioner:
     image:
-      repository: k8s.gcr.io/sig-storage/csi-provisioner
-      tag: v3.4.1
+      repository: registry.k8s.io/sig-storage/csi-provisioner
+      tag: v3.5.0
   resizer:
     image:
-      repository: k8s.gcr.io/sig-storage/csi-resizer
-      tag: v1.7.0
+      repository: registry.k8s.io/sig-storage/csi-resizer
+      tag: v1.8.0
   snapshotter:
     image:
-      repository: k8s.gcr.io/sig-storage/csi-snapshotter
-      tag: v6.2.1
+      repository: registry.k8s.io/sig-storage/csi-snapshotter
+      tag: v6.2.2
 
 nodeplugin:
   name: cephfs-nodeplugin
@@ -54,12 +54,12 @@ nodeplugin:
       enabled: false
   registrar:
     image:
-      repository: k8s.gcr.io/sig-storage/csi-node-driver-registrar
-      tag: v2.6.3
+      repository: registry.k8s.io/sig-storage/csi-node-driver-registrar
+      tag: v2.8.0
   plugin:
     image:
       repository: quay.io/cephcsi/cephcsi
-      tag: v3.8.0
+      tag: v3.9.0
 
 serviceAccounts:
   nodeplugin:
@@ -82,8 +82,6 @@ storageClass:
     "helm.sh/hook": "post-upgrade, post-install",
     "helm.sh/hook-delete-policy": "before-hook-creation"
   }
-  mountOptions:
-  - debug
 
 topology:
   enabled: false
@@ -108,4 +106,4 @@ cephconf: |-
 storage_init:
   image:
     repository: docker.io/openstackhelm/ceph-config-helper
-    tag: ubuntu_focal-20230424
+    tag: ubuntu_focal_17.2.6-1-20230508

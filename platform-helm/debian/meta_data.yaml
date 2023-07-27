@@ -1,10 +1,10 @@
 ---
 debname: platform-helm
-debver: 3.8-0
+debver: 3.9-0
 dl_path:
-  name: ceph-csi-3.8.0.tar.gz
-  url: https://github.com/ceph/ceph-csi/archive/v3.8.0.tar.gz
-  md5sum: f4100ceca0fe60150cf07cbdfbe68c61
+  name: ceph-csi-3.9.0.tar.gz
+  url: https://github.com/ceph/ceph-csi/archive/v3.9.0.tar.gz
+  md5sum: 6dda3029add28c51e05365dd0056cd00
 src_files:
   - platform-helm/files/Makefile
 revision:

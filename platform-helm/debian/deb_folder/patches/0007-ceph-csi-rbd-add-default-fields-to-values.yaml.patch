@@ -1,20 +1,21 @@
-From cb5f1ad019e4e186c6db8986c6dd12a44ad8e60f Mon Sep 17 00:00:00 2001
-From: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
-Date: Mon, 24 Apr 2023 17:11:36 -0300
+From 76f0e0e2fd42e9c541163059674b242f4f007a7d Mon Sep 17 00:00:00 2001
+From: Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>
+Date: Fri, 21 Jul 2023 08:15:53 -0300
 Subject: [PATCH] ceph-csi-rbd: add default fields to values.yaml
 
 Signed-off-by: Hediberto Cavalcante da Silva <hediberto.cavalcantedasilva@windriver.com>
 Signed-off-by: Felipe Sanches Zanoni <Felipe.SanchesZanoni@windriver.com>
 Signed-off-by: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
+Signed-off-by: Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>
 ---
  charts/ceph-csi-rbd/values.yaml | 36 +++++++++++++++++++++++++++++++++
  1 file changed, 36 insertions(+)
 
 diff --git a/charts/ceph-csi-rbd/values.yaml b/charts/ceph-csi-rbd/values.yaml
-index 45f4a9073..d74652be1 100644
+index 2b2a03541..c33d5f2a6 100644
 --- a/charts/ceph-csi-rbd/values.yaml
 +++ b/charts/ceph-csi-rbd/values.yaml
-@@ -419,6 +419,22 @@ storageClass:
+@@ -429,6 +429,22 @@ storageClass:
    # mountOptions:
    #   - discard
 
@@ -37,7 +38,7 @@ index 45f4a9073..d74652be1 100644
  # Mount the host /etc/selinux inside pods to support
  # selinux-enabled filesystems
  selinuxMount: true
-@@ -471,3 +487,23 @@ externallyManagedConfigmap: false
+@@ -481,3 +497,23 @@ externallyManagedConfigmap: false
  cephConfConfigMapName: ceph-config
  # Name of the configmap used for encryption kms configuration
  kmsConfigMapName: ceph-csi-encryption-kms-config
@@ -60,6 +61,6 @@ index 45f4a9073..d74652be1 100644
 +storage_init:
 +  image:
 +    repository: docker.io/openstackhelm/ceph-config-helper
-+    tag: ubuntu_focal-20230424
++    tag: ubuntu_focal_17.2.6-1-20230508
 --
 2.25.1
