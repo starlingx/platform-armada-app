@@ -1,16 +1,17 @@
-From a23aa2ccc5e14f8cc2abcd17c2e0e97891f1c2cb Mon Sep 17 00:00:00 2001
-From: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
-Date: Mon, 20 Mar 2023 17:44:46 -0300
+From fbb1dd8e7d2e35f59d47c5903ce638932fb20f55 Mon Sep 17 00:00:00 2001
+From: Gustavo Ornaghi Antunes <gustavo.ornaghiantunes@windriver.com>
+Date: Fri, 04 Aug 2023 10:20:51 -0300
 Subject: [PATCH] ceph-csi-rbd: add annotations to provisioner-deployment.yaml
 
 Signed-off-by: Hediberto Cavalcante da Silva <hediberto.cavalcantedasilva@windriver.com>
 Signed-off-by: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
+Signed-off-by: Gustavo Ornaghi Antunes <gustavo.ornaghiantunes@windriver.com>
 ---
  charts/ceph-csi-rbd/templates/provisioner-deployment.yaml | 3 +++
  1 file changed, 3 insertions(+)
 
 diff --git a/charts/ceph-csi-rbd/templates/provisioner-deployment.yaml b/charts/ceph-csi-rbd/templates/provisioner-deployment.yaml
-index fc1f28cdf..b9903f666 100644
+index 824377a..f31b5d6 100644
 --- a/charts/ceph-csi-rbd/templates/provisioner-deployment.yaml
 +++ b/charts/ceph-csi-rbd/templates/provisioner-deployment.yaml
 @@ -10,6 +10,9 @@ metadata:
@@ -18,7 +19,7 @@ index fc1f28cdf..b9903f666 100644
      heritage: {{ .Release.Service }}
      {{- with .Values.commonLabels }}{{ toYaml . | trim | nindent 4 }}{{- end }}
 +  annotations:
-+    "helm.sh/hook": "post-upgrade, post-install"
++    "helm.sh/hook": "post-upgrade, post-install, post-delete"
 +    "helm.sh/hook-delete-policy": "before-hook-creation"
  spec:
    replicas: {{ .Values.provisioner.replicaCount }}
