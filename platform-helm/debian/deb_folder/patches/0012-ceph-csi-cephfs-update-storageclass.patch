@@ -1,10 +1,11 @@
-From 8ef1e051d4166dd0f9f8c931465b27cadfde7ca0 Mon Sep 17 00:00:00 2001
-From: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
-Date: Tue, 21 Mar 2023 21:09:29 -0300
+From 93ae57852cf8583228e99465c3d35e5304b88e65 Mon Sep 17 00:00:00 2001
+From: Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>
+Date: Wed, 6 Dec 2023 14:24:22 -0300
 Subject: [PATCH] ceph-csi-cephfs: update storageclass
 
 Signed-off-by: Hediberto Cavalcante da Silva <hediberto.cavalcantedasilva@windriver.com>
 Signed-off-by: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
+Signed-off-by: Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>
 ---
  .../templates/storageclass.yaml               | 104 ++++++++++--------
  1 file changed, 56 insertions(+), 48 deletions(-)
@@ -17,7 +18,7 @@ index a21c99824..e3a27b455 100644
  {{- if .Values.storageClass.create -}}
 +{{- $cephCsiDefault := .Values.storageClass }}
 +{{- $defaults := .Values.classdefaults }}
-+{{- range $sc := .Values.classes }}
++{{- range $sc := .Values.storageClasses }}
  apiVersion: storage.k8s.io/v1
  kind: StorageClass
  metadata:

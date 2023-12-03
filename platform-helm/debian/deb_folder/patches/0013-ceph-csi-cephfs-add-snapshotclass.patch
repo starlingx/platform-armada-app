@@ -1,0 +1,62 @@
+From cc40abf2495bdaa0ace32441cfc6d5a78a397d3b Mon Sep 17 00:00:00 2001
+From: Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>
+Date: Thu, 30 Nov 2023 12:51:37 -0300
+Subject: ceph-csi-cephfs: add snapshotclass
+
+Signed-off-by: Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>
+---
+ .../templates/snapshotclass.yaml               | 13 +++++++++++++
+ charts/ceph-csi-cephfs/values.yaml             | 18 ++++++++++++++++++
+ 2 files changed, 31 insertions(+)
+ create mode 100644 charts/ceph-csi-cephfs/templates/snapshotclass.yaml
+
+diff --git a/charts/ceph-csi-cephfs/templates/snapshotclass.yaml b/charts/ceph-csi-cephfs/templates/snapshotclass.yaml
+new file mode 100644
+index 000000000..3bad19026
+--- /dev/null
++++ b/charts/ceph-csi-cephfs/templates/snapshotclass.yaml
+@@ -0,0 +1,13 @@
++{{- if .Values.snapshotClass.create -}}
++apiVersion: snapshot.storage.k8s.io/v1
++kind: VolumeSnapshotClass
++metadata:
++  name: {{ .Values.snapshotClass.name }}
++driver: {{ .Values.driverName }}
++parameters:
++  clusterID: {{ .Values.snapshotClass.clusterID }}
++  snapshotNamePrefix: {{ .Values.snapshotClass.snapshotNamePrefix }}
++  csi.storage.k8s.io/snapshotter-secret-name: {{ .Values.snapshotClass.provisionerSecret }}
++  csi.storage.k8s.io/snapshotter-secret-namespace: {{ .Values.snapshotClass.provisionerSecretNamespace }}
++deletionPolicy: {{ .Values.snapshotClass.deletionPolicy }}
++{{- end -}}
+diff --git a/charts/ceph-csi-cephfs/values.yaml b/charts/ceph-csi-cephfs/values.yaml
+index 7c85abd7d..912165f1d 100644
+--- a/charts/ceph-csi-cephfs/values.yaml
++++ b/charts/ceph-csi-cephfs/values.yaml
+@@ -302,6 +302,24 @@ storageClass:
+   # Ceph pools name
+   metadata_pool: kube-cephfs-metadata
+
++snapshotClass:
++  # Specifies whether the snapshotclass should be created
++  create: false
++  # Specifies the snapshotclass name
++  name: csi-cephfsplugin-snapclass
++   # (required) Unique string representing a Ceph cluster to provision
++  #storage from.
++  clusterID: <cluster-ID>
++  # Prefix to use for naming CephFS snapshots.
++  # If omitted, defaults to "csi-snap-".
++  # snapshotNamePrefix: "foo-bar-"
++  snapshotNamePrefix: ""
++  # K8 secret name
++  provisionerSecret: csi-cephfs-secret
++  # K8 secret namespace
++  provisionerSecretNamespace: ""
++  deletionPolicy: Delete
++
+ secret:
+   # Specifies whether the secret should be created
+   create: false
+--
+2.25.1
