@@ -84,6 +84,12 @@ storageClass:
   mountOptions:
   - discard
 
+snapshotClass:
+  create: false
+  name: rbd-snapshot
+  snapshotNamePrefix: rbd-snap-
+  provisionerSecretNamespace: kube-system
+
 topology:
   enabled: false
 

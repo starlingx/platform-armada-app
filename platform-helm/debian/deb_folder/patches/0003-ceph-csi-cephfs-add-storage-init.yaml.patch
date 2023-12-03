@@ -1,11 +1,12 @@
-From 239cfdde94db341aad0ccb15e420c4ecc3157d21 Mon Sep 17 00:00:00 2001
-From: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
-Date: Mon, 24 Apr 2023 16:57:46 -0300
+From 356ddba07d33e333d332415d9858f4c6354a0d85 Mon Sep 17 00:00:00 2001
+From: Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>
+Date: Wed, 6 Dec 2023 14:16:19 -0300
 Subject: [PATCH] ceph-csi-cephfs: add storage-init.yaml
 
 Signed-off-by: Hediberto Cavalcante da Silva <hediberto.cavalcantedasilva@windriver.com>
 Signed-off-by: Felipe Sanches Zanoni <Felipe.SanchesZanoni@windriver.com>
 Signed-off-by: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
+Signed-off-by: Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>
 ---
  .../templates/storage-init.yaml               | 369 ++++++++++++++++++
  1 file changed, 369 insertions(+)
@@ -344,7 +345,7 @@ index 000000000..97052d7a9
 +          name: cephfs-storage-init
 +          defaultMode: 0555
 +      containers:
-+        {{- range $sc := .Values.classes }}
++        {{- range $sc := .Values.storageClasses }}
 +        - name: storage-init-{{- $sc.name }}
 +          image: "{{ $.Values.storage_init.image.repository }}:{{ $.Values.storage_init.image.tag }}"
 +          command: ["/bin/bash", "/tmp/storage-init.sh"]
