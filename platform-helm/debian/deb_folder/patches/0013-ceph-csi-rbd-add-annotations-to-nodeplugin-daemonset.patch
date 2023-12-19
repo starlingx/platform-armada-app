@@ -1,0 +1,28 @@
+From 0fc30cb3def093b274b1646b4ddb8e633cddb19e Mon Sep 17 00:00:00 2001
+From: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
+Date: Mon, 18 Dec 2023 19:54:53 -0300
+Subject: [PATCH] ceph-csi-rbd: add annotations to nodeplugin-daemonset.yaml
+
+Support MGMT reconfiguration, restarting the rbd-nodeplugin pod
+when an IP change occurs.
+
+Signed-off-by: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
+---
+ charts/ceph-csi-rbd/templates/nodeplugin-daemonset.yaml | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/charts/ceph-csi-rbd/templates/nodeplugin-daemonset.yaml b/charts/ceph-csi-rbd/templates/nodeplugin-daemonset.yaml
+index a1744a895..f0dcea15a 100644
+--- a/charts/ceph-csi-rbd/templates/nodeplugin-daemonset.yaml
++++ b/charts/ceph-csi-rbd/templates/nodeplugin-daemonset.yaml
+@@ -20,6 +20,8 @@ spec:
+     type: {{ .Values.nodeplugin.updateStrategy }}
+   template:
+     metadata:
++      annotations:
++        checksum/config: {{ tpl (toYaml .Values.csiConfig) . | sha256sum }}
+       labels:
+         app: {{ include "ceph-csi-rbd.name" . }}
+         chart: {{ include "ceph-csi-rbd.chart" . }}
+--
+2.34.1

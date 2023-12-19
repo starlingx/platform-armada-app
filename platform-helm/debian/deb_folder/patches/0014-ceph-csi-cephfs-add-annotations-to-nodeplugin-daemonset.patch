@@ -1,0 +1,28 @@
+From 01f3f9ed470e0cc3b235e56ddfaf86f598fbd6db Mon Sep 17 00:00:00 2001
+From: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
+Date: Mon, 18 Dec 2023 19:56:05 -0300
+Subject: [PATCH] ceph-csi-cephfs: add annotations to nodeplugin-daemonset.yaml
+
+Support MGMT reconfiguration, restarting the cephfs-nodeplugin pod
+when an IP change occurs.
+
+Signed-off-by: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
+---
+ charts/ceph-csi-cephfs/templates/nodeplugin-daemonset.yaml | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/charts/ceph-csi-cephfs/templates/nodeplugin-daemonset.yaml b/charts/ceph-csi-cephfs/templates/nodeplugin-daemonset.yaml
+index d3a5b9df8..dcf52f5e2 100644
+--- a/charts/ceph-csi-cephfs/templates/nodeplugin-daemonset.yaml
++++ b/charts/ceph-csi-cephfs/templates/nodeplugin-daemonset.yaml
+@@ -20,6 +20,8 @@ spec:
+     type: {{ .Values.nodeplugin.updateStrategy }}
+   template:
+     metadata:
++      annotations:
++        checksum/config: {{ tpl (toYaml .Values.csiConfig) . | sha256sum }}
+       labels:
+         app: {{ include "ceph-csi-cephfs.name" . }}
+         chart: {{ include "ceph-csi-cephfs.chart" . }}
+--
+2.34.1
