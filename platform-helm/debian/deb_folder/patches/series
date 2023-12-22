@@ -10,5 +10,3 @@
 0010-ceph-csi-rbd-add-annotations-to-provisioner-deployment.patch
 0011-ceph-csi-rbd-update-storageclass.patch
 0012-ceph-csi-cephfs-update-storageclass.patch
-0013-ceph-csi-cephfs-add-snapshotclass.patch
-0014-ceph-csi-rbd-add-snapshotclass.patch

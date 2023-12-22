@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2020-2023 Wind River Systems, Inc.
+# Copyright (c) 2020-2022 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -107,11 +107,6 @@ class RbdProvisionerHelm(base.FluxCDBaseHelm):
 
             storage_classes.append(storage_class)
 
-        snapshot_class = {
-            "clusterID": cluster_id,
-            "provisionerSecret": user_secret_name or class_defaults["adminSecretName"]
-        }
-
         provisioner = {
             "replicaCount": self._num_replicas_for_platform_app()
         }
@@ -123,8 +118,7 @@ class RbdProvisionerHelm(base.FluxCDBaseHelm):
 
         overrides = {
             common.HELM_NS_RBD_PROVISIONER: {
-                "storageClasses": storage_classes,
-                "snapshotClass": snapshot_class,
+                "classes": storage_classes,
                 "provisioner": provisioner,
                 "csiConfig": csi_config,
                 "classdefaults": class_defaults

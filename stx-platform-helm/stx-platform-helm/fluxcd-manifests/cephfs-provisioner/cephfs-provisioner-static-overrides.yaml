@@ -83,12 +83,6 @@ storageClass:
     "helm.sh/hook-delete-policy": "before-hook-creation"
   }
 
-snapshotClass:
-  create: false
-  name: cephfs-snapshot
-  snapshotNamePrefix: cephfs-snap-
-  provisionerSecretNamespace: kube-system
-
 topology:
   enabled: false
 

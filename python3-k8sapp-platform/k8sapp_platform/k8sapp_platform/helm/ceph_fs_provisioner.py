@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2020-2023 Wind River Systems, Inc.
+# Copyright (c) 2020-2022 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -192,11 +192,6 @@ class CephFSProvisionerHelm(base.FluxCDBaseHelm):
 
             storage_classes.append(storage_class)
 
-        snapshot_class = {
-            "clusterID": cluster_id,
-            "provisionerSecret": user_secret_name or class_defaults["adminSecretName"]
-        }
-
         provisioner = {
             "replicaCount": self._num_replicas_for_platform_app()
         }
@@ -211,8 +206,7 @@ class CephFSProvisionerHelm(base.FluxCDBaseHelm):
 
         overrides = {
             app_constants.HELM_NS_CEPH_FS_PROVISIONER: {
-                "storageClasses": storage_classes,
-                "snapshotClass": snapshot_class,
+                "classes": storage_classes,
                 "provisioner": provisioner,
                 "csiConfig": csi_config,
                 "classdefaults": class_defaults
