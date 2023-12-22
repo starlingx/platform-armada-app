@@ -6,7 +6,8 @@ Build-Depends: debhelper-compat (= 13),
  helm,
  python3-k8sapp-platform,
  python3-k8sapp-platform-wheels,
- platform-helm
+ platform-helm,
+ build-info
 Standards-Version: 4.5.1
 Homepage: https://www.starlingx.io
 

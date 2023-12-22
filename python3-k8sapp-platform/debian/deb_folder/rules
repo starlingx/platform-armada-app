@@ -5,7 +5,7 @@ export APP_NAME = platform-integ-apps
 export PYBUILD_NAME = k8sapp-platform
 
 export DEB_VERSION = $(shell dpkg-parsechangelog | egrep '^Version:' | cut -f 2 -d ' ')
-export MAJOR = $(shell echo $(DEB_VERSION) | cut -f 1 -d '-')
+export MAJOR = $(shell cat /etc/build.info | grep SW_VERSION | cut -d'"' -f2)
 export MINOR_PATCH = $(shell echo $(DEB_VERSION) | cut -f 4 -d '.')
 export PBR_VERSION = $(MAJOR).$(MINOR_PATCH)
 

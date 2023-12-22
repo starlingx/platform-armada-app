@@ -5,7 +5,7 @@ export ROOT = debian/tmp
 export APP_FOLDER = $(ROOT)/usr/local/share/applications/helm
 
 export DEB_VERSION = $(shell dpkg-parsechangelog | egrep '^Version:' | cut -f 2 -d ' ')
-export RELEASE = $(shell echo $(DEB_VERSION) | cut -f 1 -d '-')
+export RELEASE = $(shell cat /etc/build.info | grep SW_VERSION | cut -d'"' -f2)
 export REVISION = $(shell echo $(DEB_VERSION) | cut -f 4 -d '.')
 
 export APP_NAME = platform-integ-apps
