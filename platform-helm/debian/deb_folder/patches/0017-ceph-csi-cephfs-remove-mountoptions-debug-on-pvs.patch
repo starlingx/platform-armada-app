@@ -1,0 +1,47 @@
+From b2ae5df05fb7f029336d8713f24825cdb121c641 Mon Sep 17 00:00:00 2001
+From: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
+Date: Tue, 16 Jan 2024 12:10:38 -0300
+Subject: [PATCH] ceph-csi-cephfs: remove mountOptions debug on PVs
+
+Since ceph-csi v3.9.0, the "debug" option has been removed
+from mountOptions of the cephfs storage class, however,
+this option still exists on cephfs PVs created with the previous
+version of ceph-csi, causing the pod to fail.
+
+To resolve this, a check for existing cephfs PVs has been added
+to the cephfs storage-init script to remove this parameter if
+it exists.
+
+Signed-off-by: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
+---
+ charts/ceph-csi-cephfs/templates/storage-init.yaml | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/charts/ceph-csi-cephfs/templates/storage-init.yaml b/charts/ceph-csi-cephfs/templates/storage-init.yaml
+index dc47e0afc..6bcaf8b30 100644
+--- a/charts/ceph-csi-cephfs/templates/storage-init.yaml
++++ b/charts/ceph-csi-cephfs/templates/storage-init.yaml
+@@ -147,6 +147,20 @@ data:
+       fi
+     }
+
++    # Patch CephFS PVs when created from a version earlier than v3.9.0 of ceph-csi
++    # See: https://github.com/ceph/ceph-csi/issues/3927
++    CEPHFS_PVS=$(kubectl get pv -o=jsonpath='{.items[?(@.spec.storageClassName=="cephfs")].metadata.name}' 2>/dev/null)
++    if [ -n "${CEPHFS_PVS}" ]; then
++      for PV in "${CEPHFS_PVS[@]}"; do
++        MOUNT_OPTIONS=$(kubectl get pv ${PV} -o jsonpath='{.spec.mountOptions}')
++        if [ -n "${MOUNT_OPTIONS}" ]; then
++          # The regex below removes the "debug" option (including the quotes) and also the comma if it exists before or after it
++          MOUNT_OPTIONS_WITHOUT_DEBUG=( `echo $MOUNT_OPTIONS | sed -E 's/\"debug\"\s*,?|,?\s*\"debug\"//g'` )
++          kubectl patch pv "${PV}" --type=json -p="[{'op': 'add', 'path': '/spec/mountOptions','value':${MOUNT_OPTIONS_WITHOUT_DEBUG}}]"
++        fi
++      done
++    fi
++
+     # Delete old driver if current fsGroupPolicy is different from "File"
+     # See: https://github.com/ceph/ceph-csi/issues/3397
+     CURRENT_FS_GROUP_POLICY=$(kubectl describe csidriver "${CSI_DRIVER_NAME}" 2>/dev/null | grep -oP 'Fs Group Policy:\K.*' | tr -d ' ')
+--
+2.34.1
+

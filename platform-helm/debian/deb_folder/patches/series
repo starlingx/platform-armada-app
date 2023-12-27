@@ -14,3 +14,4 @@
 0014-ceph-csi-cephfs-add-annotations-to-nodeplugin-daemonset.patch
 0015-ceph-csi-cephfs-add-snapshotclass.patch
 0016-ceph-csi-rbd-add-snapshotclass.patch
+0017-ceph-csi-cephfs-remove-mountoptions-debug-on-pvs.patch
