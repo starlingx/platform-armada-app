@@ -2,13 +2,13 @@ platform-helm (3.9-0) unstable; urgency=medium
 
   * New upstream release.
 
---  Gabriel de Araújo Cabral <gabriel.cabral@windriver.com> Fri, 21 Jul 2023 08:30:00 +0000
+ --  Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>  Fri, 21 Jul 2023 08:30:00 +0000
 
 platform-helm (3.8-0) unstable; urgency=medium
 
   * New upstream release.
 
- --  Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com> Wed, 17 May 2023 08:35:00 +0000
+ --  Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>  Wed, 17 May 2023 08:35:00 +0000
 
 platform-helm (1.0-1) unstable; urgency=medium
 

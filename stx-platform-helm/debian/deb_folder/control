@@ -3,11 +3,11 @@ Section: libs
 Priority: optional
 Maintainer: StarlingX Developers <starlingx-discuss@lists.starlingx.io>
 Build-Depends: debhelper-compat (= 13),
- helm,
- python3-k8sapp-platform,
- python3-k8sapp-platform-wheels,
+ build-info,
+ ceph-pools-audit-helm,
  platform-helm,
- build-info
+ python3-k8sapp-platform,
+ python3-k8sapp-platform-wheels
 Standards-Version: 4.5.1
 Homepage: https://www.starlingx.io
 
@@ -16,4 +16,4 @@ Section: libs
 Architecture: any
 Depends: ${misc:Depends}
 Description: StarlingX Platform FluxCD Helm Charts
- This package contains FluxCD helm charts for the platform applications.
+ This package contains FluxCD manifests for the platform applications.

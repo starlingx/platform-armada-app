@@ -10,46 +10,54 @@ export REVISION = $(shell echo $(DEB_VERSION) | cut -f 4 -d '.')
 
 export APP_NAME = platform-integ-apps
 export APP_VERSION = $(RELEASE)-$(REVISION)
-export APP_TARBALL_FLUXCD = $(APP_NAME)-$(APP_VERSION).tgz
+export APP_TARBALL = $(APP_NAME)-$(APP_VERSION).tgz
 export HELM_FOLDER = /usr/lib/helm
 export HELM_REPO = stx-platform
-export STAGING_FLUXCD = staging-fluxcd
+export STAGING = staging
 
 %:
 	dh $@
 
 override_dh_auto_build:
-	# Create the TGZ file.
-	cd helm-charts && make ceph-pools-audit
-
 	# Setup the staging directory.
-	mkdir -p $(STAGING_FLUXCD)
-	cp files/metadata.yaml $(STAGING_FLUXCD)
-	cp -Rv fluxcd-manifests $(STAGING_FLUXCD)
-	mkdir -p $(STAGING_FLUXCD)/charts
-	cp helm-charts/*.tgz $(STAGING_FLUXCD)/charts
-	cp /usr/lib/helm/ceph-csi-*.tgz $(STAGING_FLUXCD)/charts
+	mkdir -p $(STAGING)
+	cp files/metadata.yaml $(STAGING)
+	cp -Rv fluxcd-manifests $(STAGING)
+	mkdir -p $(STAGING)/charts
+	cp /usr/lib/helm/*.tgz $(STAGING)/charts
+
+	# Adjust the helmrelease yamls based on the chart versions
+	for c in $(STAGING)/charts/*; do \
+		chart=$$(basename $$c .tgz); \
+		chart_name=$${chart%-*}; \
+		chart_version=$${chart##*-}; \
+		echo "Found $$chart; name: $$chart_name, version: $$chart_version"; \
+		chart_manifest=$$(find $(STAGING)/fluxcd-manifests -name helmrelease.yaml -exec grep -q $$chart_name {} \; -print); \
+		echo "Updating manifest: $$chart_manifest"; \
+		sed -i "s/REPLACE_HELM_CHART_VERSION/$$chart_version/g" $$chart_manifest; \
+		grep version $$chart_manifest; \
+	done
 
 	# Populate metadata.
-	sed -i 's/APP_REPLACE_NAME/$(APP_NAME)/g' $(STAGING_FLUXCD)/metadata.yaml
-	sed -i 's/APP_REPLACE_VERSION/$(APP_VERSION)/g' $(STAGING_FLUXCD)/metadata.yaml
-	sed -i 's/HELM_REPLACE_REPO/$(HELM_REPO)/g' $(STAGING_FLUXCD)/metadata.yaml
+	sed -i 's/APP_REPLACE_NAME/$(APP_NAME)/g' $(STAGING)/metadata.yaml
+	sed -i 's/APP_REPLACE_VERSION/$(APP_VERSION)/g' $(STAGING)/metadata.yaml
+	sed -i 's/HELM_REPLACE_REPO/$(HELM_REPO)/g' $(STAGING)/metadata.yaml
 
 	# Copy the plugins: installed in the buildroot
-	mkdir -p $(STAGING_FLUXCD)/plugins
-	cp /plugins/*.whl $(STAGING_FLUXCD)/plugins
+	mkdir -p $(STAGING)/plugins
+	cp /plugins/*.whl $(STAGING)/plugins
 
 	# Create the app package.
-	cd $(STAGING_FLUXCD) && find . -type f ! -name '*.md5' -print0 | xargs -0 md5sum > checksum.md5
-	tar cfz $(APP_TARBALL_FLUXCD) -C $(STAGING_FLUXCD)/ .
+	cd $(STAGING) && find . -type f ! -name '*.md5' -print0 | xargs -0 md5sum > checksum.md5
+	tar cfz $(APP_TARBALL) -C $(STAGING)/ .
 
 	# Cleanup staging
-	rm -rf $(STAGING_FLUXCD)
+	rm -rf $(STAGING)
 
 override_dh_auto_install:
 	# Install the app tar file.
 	install -d -m 755 $(APP_FOLDER)
-	install -p -D -m 755 $(APP_TARBALL_FLUXCD) $(APP_FOLDER)
+	install -p -D -m 755 $(APP_TARBALL) $(APP_FOLDER)
 
 override_dh_auto_test:
 

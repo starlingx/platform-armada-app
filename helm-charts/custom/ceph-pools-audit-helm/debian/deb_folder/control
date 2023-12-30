@@ -1,0 +1,15 @@
+Source: ceph-pools-audit-helm
+Section: libs
+Priority: optional
+Maintainer: StarlingX Developers <starlingx-discuss@lists.starlingx.io>
+Build-Depends: debhelper-compat (= 13),
+ helm,
+Standards-Version: 4.5.1
+Homepage: https://www.starlingx.io
+
+Package: ceph-pools-audit-helm
+Section: libs
+Architecture: any
+Depends: ${misc:Depends}
+Description: StarlingX Platform Ceph pool auditor helm chart
+ This package contains a helm chart to audit the replication factor of Ceph pools.

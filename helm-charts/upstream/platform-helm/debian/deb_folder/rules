@@ -1,5 +1,10 @@
 #!/usr/bin/make -f
-export DH_VERBOSE = 1
+# export DH_VERBOSE = 1
+
+export DEB_VERSION = $(shell dpkg-parsechangelog | egrep '^Version:' | cut -f 2 -d ' ')
+export PATCH_VERSION = $(shell echo $(DEB_VERSION) | cut -f 4 -d '.')
+export CHART_BASE_VERSION = "3.9.0"
+export CHART_VERSION = $(CHART_BASE_VERSION)+STX.$(PATCH_VERSION)
 
 export ROOT = debian/tmp
 export APP_FOLDER = $(ROOT)/usr/lib/helm
@@ -8,7 +13,6 @@ export APP_FOLDER = $(ROOT)/usr/lib/helm
 	dh $@
 
 override_dh_auto_build:
-
 	mkdir -p ceph-csi
 
 	# Copy ceph-csi charts
@@ -16,8 +20,8 @@ override_dh_auto_build:
 
 	cp Makefile ceph-csi
 
-	cd ceph-csi && make ceph-csi-rbd
-	cd ceph-csi && make ceph-csi-cephfs
+	cd ceph-csi && make CHART_VERSION=$(CHART_VERSION) ceph-csi-rbd
+	cd ceph-csi && make CHART_VERSION=$(CHART_VERSION) ceph-csi-cephfs
 
 override_dh_auto_install:
 	# Install the app tar file.

@@ -9,6 +9,7 @@ src_files:
   - platform-helm/files/Makefile
 revision:
   dist: $STX_DIST
+  stx_patch: 16
   GITREVCOUNT:
     BASE_SRCREV: 69c37e9978d45dd928537523eda905e34e034b73
-    SRC_DIR: ${MY_REPO}/stx/platform-armada-app/platform-helm
+    SRC_DIR: ${MY_REPO}/stx/platform-armada-app/helm-charts/upstream/platform-helm

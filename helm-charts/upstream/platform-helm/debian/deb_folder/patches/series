@@ -15,3 +15,4 @@
 0015-ceph-csi-cephfs-add-snapshotclass.patch
 0016-ceph-csi-rbd-add-snapshotclass.patch
 0017-ceph-csi-cephfs-remove-mountoptions-debug-on-pvs.patch
+0018-Fix-chart-label-for-rbd-storage-init-Job.patch

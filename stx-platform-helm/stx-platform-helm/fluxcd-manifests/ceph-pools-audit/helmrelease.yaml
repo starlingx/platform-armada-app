@@ -15,7 +15,7 @@ spec:
   chart:
     spec:
       chart: ceph-pools-audit
-      version: 0.1.0
+      version: REPLACE_HELM_CHART_VERSION
       sourceRef:
         kind: HelmRepository
         name: stx-platform
