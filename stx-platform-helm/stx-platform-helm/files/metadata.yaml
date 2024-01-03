@@ -1,6 +1,6 @@
-app_name: @APP_NAME@
-app_version: @APP_VERSION@
-helm_repo: @HELM_REPO@
+app_name: APP_REPLACE_NAME
+app_version: APP_REPLACE_VERSION
+helm_repo: HELM_REPLACE_REPO
 maintain_user_overrides: true
 
 upgrades:

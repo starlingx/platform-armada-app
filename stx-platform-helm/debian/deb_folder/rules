@@ -31,9 +31,9 @@ override_dh_auto_build:
 	cp /usr/lib/helm/ceph-csi-*.tgz $(STAGING_FLUXCD)/charts
 
 	# Populate metadata.
-	sed -i 's/@APP_NAME@/$(APP_NAME)/g' $(STAGING_FLUXCD)/metadata.yaml
-	sed -i 's/@APP_VERSION@/$(APP_VERSION)/g' $(STAGING_FLUXCD)/metadata.yaml
-	sed -i 's/@HELM_REPO@/$(HELM_REPO)/g' $(STAGING_FLUXCD)/metadata.yaml
+	sed -i 's/APP_REPLACE_NAME/$(APP_NAME)/g' $(STAGING_FLUXCD)/metadata.yaml
+	sed -i 's/APP_REPLACE_VERSION/$(APP_VERSION)/g' $(STAGING_FLUXCD)/metadata.yaml
+	sed -i 's/HELM_REPLACE_REPO/$(HELM_REPO)/g' $(STAGING_FLUXCD)/metadata.yaml
 
 	# Copy the plugins: installed in the buildroot
 	mkdir -p $(STAGING_FLUXCD)/plugins
