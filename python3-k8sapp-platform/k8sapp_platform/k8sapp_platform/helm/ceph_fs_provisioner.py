@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2020-2023 Wind River Systems, Inc.
+# Copyright (c) 2020-2024 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -206,7 +206,10 @@ class CephFSProvisionerHelm(base.FluxCDBaseHelm):
 
         csi_config = [{
             "clusterID": cluster_id,
-            "monitors": [monitor for monitor in monitors]
+            "monitors": [monitor for monitor in monitors],
+            "cephFS": {
+                "subvolumeGroup": "csi"
+            }
         }]
 
         overrides = {

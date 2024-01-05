@@ -1,6 +1,6 @@
 ---
 debname: stx-platform-helm
-debver: 1.2-0
+debver: 1.3-0
 src_path: stx-platform-helm
 revision:
   dist: $STX_DIST

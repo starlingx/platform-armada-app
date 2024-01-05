@@ -1,21 +1,32 @@
-From 6b76ae958683ae297701994daaa5d5136bd3890a Mon Sep 17 00:00:00 2001
-From: Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>
-Date: Thu, 20 Jul 2023 15:57:27 -0300
+From c85077bed399ab34fe2da87311247fe766fee094 Mon Sep 17 00:00:00 2001
+From: Hediberto Cavalcante da Silva <hediberto.cavalcantedasilva@windriver.com>
+Date: Thu, 4 Jan 2024 14:59:12 -0300
 Subject: [PATCH] ceph-csi-cephfs: add default fields to values.yaml
 
 Signed-off-by: Hediberto Cavalcante da Silva <hediberto.cavalcantedasilva@windriver.com>
-Signed-off-by: Felipe Sanches Zanoni <Felipe.SanchesZanoni@windriver.com>
-Signed-off-by: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
 Signed-off-by: Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>
 ---
- charts/ceph-csi-cephfs/values.yaml | 35 ++++++++++++++++++++++++++++++
- 1 file changed, 35 insertions(+)
+ charts/ceph-csi-cephfs/values.yaml | 39 ++++++++++++++++++++++++++++--
+ 1 file changed, 37 insertions(+), 2 deletions(-)
 
 diff --git a/charts/ceph-csi-cephfs/values.yaml b/charts/ceph-csi-cephfs/values.yaml
-index 05f48e4c3..7c85abd7d 100644
+index fd681c1..24c0a30 100644
 --- a/charts/ceph-csi-cephfs/values.yaml
 +++ b/charts/ceph-csi-cephfs/values.yaml
-@@ -284,6 +284,24 @@ storageClass:
+@@ -222,10 +222,10 @@ provisioner:
+
+   affinity: {}
+
+-# readAffinity:
++readAffinity:
+ # Enable read affinity for CephFS subvolumes. Recommended to
+ # set to true if running kernel 5.8 or newer.
+-# enabled: false
++  enabled: false
+ # Define which node labels to use as CRUSH location.
+ # This should correspond to the values set in the CRUSH map.
+ # NOTE: the value here serves as an example
+@@ -295,6 +295,24 @@ storageClass:
    # mountOptions:
    #   - discard
 
@@ -40,7 +51,7 @@ index 05f48e4c3..7c85abd7d 100644
  secret:
    # Specifies whether the secret should be created
    create: false
-@@ -331,3 +349,20 @@ configMapName: ceph-csi-config
+@@ -346,3 +364,20 @@ configMapName: ceph-csi-config
  externallyManagedConfigmap: false
  # Name of the configmap used for ceph.conf
  cephConfConfigMapName: ceph-config
@@ -60,6 +71,6 @@ index 05f48e4c3..7c85abd7d 100644
 +storage_init:
 +  image:
 +    repository: docker.io/openstackhelm/ceph-config-helper
-+    tag: ubuntu_focal_17.2.6-1-20230508
++    tag: ubuntu_focal_18.2.0-1-20231013
 --
-2.25.1
+2.34.1

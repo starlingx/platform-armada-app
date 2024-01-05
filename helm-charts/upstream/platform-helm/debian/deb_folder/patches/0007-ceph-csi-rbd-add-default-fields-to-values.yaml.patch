@@ -1,21 +1,32 @@
-From 76f0e0e2fd42e9c541163059674b242f4f007a7d Mon Sep 17 00:00:00 2001
-From: Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>
-Date: Fri, 21 Jul 2023 08:15:53 -0300
+From 664018df5a965c4a2d38f84824c80567c9941d62 Mon Sep 17 00:00:00 2001
+From: Hediberto Cavalcante da Silva <hediberto.cavalcantedasilva@windriver.com>
+Date: Thu, 4 Jan 2024 15:47:27 -0300
 Subject: [PATCH] ceph-csi-rbd: add default fields to values.yaml
 
 Signed-off-by: Hediberto Cavalcante da Silva <hediberto.cavalcantedasilva@windriver.com>
-Signed-off-by: Felipe Sanches Zanoni <Felipe.SanchesZanoni@windriver.com>
-Signed-off-by: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
 Signed-off-by: Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>
 ---
- charts/ceph-csi-rbd/values.yaml | 36 +++++++++++++++++++++++++++++++++
- 1 file changed, 36 insertions(+)
+ charts/ceph-csi-rbd/values.yaml | 40 +++++++++++++++++++++++++++++++--
+ 1 file changed, 38 insertions(+), 2 deletions(-)
 
 diff --git a/charts/ceph-csi-rbd/values.yaml b/charts/ceph-csi-rbd/values.yaml
-index 2b2a03541..c33d5f2a6 100644
+index 0d75418..b5f2f5a 100644
 --- a/charts/ceph-csi-rbd/values.yaml
 +++ b/charts/ceph-csi-rbd/values.yaml
-@@ -429,6 +429,22 @@ storageClass:
+@@ -284,10 +284,10 @@ topology:
+     - failure-domain/region
+     - failure-domain/zone
+
+-# readAffinity:
++readAffinity:
+ # Enable read affinity for RBD volumes. Recommended to
+ # set to true if running kernel 5.8 or newer.
+-# enabled: false
++  enabled: false
+ # Define which node labels to use as CRUSH location.
+ # This should correspond to the values set in the CRUSH map.
+ # NOTE: the value here serves as an example
+@@ -472,6 +472,22 @@ storageClass:
    # mountOptions:
    #   - discard
 
@@ -38,7 +49,7 @@ index 2b2a03541..c33d5f2a6 100644
  # Mount the host /etc/selinux inside pods to support
  # selinux-enabled filesystems
  selinuxMount: true
-@@ -481,3 +497,23 @@ externallyManagedConfigmap: false
+@@ -528,3 +544,23 @@ externallyManagedConfigmap: false
  cephConfConfigMapName: ceph-config
  # Name of the configmap used for encryption kms configuration
  kmsConfigMapName: ceph-csi-encryption-kms-config
@@ -61,6 +72,6 @@ index 2b2a03541..c33d5f2a6 100644
 +storage_init:
 +  image:
 +    repository: docker.io/openstackhelm/ceph-config-helper
-+    tag: ubuntu_focal_17.2.6-1-20230508
++    tag: ubuntu_focal_18.2.0-1-20231013
 --
-2.25.1
+2.34.1

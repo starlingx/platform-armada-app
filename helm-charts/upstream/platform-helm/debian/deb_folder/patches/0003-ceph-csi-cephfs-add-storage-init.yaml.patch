@@ -1,26 +1,24 @@
-From 356ddba07d33e333d332415d9858f4c6354a0d85 Mon Sep 17 00:00:00 2001
-From: Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>
-Date: Wed, 6 Dec 2023 14:16:19 -0300
+From f380234343cbb6cb65ad54574099ca5adbca9cb4 Mon Sep 17 00:00:00 2001
+From: Hediberto Cavalcante da Silva <hediberto.cavalcantedasilva@windriver.com>
+Date: Thu, 4 Jan 2024 15:02:15 -0300
 Subject: [PATCH] ceph-csi-cephfs: add storage-init.yaml
 
 Signed-off-by: Hediberto Cavalcante da Silva <hediberto.cavalcantedasilva@windriver.com>
-Signed-off-by: Felipe Sanches Zanoni <Felipe.SanchesZanoni@windriver.com>
-Signed-off-by: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
 Signed-off-by: Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>
 ---
- .../templates/storage-init.yaml               | 369 ++++++++++++++++++
- 1 file changed, 369 insertions(+)
+ .../templates/storage-init.yaml               | 386 ++++++++++++++++++
+ 1 file changed, 386 insertions(+)
  create mode 100644 charts/ceph-csi-cephfs/templates/storage-init.yaml
 
 diff --git a/charts/ceph-csi-cephfs/templates/storage-init.yaml b/charts/ceph-csi-cephfs/templates/storage-init.yaml
 new file mode 100644
-index 000000000..97052d7a9
+index 0000000..3ffa153
 --- /dev/null
 +++ b/charts/ceph-csi-cephfs/templates/storage-init.yaml
-@@ -0,0 +1,369 @@
+@@ -0,0 +1,386 @@
 +{{/*
 +#
-+# Copyright (c) 2020-2023 Wind River Systems, Inc.
++# Copyright (c) 2020-2024 Wind River Systems, Inc.
 +#
 +# SPDX-License-Identifier: Apache-2.0
 +#
@@ -121,7 +119,7 @@ index 000000000..97052d7a9
 +    #! /bin/bash
 +
 +    #
-+    # Copyright (c) 2020-2023 Wind River Systems, Inc.
++    # Copyright (c) 2020-2024 Wind River Systems, Inc.
 +    #
 +    # SPDX-License-Identifier: Apache-2.0
 +    #
@@ -306,6 +304,23 @@ index 000000000..97052d7a9
 +      echo "Filesystem ${FS_NAME} already exists"
 +    fi
 +
++    # subvolumeGroup is no longer created automatically in v3.10.1
++    # See: https://github.com/ceph/ceph-csi/issues/4185
++    echo -e "\n================================================="
++    echo "Creating subvolumeGroup csi"
++    echo "================================================="
++
++    # There is no need to check if the subvolumegroup already exists.
++    # The following create command does not duplicate the subvolumegroup.
++    ceph fs subvolumegroup create ${FS_NAME} csi
++    RETURN_CODE=$?
++    if [ ${RETURN_CODE} -ne 0 ]; then
++      echo -e "Error creating subvolumegroup csi (return code: ${RETURN_CODE})"
++      exit ${RETURN_CODE}
++    else
++      echo "subvolumeGroup csi for ${FS_NAME} created"
++    fi
++
 +    echo -e "\n================================================="
 +    echo "ceph -s"
 +    echo "================================================="
@@ -388,4 +403,4 @@ index 000000000..97052d7a9
 +{{ toYaml . | indent 8 }}
 +{{- end}}
 --
-2.25.1
+2.34.1

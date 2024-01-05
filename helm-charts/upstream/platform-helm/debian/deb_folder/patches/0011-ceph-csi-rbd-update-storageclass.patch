@@ -1,20 +1,19 @@
-From d4ecc92cf187225ab4cdb882370647cb5b5d0d3b Mon Sep 17 00:00:00 2001
-From: Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>
-Date: Wed, 6 Dec 2023 14:22:19 -0300
+From a4a5246c189c3ee43901bbc57427e8427c4146e7 Mon Sep 17 00:00:00 2001
+From: Hediberto Cavalcante da Silva <hediberto.cavalcantedasilva@windriver.com>
+Date: Thu, 4 Jan 2024 16:06:44 -0300
 Subject: [PATCH] ceph-csi-rbd: update storageclass
 
 Signed-off-by: Hediberto Cavalcante da Silva <hediberto.cavalcantedasilva@windriver.com>
-Signed-off-by: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
 Signed-off-by: Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>
 ---
- .../ceph-csi-rbd/templates/storageclass.yaml  | 162 ++++++++++--------
- 1 file changed, 93 insertions(+), 69 deletions(-)
+ .../ceph-csi-rbd/templates/storageclass.yaml  | 194 ++++++++++--------
+ 1 file changed, 113 insertions(+), 81 deletions(-)
 
 diff --git a/charts/ceph-csi-rbd/templates/storageclass.yaml b/charts/ceph-csi-rbd/templates/storageclass.yaml
-index a559456aa..b53c3dc6c 100644
+index 459a6ea..ab489d1 100644
 --- a/charts/ceph-csi-rbd/templates/storageclass.yaml
 +++ b/charts/ceph-csi-rbd/templates/storageclass.yaml
-@@ -1,82 +1,106 @@
+@@ -1,94 +1,126 @@
  {{- if .Values.storageClass.create -}}
 +{{- $cephCsiDefault := .Values.storageClass }}
 +{{- $defaults := .Values.classdefaults }}
@@ -52,6 +51,9 @@ index a559456aa..b53c3dc6c 100644
 -{{- if .Values.storageClass.tryOtherMounters }}
 -  tryOtherMounters: {{ .Values.storageClass.tryOtherMounters | quote}}
 -{{- end }}
+-{{- if .Values.storageClass.mkfsOptions }}
+-  mkfsOptions: {{ .Values.storageClass.mkfsOptions }}
+-{{- end }}
 -{{- if .Values.storageClass.mounter }}
 -  mounter: {{ .Values.storageClass.mounter }}
 -{{- end }}
@@ -83,6 +85,11 @@ index a559456aa..b53c3dc6c 100644
 +  tryOtherMounters: {{ $sc.tryOtherMounters | quote}}
 +{{- else if $cephCsiDefault.tryOtherMounters }}
 +  tryOtherMounters: {{ $cephCsiDefault.tryOtherMounters | quote}}
++{{- end }}
++{{- if $sc.mkfsOptions }}
++  mkfsOptions: {{ $sc.mkfsOptions }}
++{{- else if $cephCsiDefault.mkfsOptions }}
++  mkfsOptions: {{ $cephCsiDefault.mkfsOptions }}
 +{{- end }}
 +{{- if $sc.mounter }}
 +  mounter: {{ $sc.mounter }}
@@ -129,6 +136,15 @@ index a559456aa..b53c3dc6c 100644
 -{{- if .Values.storageClass.unmapOptions }}
 -  unmapOptions: {{ .Values.storageClass.unmapOptions }}
 -{{- end }}
+-{{- if .Values.storageClass.stripeUnit }}
+-  stripeUnit: {{ .Values.storageClass.stripeUnit | quote }}
+-{{- end }}
+-{{- if .Values.storageClass.stripeCount }}
+-  stripeCount: {{ .Values.storageClass.stripeCount | quote }}
+-{{- end }}
+-{{- if .Values.storageClass.objectSize }}
+-  objectSize: {{ .Values.storageClass.objectSize | quote }}
+-{{- end }}
 -  csi.storage.k8s.io/provisioner-secret-name: {{ .Values.storageClass.provisionerSecret }}
 -{{- if .Values.storageClass.provisionerSecretNamespace }}
 -  csi.storage.k8s.io/provisioner-secret-namespace: {{ .Values.storageClass.provisionerSecretNamespace }}
@@ -166,6 +182,21 @@ index a559456aa..b53c3dc6c 100644
 +{{- else if $cephCsiDefault.unmapOptions }}
 +  unmapOptions: {{ $cephCsiDefault.unmapOptions }}
 +{{- end }}
++{{- if $sc.stripeUnit }}
++  stripeUnit: {{ $sc.stripeUnit | quote }}
++{{- else if $cephCsiDefault.stripeUnit }}
++  stripeUnit: {{ $cephCsiDefault.stripeUnit | quote }}
++{{- end }}
++{{- if $sc.stripeCount }}
++  stripeCount: {{ $sc.stripeCount | quote }}
++{{- else if $cephCsiDefault.stripeCount }}
++  stripeCount: {{ $cephCsiDefault.stripeCount | quote }}
++{{- end }}
++{{- if $sc.objectSize }}
++  objectSize: {{ $sc.objectSize | quote }}
++{{- else if $cephCsiDefault.objectSize }}
++  objectSize: {{ $cephCsiDefault.objectSize | quote }}
++{{- end }}
 +  csi.storage.k8s.io/provisioner-secret-name: {{ or $sc.provisionerSecret $defaults.adminSecretName }}
 +  csi.storage.k8s.io/provisioner-secret-namespace: {{ or $sc.provisionerSecretNamespace $.Release.Namespace }}
 +  csi.storage.k8s.io/controller-expand-secret-name: {{ or $sc.controllerExpandSecret $defaults.adminSecretName }}
@@ -176,19 +207,19 @@ index a559456aa..b53c3dc6c 100644
 +reclaimPolicy: {{ or $sc.reclaimPolicy $cephCsiDefault.reclaimPolicy }}
 +allowVolumeExpansion: {{ or $sc.allowVolumeExpansion $cephCsiDefault.allowVolumeExpansion }}
 +{{- if $sc.mountOptions }}
- mountOptions:
--  {{- range .Values.storageClass.mountOptions }}
-+  {{- range $sc.mountOptions }}
-   - {{ . }}
-   {{- end }}
-+{{- else if $cephCsiDefault.mountOptions }}
 +mountOptions:
-+  {{- range $cephCsiDefault.mountOptions }}
++  {{- range $sc.mountOptions }}
 +  - {{ . }}
 +  {{- end }}
-+{{- end }}
-+---
++{{- else if $cephCsiDefault.mountOptions }}
+ mountOptions:
+-  {{- range .Values.storageClass.mountOptions }}
++  {{- range $cephCsiDefault.mountOptions }}
+   - {{ . }}
+   {{- end }}
  {{- end }}
++---
++{{- end }}
  {{- end -}}
 --
-2.25.1
+2.34.1

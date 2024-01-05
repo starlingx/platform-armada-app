@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2022-2023 Wind River Systems, Inc.
+# Copyright (c) 2022-2024 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -31,15 +31,15 @@ provisioner:
   provisioner:
     image:
       repository: registry.k8s.io/sig-storage/csi-provisioner
-      tag: v3.5.0
+      tag: v3.6.2
   resizer:
     image:
       repository: registry.k8s.io/sig-storage/csi-resizer
-      tag: v1.8.0
+      tag: v1.9.2
   snapshotter:
     image:
       repository: registry.k8s.io/sig-storage/csi-snapshotter
-      tag: v6.2.2
+      tag: v6.3.2
 
 nodeplugin:
   name: cephfs-nodeplugin
@@ -55,11 +55,11 @@ nodeplugin:
   registrar:
     image:
       repository: registry.k8s.io/sig-storage/csi-node-driver-registrar
-      tag: v2.8.0
+      tag: v2.9.1
   plugin:
     image:
       repository: quay.io/cephcsi/cephcsi
-      tag: v3.9.0
+      tag: v3.10.1
 
 serviceAccounts:
   nodeplugin:
@@ -112,4 +112,4 @@ cephconf: |-
 storage_init:
   image:
     repository: docker.io/openstackhelm/ceph-config-helper
-    tag: ubuntu_focal_17.2.6-1-20230508
+    tag: ubuntu_focal_18.2.0-1-20231013
