@@ -1,11 +1,12 @@
-From 4e3d4d76c16c4d03ba33afd0581ceac5f5ea3147 Mon Sep 17 00:00:00 2001
-From: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
-Date: Mon, 24 Apr 2023 17:04:02 -0300
+From 080cad7da551b36ee22139c558770cf6520a0d55 Mon Sep 17 00:00:00 2001
+From: Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>
+Date: Wed, 6 Dec 2023 14:17:19 -0300
 Subject: [PATCH] ceph-csi-rbd: add storage-init.yaml
 
 Signed-off-by: Hediberto Cavalcante da Silva <hediberto.cavalcantedasilva@windriver.com>
 Signed-off-by: Felipe Sanches Zanoni <Felipe.SanchesZanoni@windriver.com>
 Signed-off-by: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
+Signed-off-by: Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>
 ---
  .../ceph-csi-rbd/templates/storage-init.yaml  | 394 ++++++++++++++++++
  1 file changed, 394 insertions(+)
@@ -372,7 +373,7 @@ index 000000000..6abd8ec3f
 +          configMap:
 +            name: rbd-storage-init
 +      containers:
-+        {{- range $sc := .Values.classes }}
++        {{- range $sc := .Values.storageClasses }}
 +        - name: storage-init-{{- $sc.name }}
 +          image: "{{ $.Values.storage_init.image.repository }}:{{ $.Values.storage_init.image.tag }}"
 +          command: [ "/bin/bash", "/tmp/storage-init.sh" ]

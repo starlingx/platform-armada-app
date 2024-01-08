@@ -1,0 +1,62 @@
+From d6dbc163f3be00789a74f85556de4486792f9d72 Mon Sep 17 00:00:00 2001
+From: Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>
+Date: Thu, 30 Nov 2023 13:38:09 -0300
+Subject: ceph-csi-rbd: add snapshotclass
+
+Signed-off-by: Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>
+---
+ .../ceph-csi-rbd/templates/snapshotclass.yaml  | 13 +++++++++++++
+ charts/ceph-csi-rbd/values.yaml                | 18 ++++++++++++++++++
+ 2 files changed, 31 insertions(+)
+ create mode 100644 charts/ceph-csi-rbd/templates/snapshotclass.yaml
+
+diff --git a/charts/ceph-csi-rbd/templates/snapshotclass.yaml b/charts/ceph-csi-rbd/templates/snapshotclass.yaml
+new file mode 100644
+index 000000000..3bad19026
+--- /dev/null
++++ b/charts/ceph-csi-rbd/templates/snapshotclass.yaml
+@@ -0,0 +1,13 @@
++{{- if .Values.snapshotClass.create -}}
++apiVersion: snapshot.storage.k8s.io/v1
++kind: VolumeSnapshotClass
++metadata:
++  name: {{ .Values.snapshotClass.name }}
++driver: {{ .Values.driverName }}
++parameters:
++  clusterID: {{ .Values.snapshotClass.clusterID }}
++  snapshotNamePrefix: {{ .Values.snapshotClass.snapshotNamePrefix }}
++  csi.storage.k8s.io/snapshotter-secret-name: {{ .Values.snapshotClass.provisionerSecret }}
++  csi.storage.k8s.io/snapshotter-secret-namespace: {{ .Values.snapshotClass.provisionerSecretNamespace }}
++deletionPolicy: {{ .Values.snapshotClass.deletionPolicy }}
++{{- end -}}
+diff --git a/charts/ceph-csi-rbd/values.yaml b/charts/ceph-csi-rbd/values.yaml
+index c33d5f2a6..8dd9ea3d5 100644
+--- a/charts/ceph-csi-rbd/values.yaml
++++ b/charts/ceph-csi-rbd/values.yaml
+@@ -449,6 +449,24 @@ storageClass:
+ # selinux-enabled filesystems
+ selinuxMount: true
+
++snapshotClass:
++  # Specifies whether the snapshotclass should be created
++  create: false
++  # Specifies the snapshotclass name
++  name: csi-rbdplugin-snapclass
++  # (required) Unique string representing a Ceph cluster to provision
++  #storage from.
++  clusterID: <cluster-ID>
++  # Prefix to use for naming RBD snapshots.
++  # If omitted, defaults to "csi-snap-".
++  # snapshotNamePrefix: "foo-bar-"
++  snapshotNamePrefix: ""
++  # K8s secret name
++  provisionerSecret: csi-rbd-secret
++  # K8s secret namespace
++  provisionerSecretNamespace: ""
++  deletionPolicy: Delete
++
+ secret:
+   # Specifies whether the secret should be created
+   create: false
+--
+2.25.1
