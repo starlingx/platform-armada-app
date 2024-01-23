@@ -5,8 +5,7 @@
 #
 
 from k8sapp_platform.common import constants as app_constants
-
-import subprocess
+from k8sapp_platform.common import utils as cutils
 
 from sysinv.common import constants
 from sysinv.common import exception
@@ -141,12 +140,6 @@ class CephFSProvisionerHelm(base.FluxCDBaseHelm):
         def _skip_ceph_mon_2(name):
             return name != constants.CEPH_MON_2
 
-        def _get_ceph_fsid():
-            process = subprocess.Popen(['timeout', '30', 'ceph', 'fsid'],
-                stdout=subprocess.PIPE)
-            stdout, stderr = process.communicate()
-            return stdout.strip()
-
         class_defaults = {
             "monitors": self._get_formatted_ceph_monitor_ips(
                 name_filter=_skip_ceph_mon_2),
@@ -154,9 +147,10 @@ class CephFSProvisionerHelm(base.FluxCDBaseHelm):
             "adminSecretName": app_constants.K8S_CEPHFS_PROVISIONER_ADMIN_SECRET_NAME
         }
 
+        snapshot_support = cutils.check_snapshot_support(app_constants.HELM_CHART_CEPH_FS_PROVISIONER)
         # Get tier info.
         tiers = self.dbapi.storage_tier_get_list()
-        cluster_id = _get_ceph_fsid()
+        cluster_id = cutils.get_ceph_fsid()
         storage_classes = []
 
         for bk in ceph_bks:
@@ -198,7 +192,10 @@ class CephFSProvisionerHelm(base.FluxCDBaseHelm):
         }
 
         provisioner = {
-            "replicaCount": self._num_replicas_for_platform_app()
+            "replicaCount": self._num_replicas_for_platform_app(),
+            "snapshotter": {
+                "enabled": snapshot_support
+            }
         }
 
         monitors = self._get_formatted_ceph_monitor_ips(
