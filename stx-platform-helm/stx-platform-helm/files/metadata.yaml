@@ -6,6 +6,9 @@ maintain_user_overrides: true
 upgrades:
   auto_update: true
 
+supported_k8s_version:
+  minimum: 1.24.4
+
 behavior:
   platform_managed_app: yes
   desired_state: applied
