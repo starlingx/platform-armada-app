@@ -40,9 +40,9 @@ class PlatformAppLifecycleOperator(base.AppLifecycleOperator):
         # Semantic checks
         if hook_info.lifecycle_type == constants.APP_LIFECYCLE_TYPE_SEMANTIC_CHECK:
             if hook_info.mode == constants.APP_LIFECYCLE_MODE_AUTO and \
-                    hook_info.operation in [constants.APP_APPLY_OP,
-                                            constants.APP_EVALUATE_REAPPLY_OP] and \
-                    hook_info.relative_timing == constants.APP_LIFECYCLE_TIMING_PRE:
+                    ((hook_info.operation == constants.APP_APPLY_OP and
+                    hook_info.relative_timing == constants.APP_LIFECYCLE_TIMING_PRE) or
+                    hook_info.mode == constants.APP_EVALUATE_REAPPLY_OP):
                 return self.pre_auto_apply_check(conductor_obj)
 
         # Rbd
@@ -86,6 +86,9 @@ class PlatformAppLifecycleOperator(base.AppLifecycleOperator):
         if not os.path.isfile(crushmap_flag_file):
             raise exception.LifecycleSemanticCheckException(
                 "Crush map not applied")
+        if conductor_obj is None:
+            raise exception.LifecycleSemanticCheckException(
+                "Conductor object is None")
         # conductor_obj._ceph (CephOperator) may not be initialized
         # at this point, as it depends on ceph and system conditions
         # to start the thread that initializes it
