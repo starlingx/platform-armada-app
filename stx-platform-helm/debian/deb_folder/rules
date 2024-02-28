@@ -32,7 +32,7 @@ override_dh_auto_build:
 		chart_name=$${chart%-*}; \
 		chart_version=$${chart##*-}; \
 		echo "Found $$chart; name: $$chart_name, version: $$chart_version"; \
-		chart_manifest=$$(find $(STAGING)/fluxcd-manifests -name helmrelease.yaml -exec grep -q $$chart_name {} \; -print); \
+		chart_manifest=$$(find $(STAGING)/fluxcd-manifests -name helmrelease.yaml -exec grep -q "chart:.*$$chart_name" {} \; -print); \
 		echo "Updating manifest: $$chart_manifest"; \
 		sed -i "s/REPLACE_HELM_CHART_VERSION/$$chart_version/g" $$chart_manifest; \
 		grep version $$chart_manifest; \
