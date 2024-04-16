@@ -1,17 +1,19 @@
-From e0afca6467c6986ca8f6f1facbc6859a3c42ecf5 Mon Sep 17 00:00:00 2001
-From: Gustavo Ornaghi Antunes <gustavo.ornaghiantunes@windriver.com>
-Date: Fri, 04 Aug 2023 10:20:51 -0300
-Subject: [PATCH] ceph-csi-cephfs: add annotations to provisioner-deployment.yaml
+From 2a1a89a6e94b90f2feea2b1a285330eaa2707c0c Mon Sep 17 00:00:00 2001
+From: Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>
+Date: Thu, 4 Apr 2024 16:10:05 -0300
+Subject: [PATCH] ceph-csi-cephfs: add annotations to
+ provisioner-deployment.yaml
 
-Signed-off-by: Hediberto Cavalcante da Silva <hediberto.cavalcantedasilva@windriver.com>
-Signed-off-by: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
-Signed-off-by: Gustavo Ornaghi Antunes <gustavo.ornaghiantunes@windriver.com>
+This patch adds annotations to the cephfs deployment so that
+disabling the chart works correctly.
+
+Signed-off-by: Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>
 ---
  charts/ceph-csi-cephfs/templates/provisioner-deployment.yaml | 5 ++++-
  1 file changed, 4 insertions(+), 1 deletion(-)
 
 diff --git a/charts/ceph-csi-cephfs/templates/provisioner-deployment.yaml b/charts/ceph-csi-cephfs/templates/provisioner-deployment.yaml
-index dcc15ee..2d7c815 100644
+index 4767866ba..d2ae00510 100644
 --- a/charts/ceph-csi-cephfs/templates/provisioner-deployment.yaml
 +++ b/charts/ceph-csi-cephfs/templates/provisioner-deployment.yaml
 @@ -10,6 +10,9 @@ metadata:
@@ -24,14 +26,14 @@ index dcc15ee..2d7c815 100644
  spec:
    replicas: {{ .Values.provisioner.replicaCount }}
    strategy:
-@@ -98,7 +101,7 @@ spec:
+@@ -147,7 +150,7 @@ spec:
              - "--v={{ .Values.sidecarLogLevel }}"
              - "--timeout={{ .Values.provisioner.timeout }}"
              - "--leader-election=true"
 -            - "--extra-create-metadata=true"
 +            - "--extra-create-metadata=false"
+             - "--enable-volume-group-snapshots={{.Values.provisioner.snapshotter.args.enableVolumeGroupSnapshots }}"
  {{- range .Values.provisioner.snapshotter.extraArgs }}
              - "--{{ . }}"
- {{- end }}
 --
 2.25.1

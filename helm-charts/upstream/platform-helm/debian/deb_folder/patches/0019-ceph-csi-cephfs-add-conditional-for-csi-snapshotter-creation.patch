@@ -1,8 +1,8 @@
-From ecdb1fa261cb6e1c48e4ae4ad7e36b4a2d9ae385 Mon Sep 17 00:00:00 2001
+From 3ef9d011849d3d40834df53d0d8a5d8277e69e90 Mon Sep 17 00:00:00 2001
 From: Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>
-Date: Mon, 15 Jan 2024 10:07:55 -0300
-Subject: [PATCH] ceph-csi-cephfs: Add conditional for csi-snapshotter container
- creation
+Date: Thu, 4 Apr 2024 17:36:28 -0300
+Subject: [PATCH] ceph-csi-cephfs: Add conditional for csi-snapshotter
+ container creation
 
 The creation of the csi-snapshotter container will only occur if the
 create field is 'true', as a result of the presence of CRDs and
@@ -15,36 +15,36 @@ Signed-off-by: Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>
  2 files changed, 3 insertions(+)
 
 diff --git a/charts/ceph-csi-cephfs/templates/provisioner-deployment.yaml b/charts/ceph-csi-cephfs/templates/provisioner-deployment.yaml
-index 2d7c8158e..6e6d013d5 100644
+index d2ae00510..9c930d369 100644
 --- a/charts/ceph-csi-cephfs/templates/provisioner-deployment.yaml
 +++ b/charts/ceph-csi-cephfs/templates/provisioner-deployment.yaml
-@@ -93,6 +93,7 @@ spec:
+@@ -142,6 +142,7 @@ spec:
                mountPath: /csi
            resources:
  {{ toYaml .Values.provisioner.provisioner.resources | indent 12 }}
-+{{ if .Values.provisioner.snapshotter.enabled }}
++{{- if .Values.provisioner.snapshotter.enabled }}
          - name: csi-snapshotter
            image: {{ .Values.provisioner.snapshotter.image.repository }}:{{ .Values.provisioner.snapshotter.image.tag }}
            imagePullPolicy: {{ .Values.provisioner.snapshotter.image.pullPolicy }}
-@@ -113,6 +114,7 @@ spec:
+@@ -163,6 +164,7 @@ spec:
                mountPath: /csi
            resources:
  {{ toYaml .Values.provisioner.snapshotter.resources | indent 12 }}
-+{{ end }}
++{{- end }}
  {{- if .Values.provisioner.resizer.enabled }}
          - name: csi-resizer
            image: "{{ .Values.provisioner.resizer.image.repository }}:{{ .Values.provisioner.resizer.image.tag }}"
 diff --git a/charts/ceph-csi-cephfs/values.yaml b/charts/ceph-csi-cephfs/values.yaml
-index 76726f980..41276836f 100644
+index 25e18ed64..8141d86bf 100644
 --- a/charts/ceph-csi-cephfs/values.yaml
 +++ b/charts/ceph-csi-cephfs/values.yaml
-@@ -207,6 +207,7 @@ provisioner:
+@@ -225,6 +225,7 @@ provisioner:
      extraArgs: []
 
    snapshotter:
 +    enabled: true
      image:
        repository: registry.k8s.io/sig-storage/csi-snapshotter
-       tag: v6.3.2
+       tag: v7.0.0
 --
 2.25.1

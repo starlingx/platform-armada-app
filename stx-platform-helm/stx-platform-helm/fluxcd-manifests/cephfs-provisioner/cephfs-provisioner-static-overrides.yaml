@@ -31,15 +31,15 @@ provisioner:
   provisioner:
     image:
       repository: registry.k8s.io/sig-storage/csi-provisioner
-      tag: v3.6.2
+      tag: v4.0.0
   resizer:
     image:
       repository: registry.k8s.io/sig-storage/csi-resizer
-      tag: v1.9.2
+      tag: v1.10.0
   snapshotter:
     image:
       repository: registry.k8s.io/sig-storage/csi-snapshotter
-      tag: v6.3.2
+      tag: v7.0.1
 
 nodeplugin:
   name: cephfs-nodeplugin
@@ -55,11 +55,11 @@ nodeplugin:
   registrar:
     image:
       repository: registry.k8s.io/sig-storage/csi-node-driver-registrar
-      tag: v2.9.1
+      tag: v2.10.0
   plugin:
     image:
       repository: quay.io/cephcsi/cephcsi
-      tag: v3.10.1
+      tag: v3.11.0
 
 serviceAccounts:
   nodeplugin:
@@ -112,4 +112,4 @@ cephconf: |-
 storage_init:
   image:
     repository: docker.io/openstackhelm/ceph-config-helper
-    tag: ubuntu_focal_18.2.0-1-20231013
+    tag: ubuntu_jammy_18.2.2-1-20240312

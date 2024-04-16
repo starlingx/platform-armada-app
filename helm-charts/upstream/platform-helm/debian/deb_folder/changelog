@@ -1,3 +1,10 @@
+
+platform-helm (3.11-0) unstable; urgency=medium
+
+  * New upstream release.
+
+ --  Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>  Thu, 4 Apr 2024 16:57:00 +0000
+
 platform-helm (3.10-1) unstable; urgency=medium
 
   * New upstream release.

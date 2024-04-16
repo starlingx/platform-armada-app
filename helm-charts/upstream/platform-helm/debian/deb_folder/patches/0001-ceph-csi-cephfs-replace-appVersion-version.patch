@@ -1,30 +1,32 @@
-From a3dc71e29e28a608936c20220d29c1ab1c0ded60 Mon Sep 17 00:00:00 2001
-From: Hediberto Cavalcante da Silva <hediberto.cavalcantedasilva@windriver.com>
-Date: Thu, 4 Jan 2024 14:54:20 -0300
+From 38f93e32c9437dd2a473322c291e36fba2587ffc Mon Sep 17 00:00:00 2001
+From: Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>
+Date: Thu, 4 Apr 2024 14:11:08 -0300
 Subject: [PATCH] ceph-csi-cephfs: replace appVersion/version
 
-Signed-off-by: Hediberto Cavalcante da Silva <hediberto.cavalcantedasilva@windriver.com>
+This patch changes the appVersion of the cephfs chart to the
+upstream version that ceph-csi is being updated to.
+
 Signed-off-by: Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>
 ---
  charts/ceph-csi-cephfs/Chart.yaml | 4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/charts/ceph-csi-cephfs/Chart.yaml b/charts/ceph-csi-cephfs/Chart.yaml
-index 46d38df..a1dd211 100644
+index 46d38df97..96432c638 100644
 --- a/charts/ceph-csi-cephfs/Chart.yaml
 +++ b/charts/ceph-csi-cephfs/Chart.yaml
 @@ -1,10 +1,10 @@
  ---
  apiVersion: v1
 -appVersion: canary
-+appVersion: 3.10.1
++appVersion: 3.11.0
  description: "Container Storage Interface (CSI) driver,
  provisioner, snapshotter and resizer for Ceph cephfs"
  name: ceph-csi-cephfs
 -version: 3-canary
-+version: 3.10.1
++version: 3.11.0
  keywords:
    - ceph
    - cephfs
 --
-2.34.1
+2.25.1

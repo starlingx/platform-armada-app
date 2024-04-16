@@ -1,19 +1,20 @@
-From a4a5246c189c3ee43901bbc57427e8427c4146e7 Mon Sep 17 00:00:00 2001
-From: Hediberto Cavalcante da Silva <hediberto.cavalcantedasilva@windriver.com>
-Date: Thu, 4 Jan 2024 16:06:44 -0300
+From d9c0f98127938abcfb073cfc8d75645b90548a53 Mon Sep 17 00:00:00 2001
+From: Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>
+Date: Thu, 18 Apr 2024 08:36:28 -0300
 Subject: [PATCH] ceph-csi-rbd: update storageclass
 
-Signed-off-by: Hediberto Cavalcante da Silva <hediberto.cavalcantedasilva@windriver.com>
+This patch updates some fields and values for the rbd storage class.
+
 Signed-off-by: Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>
 ---
- .../ceph-csi-rbd/templates/storageclass.yaml  | 194 ++++++++++--------
- 1 file changed, 113 insertions(+), 81 deletions(-)
+ .../ceph-csi-rbd/templates/storageclass.yaml  | 198 ++++++++++--------
+ 1 file changed, 115 insertions(+), 83 deletions(-)
 
 diff --git a/charts/ceph-csi-rbd/templates/storageclass.yaml b/charts/ceph-csi-rbd/templates/storageclass.yaml
-index 459a6ea..ab489d1 100644
+index 188362fc0..d971ed1fe 100644
 --- a/charts/ceph-csi-rbd/templates/storageclass.yaml
 +++ b/charts/ceph-csi-rbd/templates/storageclass.yaml
-@@ -1,94 +1,126 @@
+@@ -1,96 +1,128 @@
  {{- if .Values.storageClass.create -}}
 +{{- $cephCsiDefault := .Values.storageClass }}
 +{{- $defaults := .Values.classdefaults }}
@@ -46,8 +47,10 @@ index 459a6ea..ab489d1 100644
 +provisioner: {{ $.Values.driverName }}
  parameters:
 -  clusterID: {{ .Values.storageClass.clusterID }}
--  pool: {{ .Values.storageClass.pool }}
 -  imageFeatures: {{ .Values.storageClass.imageFeatures }}
+-{{- if .Values.storageClass.pool }}  
+-  pool: {{ .Values.storageClass.pool }}
+-{{- end }}  
 -{{- if .Values.storageClass.tryOtherMounters }}
 -  tryOtherMounters: {{ .Values.storageClass.tryOtherMounters | quote}}
 -{{- end }}
@@ -79,7 +82,9 @@ index 459a6ea..ab489d1 100644
 +{{- with (first $.Values.csiConfig) }}
 +  clusterID: {{ or $sc.clusterID .clusterID }}
 +{{- end}}
++{{- if $sc.pool_name }}
 +  pool: {{ $sc.pool_name }}
++{{- end }}
 +  imageFeatures: {{ or $sc.imageFeatures $cephCsiDefault.imageFeatures }}
 +{{- if $sc.tryOtherMounters }}
 +  tryOtherMounters: {{ $sc.tryOtherMounters | quote}}
@@ -222,4 +227,4 @@ index 459a6ea..ab489d1 100644
 +{{- end }}
  {{- end -}}
 --
-2.34.1
+2.25.1

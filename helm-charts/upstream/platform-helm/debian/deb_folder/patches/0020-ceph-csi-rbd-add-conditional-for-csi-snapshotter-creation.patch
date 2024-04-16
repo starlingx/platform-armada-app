@@ -1,6 +1,6 @@
-From 35d5d47bd6a1736fa2945346dc55b40c85744c14 Mon Sep 17 00:00:00 2001
+From fb64dfe6fe6fd7afa3dd0c06c5c1b53b82c4899a Mon Sep 17 00:00:00 2001
 From: Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>
-Date: Mon, 15 Jan 2024 10:17:58 -0300
+Date: Thu, 4 Apr 2024 17:36:28 -0300
 Subject: [PATCH] ceph-csi-rbd: Add conditional for csi-snapshotter container
  creation
 
@@ -15,36 +15,36 @@ Signed-off-by: Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>
  2 files changed, 3 insertions(+)
 
 diff --git a/charts/ceph-csi-rbd/templates/provisioner-deployment.yaml b/charts/ceph-csi-rbd/templates/provisioner-deployment.yaml
-index f31b5d654..982be155e 100644
+index 8c7839515..8f4e3b238 100644
 --- a/charts/ceph-csi-rbd/templates/provisioner-deployment.yaml
 +++ b/charts/ceph-csi-rbd/templates/provisioner-deployment.yaml
-@@ -121,6 +121,7 @@ spec:
+@@ -185,6 +185,7 @@ spec:
            resources:
  {{ toYaml .Values.provisioner.resizer.resources | indent 12 }}
  {{- end }}
-+{{ if .Values.provisioner.snapshotter.enabled }}
++{{- if .Values.provisioner.snapshotter.enabled }}
          - name: csi-snapshotter
            image: {{ .Values.provisioner.snapshotter.image.repository }}:{{ .Values.provisioner.snapshotter.image.tag }}
            imagePullPolicy: {{ .Values.provisioner.snapshotter.image.pullPolicy }}
-@@ -141,6 +142,7 @@ spec:
+@@ -206,6 +207,7 @@ spec:
                mountPath: /csi
            resources:
  {{ toYaml .Values.provisioner.snapshotter.resources | indent 12 }}
-+{{ end }}
++{{- end }}
  {{- if .Values.provisioner.attacher.enabled }}
          - name: csi-attacher
            image: "{{ .Values.provisioner.attacher.image.repository }}:{{ .Values.provisioner.attacher.image.tag }}"
 diff --git a/charts/ceph-csi-rbd/values.yaml b/charts/ceph-csi-rbd/values.yaml
-index 7527d0fad..70987d311 100644
+index b9b163202..308779494 100644
 --- a/charts/ceph-csi-rbd/values.yaml
 +++ b/charts/ceph-csi-rbd/values.yaml
-@@ -257,6 +257,7 @@ provisioner:
+@@ -275,6 +275,7 @@ provisioner:
      extraArgs: []
 
    snapshotter:
 +    enabled: true
      image:
        repository: registry.k8s.io/sig-storage/csi-snapshotter
-       tag: v6.3.2
+       tag: v7.0.0
 --
 2.25.1

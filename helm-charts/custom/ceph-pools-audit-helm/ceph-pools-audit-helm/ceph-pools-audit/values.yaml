@@ -26,7 +26,7 @@ conf:
 
 images:
   tags:
-    ceph_config_helper: docker.io/openstackhelm/ceph-config-helper:ubuntu_focal_18.2.0-1-20231013
+    ceph_config_helper: docker.io/openstackhelm/ceph-config-helper:ubuntu_jammy_18.2.2-1-20240312
   pullPolicy: "IfNotPresent"
   local_registry:
     active: false
