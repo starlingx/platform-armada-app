@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-apiVersion: "helm.toolkit.fluxcd.io/v2beta1"
+apiVersion: "helm.toolkit.fluxcd.io/v2"
 kind: HelmRelease
 metadata:
   name: rbd-provisioner
