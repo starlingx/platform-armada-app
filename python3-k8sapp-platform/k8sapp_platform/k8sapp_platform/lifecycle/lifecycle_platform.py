@@ -18,10 +18,8 @@ from sysinv.common import constants
 from sysinv.common import exception
 from sysinv.common import kubernetes
 from sysinv.common import utils as cutils
-from sysinv.db import api as dbapi
 from sysinv.helm import lifecycle_base as base
 from sysinv.helm import lifecycle_utils as lifecycle_utils
-from k8sapp_platform.common import constants as app_constants
 
 LOG = logging.getLogger(__name__)
 
@@ -114,9 +112,7 @@ class PlatformAppLifecycleOperator(base.AppLifecycleOperator):
     def pre_apply(self, app_op, app, hook_info):
         """Pre Apply actions
 
-        Creates the local registry secret and rename user overrides from
-        'classes' to 'storageClasses' in the rbd and cephfs charts if
-        necessary.
+        This function creates the local registry secret.
 
         :param app_op: AppOperator object
         :param app: AppOperator.Application object
@@ -124,47 +120,6 @@ class PlatformAppLifecycleOperator(base.AppLifecycleOperator):
 
         """
         lifecycle_utils.create_local_registry_secrets(app_op, app, hook_info)
-
-        # TODO: The code below is for stx.8.0 -> stx.9.0 updates.
-        # It may be removed in the stx.10.0 release cycle
-        dbapi_instance = dbapi.get_instance()
-        # get most recently created inactive app
-        inactive_db_apps = dbapi_instance.kube_app_get_inactive(
-            app.name, limit=1, sort_key='created_at', sort_dir='desc')
-
-        if not inactive_db_apps:
-            # user overrides will not be updated because there is no
-            # inactive platform-integ-apps entry in the database
-            return
-
-        from_db_app = inactive_db_apps[0]
-        to_db_app = dbapi_instance.kube_app_get(app.name)
-
-        charts = [
-            app_constants.FLUXCD_HELMRELEASE_CEPH_FS_PROVISIONER,
-            app_constants.FLUXCD_HELMRELEASE_RBD_PROVISIONER,
-        ]
-
-        # update of user overrides due to changing 'classes' to 'storageClasses'
-        # to improve understanding. The namespace of both charts are the same
-        for chart in charts:
-            user_overrides = self._get_helm_user_overrides(
-                dbapi_instance,
-                from_db_app,
-                chart,
-                app_constants.K8S_CEPHFS_PROVISIONER_DEFAULT_NAMESPACE)
-
-            if 'classes:' in user_overrides:
-                user_overrides = user_overrides.replace("classes:", "storageClasses:")
-                self._update_helm_user_overrides(
-                        dbapi_instance,
-                        to_db_app,
-                        chart,
-                        app_constants.K8S_CEPHFS_PROVISIONER_DEFAULT_NAMESPACE,
-                        user_overrides,
-                )
-                LOG.debug("User overrides of 'classes' updated to 'storageClasses'"
-                          " in {} chart from {}".format(chart, app.name))
 
     def delete_csi_drivers(self, app):
         """ Delete CSI drivers
