@@ -9,6 +9,7 @@ from k8sapp_platform.common import utils as cutils
 
 from sysinv.common import constants
 from sysinv.common import exception
+from sysinv.common import utils
 
 from sysinv.helm import base
 
@@ -147,6 +148,7 @@ class CephFSProvisionerHelm(base.FluxCDBaseHelm):
             "adminSecretName": app_constants.K8S_CEPHFS_PROVISIONER_ADMIN_SECRET_NAME
         }
 
+        is_simplex = utils.is_aio_simplex_system(self.dbapi)
         snapshot_support = cutils.check_snapshot_support(app_constants.HELM_CHART_CEPH_FS_PROVISIONER)
         # Get tier info.
         tiers = self.dbapi.storage_tier_get_list()
@@ -195,6 +197,9 @@ class CephFSProvisionerHelm(base.FluxCDBaseHelm):
             "replicaCount": self._num_replicas_for_platform_app(),
             "snapshotter": {
                 "enabled": snapshot_support
+            },
+            "leaderElection": {
+                "enabled": not is_simplex
             }
         }
 

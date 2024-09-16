@@ -1,0 +1,75 @@
+From ae66484310a368998d44654bbe7a6e0b88b28dc5 Mon Sep 17 00:00:00 2001
+From: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
+Date: Fri, 13 Sep 2024 17:46:49 -0300
+Subject: [PATCH] rbd: Add conditional to enable leader election
+
+The rbd-provisioner and cephfs-provisioner pods use the K8s
+API to conduct leadership elections, but these elections
+should be disabled on AIO-SX, since they are not needed.
+
+Signed-off-by: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
+---
+ charts/ceph-csi-rbd/templates/provisioner-deployment.yaml | 8 ++++++++
+ charts/ceph-csi-rbd/values.yaml                           | 3 +++
+ 2 files changed, 11 insertions(+)
+
+diff --git a/charts/ceph-csi-rbd/templates/provisioner-deployment.yaml b/charts/ceph-csi-rbd/templates/provisioner-deployment.yaml
+index 8f4e3b2..1bac6e8 100644
+--- a/charts/ceph-csi-rbd/templates/provisioner-deployment.yaml
++++ b/charts/ceph-csi-rbd/templates/provisioner-deployment.yaml
+@@ -141,7 +141,9 @@ spec:
+             - "--csi-address=$(ADDRESS)"
+             - "--v={{ .Values.sidecarLogLevel }}"
+             - "--timeout={{ .Values.provisioner.timeout }}"
++{{- if .Values.provisioner.leaderElection.enabled }}
+             - "--leader-election=true"
++{{- end }}
+             - "--retry-interval-start=500ms"
+             - "--default-fstype={{ .Values.provisioner.defaultFSType }}"
+             - "--extra-create-metadata=true"
+@@ -169,7 +171,9 @@ spec:
+             - "--v={{ .Values.sidecarLogLevel }}"
+             - "--csi-address=$(ADDRESS)"
+             - "--timeout={{ .Values.provisioner.timeout }}"
++{{- if .Values.provisioner.leaderElection.enabled }}
+             - "--leader-election"
++{{- end }}
+             - "--retry-interval-start=500ms"
+             - "--handle-volume-inuse-error=false"
+             - "--feature-gates=RecoverVolumeExpansionFailure=true"
+@@ -193,7 +197,9 @@ spec:
+             - "--csi-address=$(ADDRESS)"
+             - "--v={{ .Values.sidecarLogLevel }}"
+             - "--timeout={{ .Values.provisioner.timeout }}"
++{{- if .Values.provisioner.leaderElection.enabled }}
+             - "--leader-election=true"
++{{- end }}
+             - "--extra-create-metadata=true"
+             - "--enable-volume-group-snapshots={{.Values.provisioner.snapshotter.args.enableVolumeGroupSnapshots }}"
+ {{- range .Values.provisioner.snapshotter.extraArgs }}
+@@ -215,7 +221,9 @@ spec:
+           args:
+             - "--v={{ .Values.sidecarLogLevel }}"
+             - "--csi-address=$(ADDRESS)"
++{{- if .Values.provisioner.leaderElection.enabled }}
+             - "--leader-election=true"
++{{- end }}
+             - "--retry-interval-start=500ms"
+             - "--default-fstype=ext4"
+ {{- range .Values.provisioner.attacher.extraArgs }}
+diff --git a/charts/ceph-csi-rbd/values.yaml b/charts/ceph-csi-rbd/values.yaml
+index 3087794..d1b002d 100644
+--- a/charts/ceph-csi-rbd/values.yaml
++++ b/charts/ceph-csi-rbd/values.yaml
+@@ -197,6 +197,9 @@ provisioner:
+   # useful for deployments where the podNetwork has no access to ceph
+   enableHostNetwork: false
+
++  leaderElection:
++    enabled: true
++
+   httpMetrics:
+     # Metrics only available for cephcsi/cephcsi => 1.2.0
+     # Specifies whether http metrics should be exposed
+--
+2.34.1

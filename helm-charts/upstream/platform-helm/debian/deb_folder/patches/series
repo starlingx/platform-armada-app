@@ -18,3 +18,5 @@
 0018-Fix-chart-label-for-rbd-storage-init-Job.patch
 0019-ceph-csi-cephfs-add-conditional-for-csi-snapshotter-creation.patch
 0020-ceph-csi-rbd-add-conditional-for-csi-snapshotter-creation.patch
+0021-ceph-csi-cephfs-add-conditional-to-enable-leader-election.patch
+0022-ceph-csi-rbd-add-conditional-to-enable-leader-election.patch

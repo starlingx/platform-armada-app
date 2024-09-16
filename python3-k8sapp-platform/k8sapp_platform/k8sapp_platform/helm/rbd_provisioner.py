@@ -9,6 +9,7 @@ from k8sapp_platform.common import utils as cutils
 
 from sysinv.common import constants
 from sysinv.common import exception
+from sysinv.common import utils
 from sysinv.common.storage_backend_conf import K8RbdProvisioner
 
 from sysinv.helm import base
@@ -65,6 +66,7 @@ class RbdProvisionerHelm(base.FluxCDBaseHelm):
             "storageClass": constants.K8S_RBD_PROV_STOR_CLASS_NAME
         }
 
+        is_simplex = utils.is_aio_simplex_system(self.dbapi)
         snapshot_support = cutils.check_snapshot_support(app_constants.HELM_CHART_RBD_PROVISIONER)
         # Get tier info.
         tiers = self.dbapi.storage_tier_get_list()
@@ -110,6 +112,9 @@ class RbdProvisionerHelm(base.FluxCDBaseHelm):
             "replicaCount": self._num_replicas_for_platform_app(),
             "snapshotter": {
                 "enabled": snapshot_support
+            },
+            "leaderElection": {
+                "enabled": not is_simplex
             }
         }
 
