@@ -172,6 +172,7 @@ class CephFSProvisionerHelm(base.FluxCDBaseHelm):
                 "clusterID": cluster_id,
                 "name": K8CephFSProvisioner.get_storage_class_name(bk),
                 "fs_name": K8CephFSProvisioner.get_fs(bk),
+                "kernelMountOptions": "recover_session=clean",
                 "data_pool_name": K8CephFSProvisioner.get_data_pool(bk),
                 "metadata_pool_name": K8CephFSProvisioner.get_metadata_pool(bk),
                 "volumeNamePrefix": app_constants.HELM_CEPH_FS_PROVISIONER_VOLUME_NAME_PREFIX,
