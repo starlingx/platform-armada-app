@@ -1,3 +1,8 @@
+platform-helm (3.13-0) unstable; urgency=medium
+
+  * New upstream release 3.13.0.
+
+ --  Gabriel Przybysz Gonçalves Júnior <gabriel.przybyszgoncalvesjunior@windriver.com>  Mon, 18 Dec 2024 19:54:53 -0300
 
 platform-helm (3.11-0) unstable; urgency=medium
 

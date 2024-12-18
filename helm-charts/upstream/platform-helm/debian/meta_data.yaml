@@ -1,15 +1,15 @@
 ---
 debname: platform-helm
-debver: 3.11-0
+debver: 3.13-0
 dl_path:
-  name: ceph-csi-3.11.0.tar.gz
-  url: https://github.com/ceph/ceph-csi/archive/v3.11.0.tar.gz
-  sha256sum: cd27befa86097ea19fab2cf2a6ef12a97bb182fb10b6361687a7f6fdf3dc221e
+  name: ceph-csi-3.13.0.tar.gz
+  url: https://github.com/ceph/ceph-csi/archive/v3.13.0.tar.gz
+  sha256sum: 852d260461ee84ca4b0248388551fb2170faf6442995ef1516755ad41c56241e
 src_files:
   - platform-helm/files/Makefile
 revision:
   dist: $STX_DIST
-  stx_patch: 19
+  stx_patch: 20
   GITREVCOUNT:
-    BASE_SRCREV: 855c7b1da9ab3779397ffffbc49b7a6e03bca115
+    BASE_SRCREV: bc01cdee112dbb9a5511a180c07a5e3513b48692
     SRC_DIR: ${MY_REPO}/stx/platform-armada-app/helm-charts/upstream/platform-helm

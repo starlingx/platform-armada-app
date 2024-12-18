@@ -47,7 +47,7 @@ class PlatformAppLifecycleOperator(base.AppLifecycleOperator):
                                        constants.APP_EVALUATE_REAPPLY_OP]:
                 if "relative_timing" not in hook_info or \
                         hook_info.relative_timing == LifecycleConstants.APP_LIFECYCLE_TIMING_PRE:
-                    return self.pre_apply_check(conductor_obj)
+                    return self.pre_apply_check(app_op, conductor_obj)
 
         # Rbd
         elif hook_info.lifecycle_type == LifecycleConstants.APP_LIFECYCLE_TYPE_RBD:
@@ -72,10 +72,11 @@ class PlatformAppLifecycleOperator(base.AppLifecycleOperator):
         # Use the default behaviour for other hooks
         super(PlatformAppLifecycleOperator, self).app_lifecycle_actions(context, conductor_obj, app_op, app, hook_info)
 
-    def pre_apply_check(self, conductor_obj):
+    def pre_apply_check(self, app_op, conductor_obj):
         """ Semantic check for apply
 
         Check:
+            - ceph backend configured
             - ceph access
             - ceph health
             - crushmap applied
@@ -85,6 +86,13 @@ class PlatformAppLifecycleOperator(base.AppLifecycleOperator):
         :param conductor_obj: conductor object
 
         """
+        dbapi = app_op._dbapi
+        storage_backend_list = dbapi.storage_backend_get_list_by_type(constants.SB_TYPE_CEPH)
+
+        if not storage_backend_list:
+            raise exception.LifecycleSemanticCheckException(
+                "Ceph storage backend not configured")
+
         crushmap_flag_file = os.path.join(constants.SYSINV_CONFIG_PATH,
                                           constants.CEPH_CRUSH_MAP_APPLIED)
 

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2019-2024 Wind River Systems, Inc.
+# Copyright (c) 2019-2025 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -26,7 +26,7 @@ conf:
 
 images:
   tags:
-    ceph_config_helper: docker.io/openstackhelm/ceph-config-helper:ubuntu_jammy_18.2.2-1-20240312
+    ceph_config_helper: docker.io/openstackhelm/ceph-config-helper:ubuntu_jammy_19.2.1-1-20250207
   pullPolicy: "IfNotPresent"
   local_registry:
     active: false

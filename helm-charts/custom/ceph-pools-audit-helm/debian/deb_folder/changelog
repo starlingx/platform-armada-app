@@ -1,3 +1,9 @@
+ceph-pools-audit-helm (0.3-0) unstable; urgency=medium
+
+  * Update of ceph-config-helper image.
+
+ --  Gabriel Przybysz Gonçalves Júnior <gabriel.przybyszgoncalvesjunior@windriver.com>  Fri, 21 Feb 2025 11:30:01 +0000
+
 ceph-pools-audit-helm (0.2-0) unstable; urgency=medium
 
   * Update of ceph-config-helper image.
