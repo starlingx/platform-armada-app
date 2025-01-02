@@ -20,6 +20,7 @@ from sysinv.common import kubernetes
 from sysinv.common import utils as cutils
 from sysinv.helm import lifecycle_base as base
 from sysinv.helm import lifecycle_utils as lifecycle_utils
+from sysinv.helm.lifecycle_constants import LifecycleConstants
 
 LOG = logging.getLogger(__name__)
 
@@ -36,31 +37,31 @@ class PlatformAppLifecycleOperator(base.AppLifecycleOperator):
 
         """
         # Semantic checks
-        if hook_info.lifecycle_type == constants.APP_LIFECYCLE_TYPE_SEMANTIC_CHECK:
-            if hook_info.mode == constants.APP_LIFECYCLE_MODE_AUTO and \
+        if hook_info.lifecycle_type == LifecycleConstants.APP_LIFECYCLE_TYPE_SEMANTIC_CHECK:
+            if hook_info.mode == LifecycleConstants.APP_LIFECYCLE_MODE_AUTO and \
                     ((hook_info.operation == constants.APP_APPLY_OP and
-                    hook_info.relative_timing == constants.APP_LIFECYCLE_TIMING_PRE) or
+                    hook_info.relative_timing == LifecycleConstants.APP_LIFECYCLE_TIMING_PRE) or
                     hook_info.mode == constants.APP_EVALUATE_REAPPLY_OP):
                 return self.pre_auto_apply_check(conductor_obj)
 
         # Rbd
-        elif hook_info.lifecycle_type == constants.APP_LIFECYCLE_TYPE_RBD:
+        elif hook_info.lifecycle_type == LifecycleConstants.APP_LIFECYCLE_TYPE_RBD:
             if hook_info.operation == constants.APP_APPLY_OP and \
-                    hook_info.relative_timing == constants.APP_LIFECYCLE_TIMING_PRE:
+                    hook_info.relative_timing == LifecycleConstants.APP_LIFECYCLE_TIMING_PRE:
                 return lifecycle_utils.create_rbd_provisioner_secrets(app_op, app, hook_info)
             elif hook_info.operation == constants.APP_REMOVE_OP and \
-                    hook_info.relative_timing == constants.APP_LIFECYCLE_TIMING_POST:
+                    hook_info.relative_timing == LifecycleConstants.APP_LIFECYCLE_TIMING_POST:
                 return lifecycle_utils.delete_rbd_provisioner_secrets(app_op, app, hook_info)
             elif hook_info.operation == constants.APP_RECOVER_OP:
                 return self.delete_csi_drivers(app)
 
         # Resources
-        elif hook_info.lifecycle_type == constants.APP_LIFECYCLE_TYPE_RESOURCE:
+        elif hook_info.lifecycle_type == LifecycleConstants.APP_LIFECYCLE_TYPE_RESOURCE:
             if hook_info.operation == constants.APP_APPLY_OP and \
-                    hook_info.relative_timing == constants.APP_LIFECYCLE_TIMING_PRE:
+                    hook_info.relative_timing == LifecycleConstants.APP_LIFECYCLE_TIMING_PRE:
                 return self.pre_apply(app_op, app, hook_info)
             elif hook_info.operation == constants.APP_REMOVE_OP and \
-                    hook_info.relative_timing == constants.APP_LIFECYCLE_TIMING_POST:
+                    hook_info.relative_timing == LifecycleConstants.APP_LIFECYCLE_TIMING_POST:
                 return lifecycle_utils.delete_local_registry_secrets(app_op, app, hook_info)
 
         # Use the default behaviour for other hooks
