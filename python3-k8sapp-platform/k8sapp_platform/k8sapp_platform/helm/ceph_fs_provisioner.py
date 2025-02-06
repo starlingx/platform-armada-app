@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2020-2024 Wind River Systems, Inc.
+# Copyright (c) 2020-2025 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -153,6 +153,8 @@ class CephFSProvisionerHelm(base.FluxCDBaseHelm):
         # Get tier info.
         tiers = self.dbapi.storage_tier_get_list()
         cluster_id = cutils.get_ceph_fsid()
+        if not cluster_id:
+            raise Exception("Could not identify Ceph cluster fsid. Try again when ceph cli is responsive.")
         storage_classes = []
 
         for bk in ceph_bks:

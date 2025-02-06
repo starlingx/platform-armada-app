@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2021-2024 Wind River Systems, Inc.
+# Copyright (c) 2021-2025 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -12,6 +12,7 @@
 # pylint: disable=no-member
 # pylint: disable=no-name-in-module
 import os
+import subprocess
 
 from oslo_log import log as logging
 from sysinv.common import constants
@@ -38,11 +39,15 @@ class PlatformAppLifecycleOperator(base.AppLifecycleOperator):
         """
         # Semantic checks
         if hook_info.lifecycle_type == LifecycleConstants.APP_LIFECYCLE_TYPE_SEMANTIC_CHECK:
-            if hook_info.mode == LifecycleConstants.APP_LIFECYCLE_MODE_AUTO and \
-                    ((hook_info.operation == constants.APP_APPLY_OP and
-                    hook_info.relative_timing == LifecycleConstants.APP_LIFECYCLE_TIMING_PRE) or
-                    hook_info.mode == constants.APP_EVALUATE_REAPPLY_OP):
-                return self.pre_auto_apply_check(conductor_obj)
+            # The kube_app logic does not send the hook_info.relative_timing value
+            # when this is an APP_EVALUATE_REAPLY_OP operation.
+            # Therefore, check the hook_info.operation first and validate if the
+            # relative_timing is provided. If it is not, run the pre-apply checks.
+            if hook_info.operation in [constants.APP_APPLY_OP,
+                                       constants.APP_EVALUATE_REAPPLY_OP]:
+                if "relative_timing" not in hook_info or \
+                        hook_info.relative_timing == LifecycleConstants.APP_LIFECYCLE_TIMING_PRE:
+                    return self.pre_apply_check(conductor_obj)
 
         # Rbd
         elif hook_info.lifecycle_type == LifecycleConstants.APP_LIFECYCLE_TYPE_RBD:
@@ -67,14 +72,15 @@ class PlatformAppLifecycleOperator(base.AppLifecycleOperator):
         # Use the default behaviour for other hooks
         super(PlatformAppLifecycleOperator, self).app_lifecycle_actions(context, conductor_obj, app_op, app, hook_info)
 
-    def pre_auto_apply_check(self, conductor_obj):
-        """ Semantic check for auto-apply
+    def pre_apply_check(self, conductor_obj):
+        """ Semantic check for apply
 
         Check:
             - ceph access
             - ceph health
             - crushmap applied
             - replica count is non-zero so that manifest apply will not timeout
+            - ceph cli is responsive as it will be used by the application during the apply
 
         :param conductor_obj: conductor object
 
@@ -96,7 +102,7 @@ class PlatformAppLifecycleOperator(base.AppLifecycleOperator):
                 "CephOperator is not initialized yet")
         if not conductor_obj._ceph.have_ceph_monitor_access():
             raise exception.LifecycleSemanticCheckException(
-                "Monitor access error")
+                "Ceph monitor is unreacheable")
         if not conductor_obj._ceph.ceph_status_ok():
             raise exception.LifecycleSemanticCheckException(
                 "Ceph status is not HEALTH_OK")
@@ -109,6 +115,13 @@ class PlatformAppLifecycleOperator(base.AppLifecycleOperator):
                 vim_progress_status=constants.VIM_SERVICES_ENABLED) < 1:
             raise exception.LifecycleSemanticCheckException(
                 "Not enough hosts in desired state")
+
+        # Check if ceph cli is responsive.
+        ceph_fsid_cmd = ["timeout", "10", "ceph", "fsid"]
+        result = subprocess.run(ceph_fsid_cmd, check=False)
+        if (result.returncode != 0):
+            raise exception.LifecycleSemanticCheckException(
+                "Ceph CLI is not responsive")
 
     def pre_apply(self, app_op, app, hook_info):
         """Pre Apply actions
