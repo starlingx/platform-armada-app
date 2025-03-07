@@ -1,23 +1,20 @@
-From 080cad7da551b36ee22139c558770cf6520a0d55 Mon Sep 17 00:00:00 2001
-From: Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>
-Date: Wed, 6 Dec 2023 14:17:19 -0300
+From e3f7a30bdc7a46657dabb64dc3914c20220d183f Mon Sep 17 00:00:00 2001
+From: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
+Date: Thu, 27 Feb 2025 20:23:37 -0300
 Subject: [PATCH] ceph-csi-rbd: add storage-init.yaml
 
-Signed-off-by: Hediberto Cavalcante da Silva <hediberto.cavalcantedasilva@windriver.com>
-Signed-off-by: Felipe Sanches Zanoni <Felipe.SanchesZanoni@windriver.com>
 Signed-off-by: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
-Signed-off-by: Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>
 ---
- .../ceph-csi-rbd/templates/storage-init.yaml  | 394 ++++++++++++++++++
- 1 file changed, 394 insertions(+)
+ .../ceph-csi-rbd/templates/storage-init.yaml  | 404 ++++++++++++++++++
+ 1 file changed, 404 insertions(+)
  create mode 100644 charts/ceph-csi-rbd/templates/storage-init.yaml
 
 diff --git a/charts/ceph-csi-rbd/templates/storage-init.yaml b/charts/ceph-csi-rbd/templates/storage-init.yaml
 new file mode 100644
-index 000000000..6abd8ec3f
+index 0000000..cd91bfe
 --- /dev/null
 +++ b/charts/ceph-csi-rbd/templates/storage-init.yaml
-@@ -0,0 +1,394 @@
+@@ -0,0 +1,404 @@
 +{{/*
 +#
 +# Copyright (c) 2020-2023 Wind River Systems, Inc.
@@ -218,6 +215,14 @@ index 000000000..6abd8ec3f
 +      exit ${RETURN_CODE}
 +    fi
 +
++    echo "- Setting the minimum number of replicas:"
++    ceph osd pool set "${POOL_NAME}" min_size "${POOL_MIN_REPLICATION}"
++    RETURN_CODE=$?
++    if [ ${RETURN_CODE} -ne 0 ]; then
++      echo "Error setting the minimum number of pool replicas (return code: ${RETURN_CODE})"
++      exit ${RETURN_CODE}
++    fi
++
 +    echo "- Assigning crush rule:"
 +    ceph osd pool set "${POOL_NAME}" crush_rule "${POOL_CRUSH_RULE_NAME}"
 +    RETURN_CODE=$?
@@ -364,7 +369,7 @@ index 000000000..6abd8ec3f
 +      labels:
 +        heritage: {{ .Release.Service | quote }}
 +        release: {{ .Release.Name | quote }}
-+        chart: "{{ .Chart.Name }}-{{- .Chart.Version }}"
++        chart: {{ include "ceph-csi-rbd.chart" . }}
 +    spec:
 +      serviceAccountName: {{ include "ceph-csi-rbd.serviceAccountName.provisioner" . }}
 +      restartPolicy: OnFailure
@@ -394,6 +399,8 @@ index 000000000..6abd8ec3f
 +              value: {{ $sc.pool_name }}
 +            - name: POOL_REPLICATION
 +              value: {{ $sc.replication | quote }}
++            - name: POOL_MIN_REPLICATION
++              value: {{ $sc.min_replication | quote }}
 +            - name: POOL_CRUSH_RULE_NAME
 +              value: {{ $sc.crush_rule_name | quote }}
 +            - name: POOL_CHUNK_SIZE
@@ -413,4 +420,4 @@ index 000000000..6abd8ec3f
 +{{ toYaml . | indent 8 }}
 +{{- end }}
 --
-2.25.1
+2.34.1

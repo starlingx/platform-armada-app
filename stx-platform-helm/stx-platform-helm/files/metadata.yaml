@@ -2,6 +2,10 @@ app_name: APP_REPLACE_NAME
 app_version: APP_REPLACE_VERSION
 helm_repo: HELM_REPLACE_REPO
 maintain_user_overrides: true
+maintain_attributes: true
+
+disabled_charts:
+- ceph-pools-audit
 
 upgrades:
   auto_update: true
@@ -16,6 +20,7 @@ behavior:
     triggers:
       - type: runtime-apply-puppet # TODO(dvoicule): optimize triggers
       - type: host-availability-updated
+      - type: storage-backend-modify
       - type: kube-upgrade-complete
         filters:
           - availability: services-enabled

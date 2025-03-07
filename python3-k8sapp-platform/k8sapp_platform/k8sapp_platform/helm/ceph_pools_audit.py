@@ -27,15 +27,6 @@ class CephPoolsAuditHelm(base.FluxCDBaseHelm):
 
     SERVICE_NAME = 'ceph-pools'
 
-    def execute_manifest_updates(self, operator):
-        # On application load this chart is enabled. Only disable if specified
-        # by the user
-        if not self._is_enabled(operator.APP, self.CHART,
-                                common.HELM_NS_RBD_PROVISIONER):
-            operator.chart_group_chart_delete(
-                operator.CHART_GROUPS_LUT[self.CHART],
-                operator.CHARTS_LUT[self.CHART])
-
     def execute_kustomize_updates(self, operator):
         # On application load this chart is enabled. Only disable if specified
         # by the user
