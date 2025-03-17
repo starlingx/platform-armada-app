@@ -1,3 +1,9 @@
+stx-platform-helm (1.5-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ --  Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>  Fri, 14 Mar 2025 10:42:34 -0300
+
 stx-platform-helm (1.5-0) unstable; urgency=medium
 
   * New upstream release.

@@ -1,20 +1,20 @@
-From e1135482686d37c98e794668c205d1ac29afd8f9 Mon Sep 17 00:00:00 2001
-From: Gabriel Przybysz Gonçalves Júnior <gabriel.przybyszgoncalvesjunior@windriver.com>
-Date: Wed, 4 Dec 2024 09:32:37 -0300
-Subject: [PATCH] cephfs: Add conditional to enable leader election
+From 6e9281276ddd6d37040b49083d4c39b154a40eae Mon Sep 17 00:00:00 2001
+From: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
+Date: Mon, 17 Mar 2025 09:25:21 -0300
+Subject: [PATCH] ceph-csi-cephfs: Add conditional to enable leader election
 
 The rbd-provisioner and cephfs-provisioner pods use the K8s
 API to conduct leadership elections, but these elections
 should be disabled on AIO-SX, since they are not needed.
 
-Signed-off-by: Gabriel Przybysz Gonçalves Júnior <gabriel.przybyszgoncalvesjunior@windriver.com>
+Signed-off-by: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
 ---
  .../ceph-csi-cephfs/templates/provisioner-deployment.yaml   | 6 ++++++
  charts/ceph-csi-cephfs/values.yaml                          | 3 +++
  2 files changed, 9 insertions(+)
 
 diff --git a/charts/ceph-csi-cephfs/templates/provisioner-deployment.yaml b/charts/ceph-csi-cephfs/templates/provisioner-deployment.yaml
-index ff64785..94f5300 100644
+index 3a5287f..fe8206c 100644
 --- a/charts/ceph-csi-cephfs/templates/provisioner-deployment.yaml
 +++ b/charts/ceph-csi-cephfs/templates/provisioner-deployment.yaml
 @@ -139,7 +139,9 @@ spec:
@@ -35,7 +35,7 @@ index ff64785..94f5300 100644
              - "--leader-election=true"
 +{{- end }}
              - "--extra-create-metadata=false"
-             - "--enable-volume-group-snapshots={{.Values.provisioner.snapshotter.args.enableVolumeGroupSnapshots }}"
+             - "--feature-gates=CSIVolumeGroupSnapshot={{.Values.provisioner.snapshotter.args.enableVolumeGroupSnapshots }}"
  {{- if and .Values.provisioner.snapshotter.args .Values.provisioner.snapshotter.args.httpEndpointPort }}
 @@ -212,7 +216,9 @@ spec:
              - "--v={{ .Values.sidecarLogLevel }}"
@@ -48,7 +48,7 @@ index ff64785..94f5300 100644
              - "--handle-volume-inuse-error=false"
              - "--feature-gates=RecoverVolumeExpansionFailure=true"
 diff --git a/charts/ceph-csi-cephfs/values.yaml b/charts/ceph-csi-cephfs/values.yaml
-index 6af072e..94b7531 100644
+index 4307ce0..974a428 100644
 --- a/charts/ceph-csi-cephfs/values.yaml
 +++ b/charts/ceph-csi-cephfs/values.yaml
 @@ -187,6 +187,9 @@ provisioner:

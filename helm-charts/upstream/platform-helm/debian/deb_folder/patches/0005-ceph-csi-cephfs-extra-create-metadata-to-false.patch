@@ -1,19 +1,19 @@
-From cc06b73b13ec2433507978d1ce42728c8be3a4dc Mon Sep 17 00:00:00 2001
-From: Gabriel Przybysz Gonçalves Júnior <gabriel.przybyszgoncalvesjunior@windriver.com>
-Date: Wed, 4 Dec 2024 09:18:39 -0300
+From a87102a0117e369821d90ad0cf27bd82ee2bf46c Mon Sep 17 00:00:00 2001
+From: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
+Date: Mon, 17 Mar 2025 08:11:40 -0300
 Subject: [PATCH] ceph-csi-cephfs: add annotations to
  provisioner-deployment.yaml
 
 This patch adds annotations to the cephfs deployment so that
 disabling the chart works correctly.
 
-Signed-off-by: Gabriel Przybysz Gonçalves Júnior <gabriel.przybyszgoncalvesjunior@windriver.com>
+Signed-off-by: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
 ---
- charts/ceph-csi-cephfs/templates/provisioner-deployment.yaml | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+ charts/ceph-csi-cephfs/templates/provisioner-deployment.yaml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/charts/ceph-csi-cephfs/templates/provisioner-deployment.yaml b/charts/ceph-csi-cephfs/templates/provisioner-deployment.yaml
-index e68dd03..a43193d 100644
+index 84d9dcb..c6ebf3c 100644
 --- a/charts/ceph-csi-cephfs/templates/provisioner-deployment.yaml
 +++ b/charts/ceph-csi-cephfs/templates/provisioner-deployment.yaml
 @@ -176,7 +176,7 @@ spec:
@@ -22,8 +22,8 @@ index e68dd03..a43193d 100644
              - "--leader-election=true"
 -            - "--extra-create-metadata=true"
 +            - "--extra-create-metadata=false"
-             - "--enable-volume-group-snapshots={{.Values.provisioner.snapshotter.args.enableVolumeGroupSnapshots }}"
+             - "--feature-gates=CSIVolumeGroupSnapshot={{.Values.provisioner.snapshotter.args.enableVolumeGroupSnapshots }}"
  {{- if and .Values.provisioner.snapshotter.args .Values.provisioner.snapshotter.args.httpEndpointPort }}
              - "--http-endpoint=$(POD_IP):{{ .Values.provisioner.snapshotter.args.httpEndpointPort }}"
 --
-2.25.1
+2.34.1
