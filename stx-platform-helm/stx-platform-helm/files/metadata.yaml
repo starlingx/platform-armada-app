@@ -27,3 +27,5 @@ behavior:
       - type: host-delete
         filters:
           - personality: controller
+
+class: storage
