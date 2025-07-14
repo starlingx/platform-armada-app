@@ -1,3 +1,9 @@
+ceph-pools-audit-helm (1.0-0) unstable; urgency=medium
+
+  * Change CronJob to Deployment and improves audit script performance.
+
+ --  Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com> Fri, 6 Mar 2025 10:57:10 +0000
+
 ceph-pools-audit-helm (0.3-0) unstable; urgency=medium
 
   * Update of ceph-config-helper image.

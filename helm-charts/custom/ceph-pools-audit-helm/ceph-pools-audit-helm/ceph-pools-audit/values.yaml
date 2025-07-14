@@ -49,14 +49,6 @@ dependencies:
         - endpoint: internal
           service: local_image_registry
 
-jobs:
-  job_ceph_pools_audit:
-    cron: "*/5 * * * *"
-    startingDeadlineSeconds: 200
-    history:
-      success: 3
-      failed: 1
-
 resources: {}
 
 nodeSelector: { node-role.kubernetes.io/control-plane: "" }
@@ -69,3 +61,4 @@ manifests:
   job_ceph_pools_audit: true
   configmap_bin: true
   configmap_ceph_conf: true
+  audit_interval: 300 # in seconds

@@ -1,32 +1,32 @@
-From a7d30b59169bfe98ce02b48ec2057ec10ddb3c21 Mon Sep 17 00:00:00 2001
-From: Gabriel Przybysz Gonçalves Júnior <gabriel.przybyszgoncalvesjunior@windriver.com>
-Date: Wed, 4 Dec 2024 09:20:35 -0300
+From e5e49250e10d03bb8e3c235046a46e745f83e577 Mon Sep 17 00:00:00 2001
+From: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
+Date: Mon, 17 Mar 2025 08:23:53 -0300
 Subject: [PATCH] ceph-csi-rbd: replace appVersion/version
 
 This patch changes the appVersion of the rbd chart to the
 upstream version that ceph-csi is being updated to.
 
-Signed-off-by: Gabriel Przybysz Gonçalves Júnior <gabriel.przybyszgoncalvesjunior@windriver.com>
+Signed-off-by: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
 ---
  charts/ceph-csi-rbd/Chart.yaml | 4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/charts/ceph-csi-rbd/Chart.yaml b/charts/ceph-csi-rbd/Chart.yaml
-index 5ab42a1..f176f53 100644
+index 5ab42a1..0d89dd2 100644
 --- a/charts/ceph-csi-rbd/Chart.yaml
 +++ b/charts/ceph-csi-rbd/Chart.yaml
 @@ -1,10 +1,10 @@
  ---
  apiVersion: v1
 -appVersion: canary
-+appVersion: 3.13.0
++appVersion: 3.13.1
  description: "Container Storage Interface (CSI) driver,
  provisioner, snapshotter, resizer and attacher for Ceph RBD"
  name: ceph-csi-rbd
 -version: 3-canary
-+version: 3.13.0
++version: 3.13.1
  keywords:
    - ceph
    - rbd
 --
-2.25.1
+2.34.1

@@ -114,15 +114,6 @@ class CephFSProvisionerHelm(base.FluxCDBaseHelm):
     SERVICE_NAME = app_constants.HELM_CHART_CEPH_FS_PROVISIONER
     SERVICE_PORT_MON = 6789
 
-    def execute_manifest_updates(self, operator):
-        # On application load this chart is enabled. Only disable if specified
-        # by the user
-        if not self._is_enabled(operator.APP, self.CHART,
-                                app_constants.HELM_NS_CEPH_FS_PROVISIONER):
-            operator.chart_group_chart_delete(
-                operator.CHART_GROUPS_LUT[self.CHART],
-                operator.CHARTS_LUT[self.CHART])
-
     def execute_kustomize_updates(self, operator):
         # On application load this chart is enabled. Only disable if specified
         # by the user
@@ -185,6 +176,7 @@ class CephFSProvisionerHelm(base.FluxCDBaseHelm):
                 "userSecretName": user_secret_name or class_defaults["adminSecretName"],
                 "chunk_size": 64,
                 "replication": int(bk.capabilities.get("replication")),
+                "min_replication": int(bk.capabilities.get("min_replication")),
                 "crush_rule_name": rule_name,
                 "additionalNamespaces": ['default', 'kube-public']
             }

@@ -1,18 +1,18 @@
-From fcd8a2e8f92526af3243724ae53389c5d0d23bb5 Mon Sep 17 00:00:00 2001
-From: Gabriel Przybysz Gonçalves Júnior <gabriel.przybyszgoncalvesjunior@windriver.com>
-Date: Wed, 4 Dec 2024 09:15:12 -0300
+From 56abdf56024a46a2ea09a72a11a85f3bcdc61fd5 Mon Sep 17 00:00:00 2001
+From: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
+Date: Thu, 27 Feb 2025 20:16:53 -0300
 Subject: [PATCH] ceph-csi-cephfs: add default fields to values.yaml
 
 This patch adds fields and values necessary for the proper use
 of the cephfs chart in the system.
 
-Signed-off-by: Gabriel Przybysz Gonçalves Júnior <gabriel.przybyszgoncalvesjunior@windriver.com>
+Signed-off-by: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
 ---
- charts/ceph-csi-cephfs/values.yaml | 39 ++++++++++++++++++++++++++++--
- 1 file changed, 37 insertions(+), 2 deletions(-)
+ charts/ceph-csi-cephfs/values.yaml | 41 ++++++++++++++++++++++++++++--
+ 1 file changed, 39 insertions(+), 2 deletions(-)
 
 diff --git a/charts/ceph-csi-cephfs/values.yaml b/charts/ceph-csi-cephfs/values.yaml
-index caf29f4..b340892 100644
+index f30e2b7..160b7da 100644
 --- a/charts/ceph-csi-cephfs/values.yaml
 +++ b/charts/ceph-csi-cephfs/values.yaml
 @@ -290,10 +290,10 @@ provisioner:
@@ -28,7 +28,7 @@ index caf29f4..b340892 100644
  # Define which node labels to use as CRUSH location.
  # This should correspond to the values set in the CRUSH map.
  # NOTE: the value here serves as an example
-@@ -321,6 +321,24 @@ storageClass:
+@@ -375,6 +375,26 @@ storageClass:
    # mountOptions:
    #   - discard
 
@@ -38,6 +38,8 @@ index caf29f4..b340892 100644
 +  userSecretName: ceph-secret-kube
 +  # Pool replication
 +  replication: 1
++  # Pool min replication
++  min_replication: 1
 +  # Pool crush rule name
 +  crush_rule_name: storage_tier_ruleset
 +  # Pool chunk size / PG_NUM
@@ -53,7 +55,7 @@ index caf29f4..b340892 100644
  secret:
    # Specifies whether the secret should be created
    create: false
-@@ -431,6 +431,23 @@ externallyManagedConfigmap: false
+@@ -431,6 +451,23 @@ externallyManagedConfigmap: false
  cephConfConfigMapName: ceph-config
  # Name of the configmap used for encryption kms configuration
  kmsConfigMapName: ceph-csi-encryption-kms-config
@@ -78,4 +80,4 @@ index caf29f4..b340892 100644
  # radosNamespaceCephFS: csi
  # Unique ID distinguishing this instance of Ceph CSI among other instances,
 --
-2.25.1
+2.34.1

@@ -1,6 +1,6 @@
 {{/*
 #
-# Copyright (c) 2019-2022 Wind River Systems, Inc.
+# Copyright (c) 2019-2022,2025 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -19,56 +19,94 @@ data:
 
     {{/*
     #
-    # Copyright (c) 2019 Wind River Systems, Inc.
+    # Copyright (c) 2019,2025 Wind River Systems, Inc.
     #
     # SPDX-License-Identifier: Apache-2.0
     #
     */}}
 
-    ceph -s
-    if [ $? -ne 0 ]; then
-        echo "Error: Ceph cluster is not accessible, check Pod logs for details."
-        exit 1
-    fi
+    TIMEOUT_CEPH_CLI=60
 
-    touch /etc/ceph/ceph.client.admin.keyring
+    while true
+    do
+        echo -e "\nWaiting ${AUDIT_INTERVAL} seconds to check pools...\n"
+        sleep "${AUDIT_INTERVAL}"
 
-    echo "RBD_POOL_CRUSH_RULE_NAME: ${RBD_POOL_CRUSH_RULE_NAME}"
-    if [ -z "${RBD_POOL_CRUSH_RULE_NAME}" ]; then
-        echo "Error: No Ceph crush rule name specified"
-        exit 1
-    fi
-
-    ceph osd crush rule ls | grep -q "${RBD_POOL_CRUSH_RULE_NAME}"
-    if [ $? -ne 0 ]; then
-        echo "Error: Ceph crush rule ${RBD_POOL_CRUSH_RULE_NAME} not found, exit"
-        exit 1
-    fi
-
-    POOLS=( $(ceph osd pool ls) )
-
-    for pool in "${POOLS[@]}"; do
-        echo "Check for pool name: $pool"
-
-        pool_rule=$(ceph osd pool get $pool crush_rule | awk '{print $2}')
-        echo "Pool crush rule name: ${pool_rule}"
-        if [ "${pool_rule}" != "${RBD_POOL_CRUSH_RULE_NAME}" ]; then
+        timeout $TIMEOUT_CEPH_CLI ceph -s
+        if [ $? -ne 0 ]; then
+            echo "Error: Ceph cluster is not accessible, check ceph mon logs for details."
             continue
         fi
 
-        pool_size=$(ceph osd pool get $pool size | awk '{print $2}')
-        pool_min_size=$(ceph osd pool get $pool min_size | awk '{print $2}')
-
-        echo "===> pool_size: ${pool_size} pool_min_size: ${pool_min_size}"
-        if [ "${pool_size}" != "${RBD_POOL_REPLICATION}" ]; then
-            echo "Set size for $pool to ${RBD_POOL_REPLICATION}"
-            ceph osd pool set $pool size "${RBD_POOL_REPLICATION}"
+        echo "POOL_CRUSH_RULE_NAME: ${POOL_CRUSH_RULE_NAME}"
+        if [ -z "${POOL_CRUSH_RULE_NAME}" ]; then
+            echo "Error: No ceph crush rule name specified"
+            exit
         fi
 
-        if [ "${pool_min_size}" != "${RBD_POOL_MIN_REPLICATION}" ]; then
-            echo "Set min_size for $pool to ${RBD_POOL_MIN_REPLICATION}"
-            ceph osd pool set $pool min_size "${RBD_POOL_MIN_REPLICATION}"
+        CRUSH_RULE_DUMP=$(timeout $TIMEOUT_CEPH_CLI ceph osd crush rule dump)
+        if [ $? -ne 0 ]; then
+            echo "Error: Failed to get crush rules."
+            continue
         fi
+
+        for crush_rule in $(echo $CRUSH_RULE_DUMP | jq -r '.[] | tostring | @base64'); do
+            _jq() {
+                echo "${crush_rule}" | base64 -di | jq -r "${1}"
+            }
+            rule_name=$(_jq '.rule_name')
+            if [ "${rule_name}" == "${POOL_CRUSH_RULE_NAME}" ]; then
+                POOL_CRUSH_RULE_ID=$(_jq '.rule_id')
+                echo "POOL_CRUSH_RULE_ID: ${POOL_CRUSH_RULE_ID}"
+                break
+            fi
+        done
+
+        if [ -z  "${POOL_CRUSH_RULE_ID}" ]; then
+            echo "Error: Ceph crush rule ${POOL_CRUSH_RULE_NAME} not found."
+            continue
+        fi
+
+        POOLS=$(timeout $TIMEOUT_CEPH_CLI ceph osd pool ls detail -f json)
+        if [ $? -ne 0 ]; then
+            echo "Error: Failed to list pools."
+            continue
+        fi
+
+        for pool in $(echo $POOLS | jq -r '.[] | tostring | @base64'); do
+            _jq() {
+                echo "${pool}" | base64 -di | jq -r "${1}"
+            }
+
+            pool_name=$(_jq '.pool_name')
+            echo -e "\nChecking the pool: ${pool_name}"
+
+            crush_rule_id=$(_jq '.crush_rule')
+            if [ "${crush_rule_id}" != "${POOL_CRUSH_RULE_ID}" ]; then
+                echo "The pool is not associated with the crush rule, skipping."
+                continue
+            fi
+
+            pool_size=$(_jq '.size')
+            pool_min_size=$(_jq '.min_size')
+
+            echo "===> pool_size: ${pool_size} pool_min_size: ${pool_min_size}"
+            if [ "${pool_size}" != "${POOL_REPLICATION}" ]; then
+                echo "Set size for $pool_name to ${POOL_REPLICATION}"
+                timeout $TIMEOUT_CEPH_CLI ceph osd pool set $pool_name size "${POOL_REPLICATION}"
+                if [ $? -ne 0 ]; then
+                    echo "Error: Failed to set size for pool $pool_name."
+                fi
+            fi
+
+            if [ "${pool_min_size}" != "${POOL_MIN_REPLICATION}" ]; then
+                echo "Set min_size for $pool_name to ${POOL_MIN_REPLICATION}"
+                timeout $TIMEOUT_CEPH_CLI ceph osd pool set $pool_name min_size "${POOL_MIN_REPLICATION}"
+                if [ $? -ne 0 ]; then
+                    echo "Error: Failed to set minimum size for pool $pool_name."
+                fi
+            fi
+        done
     done
 
 {{- end }}
