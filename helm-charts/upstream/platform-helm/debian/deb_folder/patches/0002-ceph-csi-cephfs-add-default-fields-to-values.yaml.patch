@@ -1,21 +1,21 @@
-From 56abdf56024a46a2ea09a72a11a85f3bcdc61fd5 Mon Sep 17 00:00:00 2001
-From: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
-Date: Thu, 27 Feb 2025 20:16:53 -0300
+From d37f39b7d2c2f34272a2f23bdbf5d97131286054 Mon Sep 17 00:00:00 2001
+From: Heitor Farhat <heitor.farhat@windriver.com>
+Date: Tue, 2 Sep 2025 10:06:49 -0300
 Subject: [PATCH] ceph-csi-cephfs: add default fields to values.yaml
 
 This patch adds fields and values necessary for the proper use
 of the cephfs chart in the system.
 
-Signed-off-by: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
+Signed-off-by: Heitor Farhat <heitor.farhat@windriver.com>
 ---
- charts/ceph-csi-cephfs/values.yaml | 41 ++++++++++++++++++++++++++++--
- 1 file changed, 39 insertions(+), 2 deletions(-)
+ charts/ceph-csi-cephfs/values.yaml | 43 ++++++++++++++++++++++++++++--
+ 1 file changed, 41 insertions(+), 2 deletions(-)
 
 diff --git a/charts/ceph-csi-cephfs/values.yaml b/charts/ceph-csi-cephfs/values.yaml
-index f30e2b7..160b7da 100644
+index 9174ee7..69b11c8 100644
 --- a/charts/ceph-csi-cephfs/values.yaml
 +++ b/charts/ceph-csi-cephfs/values.yaml
-@@ -290,10 +290,10 @@ provisioner:
+@@ -307,10 +307,10 @@ provisioner:
 
    podAnnotations: {}
 
@@ -24,11 +24,11 @@ index f30e2b7..160b7da 100644
  # Enable read affinity for CephFS subvolumes. Recommended to
  # set to true if running kernel 5.8 or newer.
 -# enabled: false
-+  enabled: false
++enabled: false
  # Define which node labels to use as CRUSH location.
  # This should correspond to the values set in the CRUSH map.
  # NOTE: the value here serves as an example
-@@ -375,6 +375,26 @@ storageClass:
+@@ -392,6 +392,27 @@ storageClass:
    # mountOptions:
    #   - discard
 
@@ -52,13 +52,15 @@ index f30e2b7..160b7da 100644
 +  # Ceph pools name
 +  metadata_pool: kube-cephfs-metadata
 +
- secret:
-   # Specifies whether the secret should be created
++
+ volumeSnapshotClass:
+   # Specifies whether the VolumeSnapshotClass should be created
    create: false
-@@ -431,6 +451,23 @@ externallyManagedConfigmap: false
+@@ -511,6 +532,24 @@ externallyManagedConfigmap: false
  cephConfConfigMapName: ceph-config
  # Name of the configmap used for encryption kms configuration
  kmsConfigMapName: ceph-csi-encryption-kms-config
++
 +
 +#
 +# Defaults for storage classes.
@@ -75,7 +77,7 @@ index f30e2b7..160b7da 100644
 +storage_init:
 +  image:
 +    repository: docker.io/openstackhelm/ceph-config-helper
-+    tag: ubuntu_jammy_19.2.1-1-20250207
++    tag: ubuntu_jammy_18.2.2-1-20241210
  # CephFS RadosNamespace used to store CSI specific objects and keys.
  # radosNamespaceCephFS: csi
  # Unique ID distinguishing this instance of Ceph CSI among other instances,

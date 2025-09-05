@@ -1,24 +1,24 @@
-From 5f2dc34fdad92fbb95a0dc6e4b0446b1681da9b4 Mon Sep 17 00:00:00 2001
-From: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
-Date: Mon, 17 Mar 2025 09:06:15 -0300
-Subject: [PATCH] ceph-csi-cephfs: Add conditional for csi-snapshotter
+From ffff91af78c22c92d8431056c15c01bcb4ef151e Mon Sep 17 00:00:00 2001
+From: Heitor Farhat <heitor.farhat@windriver.com>
+Date: Tue, 2 Sep 2025 11:16:47 -0300
+Subject: [PATCH] ceph-csi-cephfs: add conditional for csi-snapshotter 
  container creation
 
 The creation of the csi-snapshotter container will only occur if the
 create field is 'true', as a result of the presence of CRDs and
 snapshot-controller to support PVC snapshots.
 
-Signed-off-by: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
+Signed-off-by: Heitor Farhat <heitor.farhat@windriver.com>
 ---
  charts/ceph-csi-cephfs/templates/provisioner-deployment.yaml | 2 ++
  charts/ceph-csi-cephfs/values.yaml                           | 1 +
  2 files changed, 3 insertions(+)
 
 diff --git a/charts/ceph-csi-cephfs/templates/provisioner-deployment.yaml b/charts/ceph-csi-cephfs/templates/provisioner-deployment.yaml
-index c6ebf3c..3a5287f 100644
+index 8877268..0d2d77e 100644
 --- a/charts/ceph-csi-cephfs/templates/provisioner-deployment.yaml
 +++ b/charts/ceph-csi-cephfs/templates/provisioner-deployment.yaml
-@@ -168,6 +168,7 @@ spec:
+@@ -169,6 +169,7 @@ spec:
                mountPath: /csi
            resources:
  {{ toYaml .Values.provisioner.provisioner.resources | indent 12 }}
@@ -26,19 +26,19 @@ index c6ebf3c..3a5287f 100644
          - name: csi-snapshotter
            image: {{ .Values.provisioner.snapshotter.image.repository }}:{{ .Values.provisioner.snapshotter.image.tag }}
            imagePullPolicy: {{ .Values.provisioner.snapshotter.image.pullPolicy }}
-@@ -202,6 +203,7 @@ spec:
+@@ -203,6 +204,7 @@ spec:
                mountPath: /csi
            resources:
  {{ toYaml .Values.provisioner.snapshotter.resources | indent 12 }}
 +{{- end }}
- {{- if .Values.provisioner.resizer.enabled }}
-         - name: csi-resizer
-           image: "{{ .Values.provisioner.resizer.image.repository }}:{{ .Values.provisioner.resizer.image.tag }}"
+ {{- if .Values.provisioner.attacher.enabled }}
+         - name: csi-attacher
+           image: "{{ .Values.provisioner.attacher.image.repository }}:{{ .Values.provisioner.attacher.image.tag }}"
 diff --git a/charts/ceph-csi-cephfs/values.yaml b/charts/ceph-csi-cephfs/values.yaml
-index ce0a7e1..4307ce0 100644
+index 69b11c8..e345d28 100644
 --- a/charts/ceph-csi-cephfs/values.yaml
 +++ b/charts/ceph-csi-cephfs/values.yaml
-@@ -262,6 +262,7 @@ provisioner:
+@@ -279,6 +279,7 @@ provisioner:
      extraArgs: []
 
    snapshotter:

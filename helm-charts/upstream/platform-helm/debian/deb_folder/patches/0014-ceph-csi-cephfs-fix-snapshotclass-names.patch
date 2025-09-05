@@ -1,0 +1,89 @@
+From 3501d2231e1ceffa7a4e1cc3cfaaa2836b3fa87d Mon Sep 17 00:00:00 2001
+From: Heitor Farhat <heitor.farhat@windriver.com>
+Date: Thu, 4 Sep 2025 11:05:33 -0300
+Subject: [PATCH] ceph-csi-cephfs: fix snapshotclass names
+
+In cephcsi 3.15.0 the snapshotclass.yaml file already exists
+but a few field names are different than what we used.
+
+We need to fix those names for backwards compatibility
+on upgrade and rollback.
+
+Signed-off-by: Heitor Farhat <heitor.farhat@windriver.com>
+---
+ .../templates/snapshotclass.yaml              | 22 +++++++++----------
+ charts/ceph-csi-cephfs/values.yaml            |  7 +++---
+ 2 files changed, 14 insertions(+), 15 deletions(-)
+
+diff --git a/charts/ceph-csi-cephfs/templates/snapshotclass.yaml b/charts/ceph-csi-cephfs/templates/snapshotclass.yaml
+index e603397..65cd33b 100644
+--- a/charts/ceph-csi-cephfs/templates/snapshotclass.yaml
++++ b/charts/ceph-csi-cephfs/templates/snapshotclass.yaml
+@@ -1,11 +1,11 @@
+-{{- if .Values.volumeSnapshotClass.create -}}
++{{- if .Values.snapshotClass.create -}}
+ apiVersion: snapshot.storage.k8s.io/v1
+ kind: VolumeSnapshotClass
+ metadata:
+-  name: {{ .Values.volumeSnapshotClass.name }}
+-{{- if .Values.volumeSnapshotClass.annotations }}
++  name: {{ .Values.snapshotClass.name }}
++{{- if .Values.snapshotClass.annotations }}
+   annotations:
+-{{ toYaml .Values.volumeSnapshotClass.annotations | indent 4 }}
++{{ toYaml .Values.snapshotClass.annotations | indent 4 }}
+ {{- end }}
+   labels:
+     app: {{ include "ceph-csi-cephfs.name" . }}
+@@ -15,15 +15,15 @@ metadata:
+     {{- with .Values.commonLabels }}{{ toYaml . | trim | nindent 4 }}{{- end }}
+ driver: {{ .Values.driverName }}
+ parameters:
+-  clusterID: {{ .Values.volumeSnapshotClass.clusterID }}
+-{{- if .Values.volumeSnapshotClass.snapshotNamePrefix }}
+-  snapshotNamePrefix: "{{ .Values.volumeSnapshotClass.snapshotNamePrefix }}"
++  clusterID: {{ .Values.snapshotClass.clusterID }}
++{{- if .Values.snapshotClass.snapshotNamePrefix }}
++  snapshotNamePrefix: "{{ .Values.snapshotClass.snapshotNamePrefix }}"
+ {{- end }}
+-  csi.storage.k8s.io/snapshotter-secret-name: {{ .Values.volumeSnapshotClass.snapshotterSecret }}
+-{{- if .Values.volumeSnapshotClass.snapshotterSecretNamespace }}
+-  csi.storage.k8s.io/snapshotter-secret-namespace: {{ .Values.volumeSnapshotClass.snapshotterSecretNamespace }}
++  csi.storage.k8s.io/snapshotter-secret-name: {{ .Values.snapshotClass.provisionerSecret }}
++{{- if .Values.snapshotClass.provisionerSecretNamespace }}
++  csi.storage.k8s.io/snapshotter-secret-namespace: {{ .Values.snapshotClass.provisionerSecretNamespace }}
+ {{ else }}
+   csi.storage.k8s.io/snapshotter-secret-namespace: {{ .Release.Namespace }}
+ {{- end }}
+-deletionPolicy: {{ .Values.volumeSnapshotClass.deletionPolicy }}
++deletionPolicy: {{ .Values.snapshotClass.deletionPolicy }}
+ {{- end -}}
+diff --git a/charts/ceph-csi-cephfs/values.yaml b/charts/ceph-csi-cephfs/values.yaml
+index 25059f4..f1c3bc8 100644
+--- a/charts/ceph-csi-cephfs/values.yaml
++++ b/charts/ceph-csi-cephfs/values.yaml
+@@ -416,8 +416,7 @@ storageClass:
+   # Ceph pools name
+   metadata_pool: kube-cephfs-metadata
+
+-
+-volumeSnapshotClass:
++snapshotClass:
+   # Specifies whether the VolumeSnapshotClass should be created
+   create: false
+   name: csi-cephfsplugin-snapclass
+@@ -443,10 +442,10 @@ volumeSnapshotClass:
+   snapshotNamePrefix: ""
+
+   # The secrets have to contain user and/or Ceph admin credentials.
+-  snapshotterSecret: csi-cephfs-secret
++  provisionerSecret: csi-cephfs-secret
+   # If the Namespaces are not specified, the secrets are assumed to
+   # be in the Release namespace.
+-  snapshotterSecretNamespace: ""
++  provisionerSecretNamespace: ""
+
+   deletionPolicy: Delete
+
+--
+2.34.1

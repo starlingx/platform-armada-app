@@ -1,9 +1,9 @@
 ---
 debname: ceph-pools-audit-helm
-debver: 1.0-0
+debver: 1.0-1
 src_path: ceph-pools-audit-helm
 revision:
   dist: $STX_DIST
   GITREVCOUNT:
     SRC_DIR: ${MY_REPO}/stx/platform-armada-app/helm-charts/custom/ceph-pools-audit-helm/ceph-pools-audit-helm/ceph-pools-audit
-    BASE_SRCREV: b9b1d8a515f539be66d50341ca1b4b015c5507cd
+    BASE_SRCREV: 627c1d30e7455cc381262aeb36cfa10b8aff814a
