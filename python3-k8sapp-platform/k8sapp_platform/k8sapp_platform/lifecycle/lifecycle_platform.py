@@ -13,6 +13,7 @@
 # pylint: disable=no-name-in-module
 import os
 import subprocess
+from pathlib import Path
 
 from oslo_log import log as logging
 from sysinv.common import constants
@@ -68,6 +69,9 @@ class PlatformAppLifecycleOperator(base.AppLifecycleOperator):
             elif hook_info.operation == constants.APP_REMOVE_OP and \
                     hook_info.relative_timing == LifecycleConstants.APP_LIFECYCLE_TIMING_POST:
                 return lifecycle_utils.delete_local_registry_secrets(app_op, app, hook_info)
+            elif (hook_info.operation == constants.APP_DOWNGRADE_OP and
+                  hook_info.relative_timing == LifecycleConstants.APP_LIFECYCLE_TIMING_PRE):
+                return self.pre_downgrade(app, hook_info)
 
         # Use the default behaviour for other hooks
         super(PlatformAppLifecycleOperator, self).app_lifecycle_actions(context, conductor_obj, app_op, app, hook_info)
@@ -142,6 +146,32 @@ class PlatformAppLifecycleOperator(base.AppLifecycleOperator):
 
         """
         lifecycle_utils.create_local_registry_secrets(app_op, app, hook_info)
+
+    def pre_downgrade(self, app, hook_info):
+        """ Pre downgrade actions
+
+        This function forces a reapply of the app after 'software deploy activate-rollback',
+        clearing the contents of the N-1 release overrides, so that kube_app can identify
+        changes in the overrides.
+
+        :param app: AppOperator.Application object
+        :param app_op: AppOperator object
+        """
+        from_app_version = hook_info.extra.get("from_app_version")
+        to_app_version = hook_info.extra.get("to_app_version")
+
+        from_release = from_app_version.split("-")[0]
+        to_release = to_app_version.split("-")[0]
+
+        if from_release != to_release:
+            overrides_path = Path(os.path.join(constants.PLATFORM_PATH,
+                                               "helm",
+                                               to_release,
+                                               app.name,
+                                               to_app_version))
+            if os.path.isdir(overrides_path):
+                for override_path in overrides_path.glob("*.yaml"):
+                    override_path.write_text("")
 
     def delete_csi_drivers(self, app):
         """ Delete CSI drivers
