@@ -69,8 +69,11 @@ class PlatformAppLifecycleOperator(base.AppLifecycleOperator):
             elif hook_info.operation == constants.APP_REMOVE_OP and \
                     hook_info.relative_timing == LifecycleConstants.APP_LIFECYCLE_TIMING_POST:
                 return lifecycle_utils.delete_local_registry_secrets(app_op, app, hook_info)
-            elif (hook_info.operation == constants.APP_DOWNGRADE_OP and
-                  hook_info.relative_timing == LifecycleConstants.APP_LIFECYCLE_TIMING_PRE):
+            elif hook_info.operation == constants.APP_UPDATE_OP and \
+                    hook_info.relative_timing == LifecycleConstants.APP_LIFECYCLE_TIMING_PRE:
+                return self.pre_update(app)
+            elif hook_info.operation == constants.APP_DOWNGRADE_OP and \
+                    hook_info.relative_timing == LifecycleConstants.APP_LIFECYCLE_TIMING_PRE:
                 return self.pre_downgrade(app, hook_info)
 
         # Use the default behaviour for other hooks
@@ -150,12 +153,29 @@ class PlatformAppLifecycleOperator(base.AppLifecycleOperator):
     def pre_downgrade(self, app, hook_info):
         """ Pre downgrade actions
 
+        :param app: AppOperator.Application object
+        :param hook_info: LifecycleHookInfo object
+        """
+        self.truncate_helm_overrides(app, hook_info)
+        self.delete_cephfs_driver(app)
+
+    def pre_update(self, app):
+        """ Pre update actions
+
+        :param app: AppOperator.Application object
+
+        """
+        self.delete_cephfs_driver(app)
+
+    def truncate_helm_overrides(self, app, hook_info):
+        """ Truncate helm overrides
+
         This function forces a reapply of the app after 'software deploy activate-rollback',
         clearing the contents of the N-1 release overrides, so that kube_app can identify
         changes in the overrides.
 
         :param app: AppOperator.Application object
-        :param app_op: AppOperator object
+        :param hook_info: LifecycleHookInfo object
         """
         from_app_version = hook_info.extra.get("from_app_version")
         to_app_version = hook_info.extra.get("to_app_version")
@@ -173,6 +193,32 @@ class PlatformAppLifecycleOperator(base.AppLifecycleOperator):
                 for override_path in overrides_path.glob("*.yaml"):
                     override_path.write_text("")
 
+    def delete_cephfs_driver(self, app):
+        """ Delete CephFS CSI driver
+
+        This is to address a breaking change when downgrading from cephcsi v3.15.0
+        which added the csi-attacher to cephfs and the attachRequired field
+        changed from false to true on the csi driver.
+
+        Since this field is immutable, we need to delete the driver and allow
+        helm to recreate it.
+
+        :param app: AppOperator.Application object
+
+        """
+        driver_name = "cephfs.csi.ceph.com"
+        self.delete_csi_driver(app, driver_name)
+
+    def delete_csi_driver(self, app, driver_name):
+        """ Delete a specific CSI driver
+
+        :param app: AppOperator.Application object
+        :param driver_name: name of the CSI driver to delete
+
+        """
+        cmd = ["kubectl", "--kubeconfig", kubernetes.KUBERNETES_ADMIN_CONF, "delete", "csidriver", driver_name]
+        cutils.trycmd(*cmd)
+
     def delete_csi_drivers(self, app):
         """ Delete CSI drivers
 
@@ -184,9 +230,7 @@ class PlatformAppLifecycleOperator(base.AppLifecycleOperator):
         """
         drivers = ["cephfs.csi.ceph.com", "rbd.csi.ceph.com"]
         for driver in drivers:
-            cmd = ["kubectl", "--kubeconfig", kubernetes.KUBERNETES_ADMIN_CONF, "delete", "csidriver", driver]
-            stdout, stderr = cutils.trycmd(*cmd)
-            LOG.debug("{} app: cmd={} stdout={} stderr={}".format(app.name, cmd, stdout, stderr))
+            self.delete_csi_driver(app, driver)
 
     def _get_helm_user_overrides(self, dbapi_instance, app, chart, namespace):
         try:

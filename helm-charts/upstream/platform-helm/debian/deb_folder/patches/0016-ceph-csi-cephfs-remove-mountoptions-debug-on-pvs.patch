@@ -44,4 +44,3 @@ index dc47e0afc..6bcaf8b30 100644
      CURRENT_FS_GROUP_POLICY=$(kubectl describe csidriver "${CSI_DRIVER_NAME}" 2>/dev/null | grep -oP 'Fs Group Policy:\K.*' | tr -d ' ')
 --
 2.34.1
-
