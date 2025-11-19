@@ -1,4 +1,4 @@
-ceph-pools-audit-helm (1.0-1) unstable; urgency=medium
+ceph-pools-audit-helm (1.1-0) unstable; urgency=medium
 
   * Update of ceph-config-helper image.
 

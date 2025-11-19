@@ -1,6 +1,6 @@
 ---
 debname: ceph-pools-audit-helm
-debver: 1.0-1
+debver: 1.1-0
 src_path: ceph-pools-audit-helm
 revision:
   dist: $STX_DIST
