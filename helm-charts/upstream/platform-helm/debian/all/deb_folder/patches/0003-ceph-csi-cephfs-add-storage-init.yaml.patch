@@ -1,23 +1,23 @@
-From b0f74d567f5004058564f24261eed00207af023c Mon Sep 17 00:00:00 2001
+From d29975e7ebb5e2e28cdd986382295a47b09910d4 Mon Sep 17 00:00:00 2001
 From: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
-Date: Thu, 27 Feb 2025 20:21:59 -0300
+Date: Thu, 27 Nov 2025 16:30:41 -0300
 Subject: [PATCH] ceph-csi-cephfs: add storage-init.yaml
 
 Signed-off-by: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
 ---
- .../templates/storage-init.yaml               | 396 ++++++++++++++++++
- 1 file changed, 396 insertions(+)
+ .../templates/storage-init.yaml               | 346 ++++++++++++++++++
+ 1 file changed, 346 insertions(+)
  create mode 100644 charts/ceph-csi-cephfs/templates/storage-init.yaml
 
 diff --git a/charts/ceph-csi-cephfs/templates/storage-init.yaml b/charts/ceph-csi-cephfs/templates/storage-init.yaml
 new file mode 100644
-index 0000000..9538cf5
+index 0000000..35f69aa
 --- /dev/null
 +++ b/charts/ceph-csi-cephfs/templates/storage-init.yaml
-@@ -0,0 +1,396 @@
+@@ -0,0 +1,346 @@
 +{{/*
 +#
-+# Copyright (c) 2020-2024 Wind River Systems, Inc.
++# Copyright (c) 2020-2025 Wind River Systems, Inc.
 +#
 +# SPDX-License-Identifier: Apache-2.0
 +#
@@ -235,55 +235,7 @@ index 0000000..9538cf5
 +      else
 +        echo "Secret ${CEPH_USER_SECRET} for namespace ${NAMESPACE} already exists"
 +      fi
-+
-+      echo -e "\n================================================="
-+      echo "Creating secrets for additional namespaces"
-+      echo "================================================="
-+      # Support creating namespaces and Ceph user secrets for additional
-+      # namespaces other than that which the provisioner is installed. This
-+      # allows the provisioner to set up and provide PVs for multiple
-+      # applications across many namespaces.
-+      if [ -n "${ADDITIONAL_NAMESPACES}" ]; then
-+        for ns in $(
-+          IFS=,
-+          echo ${ADDITIONAL_NAMESPACES}
-+        ); do
-+          kubectl get namespace "${ns}" &>/dev/null
-+          if [ $? -ne 0 ]; then
-+            kubectl create namespace "${ns}"
-+            RETURN_CODE=$?
-+            if [ ${RETURN_CODE} -ne 0 ]; then
-+              echo "Error creating namespace ${ns} but continuing anyway (return code: ${RETURN_CODE})"
-+              continue
-+            fi
-+          fi
-+
-+          # check if the secret exists or is an old pattern, if not create a new one.
-+          kubectl describe secret -n "${ns}" "${CEPH_USER_SECRET}" 2>/dev/null | grep -qE "^userID"
-+          if [ $? -ne 0 ]; then
-+            kubectl get secret -n "${ns}" "${CEPH_USER_SECRET}" &>/dev/null
-+            if [ $? -eq 0 ]; then
-+              echo "- Deleting old ${CEPH_USER_SECRET} secret for namespace ${ns}:"
-+              kubectl delete secret -n "${ns}" "${CEPH_USER_SECRET}"
-+              RETURN_CODE=$?
-+              if [ ${RETURN_CODE} -ne 0 ]; then
-+                echo "Error deleting secret ${CEPH_USER_SECRET} for namespace ${ns} (return code: ${RETURN_CODE})"
-+                exit ${RETURN_CODE}
-+              fi
-+            fi
-+            echo "- Creating secret ${CEPH_USER_SECRET} for namespace ${ns}:"
-+            kubectl create secret generic -n "${ns}" "${CEPH_USER_SECRET}" --type="kubernetes.io/cephfs" --from-literal=userKey="${KEYRING}" --from-literal=userID="${USER_ID}" --from-literal=adminKey="${KEYRING}" --from-literal=adminID="${ADMIN_ID}"
-+            RETURN_CODE=$?
-+            if [ ${RETURN_CODE} -ne 0 ]; then
-+              echo "Error creating secret ${CEPH_USER_SECRET} for namespace ${ns} but continuing anyway (return code: ${RETURN_CODE})"
-+            fi
-+          else
-+            echo "Secret ${CEPH_USER_SECRET} for namespace ${ns} already exists"
-+          fi
-+        done
-+      fi
 +    fi
-+
 +
 +    echo -e "\n================================================="
 +    echo "Setting pool configuration"
@@ -374,8 +326,6 @@ index 0000000..9538cf5
 +          env:
 +            - name: NAMESPACE
 +              value: {{ $.Values.classdefaults.cephFSNamespace }}
-+            - name: ADDITIONAL_NAMESPACES
-+              value: {{ join "," $sc.additionalNamespaces | quote }}
 +            - name: CEPH_USER_SECRET
 +              value: {{ $sc.userSecretName }}
 +            - name: USER_ID

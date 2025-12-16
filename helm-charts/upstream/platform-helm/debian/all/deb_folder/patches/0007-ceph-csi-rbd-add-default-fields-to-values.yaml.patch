@@ -1,18 +1,19 @@
-From 0db2bdf58f2d614a1240e9592b77524dad73e598 Mon Sep 17 00:00:00 2001
-From: Heitor Farhat <heitor.farhat@windriver.com>
-Date: Tue, 2 Sep 2025 10:42:36 -0300
+From 9c182af656810c748605f004da8451f5f6c2dfce Mon Sep 17 00:00:00 2001
+From: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
+Date: Thu, 27 Nov 2025 16:31:05 -0300
 Subject: [PATCH] ceph-csi-rbd: add default fields to values.yaml
 
 This patch adds fields and values necessary for the proper use
 of the rbd chart in the system.
 
 Signed-off-by: Heitor Farhat <heitor.farhat@windriver.com>
+Signed-off-by: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
 ---
- charts/ceph-csi-rbd/values.yaml | 42 +++++++++++++++++++++++++++++++--
- 1 file changed, 40 insertions(+), 2 deletions(-)
+ charts/ceph-csi-rbd/values.yaml | 37 +++++++++++++++++++++++++++++++--
+ 1 file changed, 35 insertions(+), 2 deletions(-)
 
 diff --git a/charts/ceph-csi-rbd/values.yaml b/charts/ceph-csi-rbd/values.yaml
-index 2593b97..1fb94a9 100644
+index 2593b97..2147ac6 100644
 --- a/charts/ceph-csi-rbd/values.yaml
 +++ b/charts/ceph-csi-rbd/values.yaml
 @@ -337,10 +337,10 @@ topology:
@@ -28,7 +29,7 @@ index 2593b97..1fb94a9 100644
  # Define which node labels to use as CRUSH location.
  # This should correspond to the values set in the CRUSH map.
  # NOTE: the value here serves as an example
-@@ -526,6 +526,24 @@ storageClass:
+@@ -526,6 +526,19 @@ storageClass:
    # mountOptions:
    #   - discard
 
@@ -44,16 +45,11 @@ index 2593b97..1fb94a9 100644
 +  crush_rule_name: storage_tier_ruleset
 +  # Pool chunk size / PG_NUM
 +  chunk_size: 8
-+  # Additional namespace to allow storage class access (other than where
-+  # installed)
-+  additionalNamespaces:
-+  - default
-+  - kube-public
 +
  volumeSnapshotClass:
    # Specifies whether the VolumeSnapshotClass should be created
    create: false
-@@ -650,6 +668,26 @@ externallyManagedConfigmap: false
+@@ -650,6 +663,26 @@ externallyManagedConfigmap: false
  cephConfConfigMapName: ceph-config
  # Name of the configmap used for encryption kms configuration
  kmsConfigMapName: ceph-csi-encryption-kms-config

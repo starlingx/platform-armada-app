@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2020-2025 Wind River Systems, Inc.
+# Copyright (c) 2020-2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -92,7 +92,6 @@ class RbdProvisionerHelm(base.FluxCDBaseHelm):
                 "replication": int(bk.capabilities.get("replication")),
                 "min_replication": int(bk.capabilities.get("min_replication")),
                 "crush_rule_name": rule_name,
-                "additionalNamespaces": ['default', 'kube-public']
             }
 
             storage_classes.append(storage_class)
