@@ -1,18 +1,18 @@
-From d7571be3b5312c170ffd6a18f71ef6072064bf46 Mon Sep 17 00:00:00 2001
-From: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
-Date: Thu, 27 Feb 2025 20:12:39 -0300
+From 0db2bdf58f2d614a1240e9592b77524dad73e598 Mon Sep 17 00:00:00 2001
+From: Heitor Farhat <heitor.farhat@windriver.com>
+Date: Tue, 2 Sep 2025 10:42:36 -0300
 Subject: [PATCH] ceph-csi-rbd: add default fields to values.yaml
 
 This patch adds fields and values necessary for the proper use
 of the rbd chart in the system.
 
-Signed-off-by: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
+Signed-off-by: Heitor Farhat <heitor.farhat@windriver.com>
 ---
  charts/ceph-csi-rbd/values.yaml | 42 +++++++++++++++++++++++++++++++--
  1 file changed, 40 insertions(+), 2 deletions(-)
 
 diff --git a/charts/ceph-csi-rbd/values.yaml b/charts/ceph-csi-rbd/values.yaml
-index 91d4ad2..e835624 100644
+index 2593b97..1fb94a9 100644
 --- a/charts/ceph-csi-rbd/values.yaml
 +++ b/charts/ceph-csi-rbd/values.yaml
 @@ -337,10 +337,10 @@ topology:
@@ -24,7 +24,7 @@ index 91d4ad2..e835624 100644
  # Enable read affinity for RBD volumes. Recommended to
  # set to true if running kernel 5.8 or newer.
 -# enabled: false
-+  enabled: false
++enabled: false
  # Define which node labels to use as CRUSH location.
  # This should correspond to the values set in the CRUSH map.
  # NOTE: the value here serves as an example
@@ -50,10 +50,10 @@ index 91d4ad2..e835624 100644
 +  - default
 +  - kube-public
 +
- # Mount the host /etc/selinux inside pods to support
- # selinux-enabled filesystems
- selinuxMount: true
-@@ -582,6 +600,26 @@ externallyManagedConfigmap: false
+ volumeSnapshotClass:
+   # Specifies whether the VolumeSnapshotClass should be created
+   create: false
+@@ -650,6 +668,26 @@ externallyManagedConfigmap: false
  cephConfConfigMapName: ceph-config
  # Name of the configmap used for encryption kms configuration
  kmsConfigMapName: ceph-csi-encryption-kms-config
@@ -76,7 +76,7 @@ index 91d4ad2..e835624 100644
 +storage_init:
 +  image:
 +    repository: docker.io/openstackhelm/ceph-config-helper
-+    tag: ubuntu_jammy_19.2.1-1-20250207
++    tag: ubuntu_jammy_18.2.2-1-20241210
  # Unique ID distinguishing this instance of Ceph CSI among other instances,
  # when sharing Ceph clusters across CSI instances for provisioning
  # instanceID: default

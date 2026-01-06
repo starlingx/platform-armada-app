@@ -1,0 +1,4 @@
+helm-charts/custom/ceph-pools-audit-helm
+helm-charts/upstream/platform-helm
+python3-k8sapp-platform
+stx-platform-helm
