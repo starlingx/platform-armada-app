@@ -85,6 +85,7 @@ class RbdProvisionerHelm(base.FluxCDBaseHelm):
                 "pool_name": K8RbdProvisioner.get_pool(bk),
                 "provisionerSecret": user_secret_name or class_defaults["adminSecretName"],
                 "controllerExpandSecret": user_secret_name or class_defaults["adminSecretName"],
+                "controllerPublishSecret": user_secret_name or class_defaults["adminSecretName"],
                 "nodeStageSecret": user_secret_name or class_defaults["adminSecretName"],
                 "userId": K8RbdProvisioner.get_user_id(bk),
                 "userSecretName": user_secret_name,

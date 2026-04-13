@@ -1,3 +1,9 @@
+platform-helm (3.16-2) unstable; urgency=medium
+
+  * New upstream release 3.16.2.
+
+ --  Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>  Tue, 10 Apr 2026 13:25:32 -0300
+
 platform-helm (3.15-0) unstable; urgency=medium
 
   * New upstream release 3.15.0.

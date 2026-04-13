@@ -1,6 +1,6 @@
-From a87102a0117e369821d90ad0cf27bd82ee2bf46c Mon Sep 17 00:00:00 2001
+From eb8e42bdd4aab470b4fc783ec733cf549088f18a Mon Sep 17 00:00:00 2001
 From: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
-Date: Mon, 17 Mar 2025 08:11:40 -0300
+Date: Mon, 13 Apr 2026 09:58:49 -0300
 Subject: [PATCH] ceph-csi-cephfs: add annotations to
  provisioner-deployment.yaml
 
@@ -13,17 +13,17 @@ Signed-off-by: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.co
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/charts/ceph-csi-cephfs/templates/provisioner-deployment.yaml b/charts/ceph-csi-cephfs/templates/provisioner-deployment.yaml
-index 84d9dcb..c6ebf3c 100644
+index 497b5d1..42befde 100644
 --- a/charts/ceph-csi-cephfs/templates/provisioner-deployment.yaml
 +++ b/charts/ceph-csi-cephfs/templates/provisioner-deployment.yaml
-@@ -176,7 +176,7 @@ spec:
+@@ -185,7 +185,7 @@ spec:
              - "--v={{ .Values.sidecarLogLevel }}"
              - "--timeout={{ .Values.provisioner.timeout }}"
              - "--leader-election=true"
 -            - "--extra-create-metadata=true"
 +            - "--extra-create-metadata=false"
+             - "--automaxprocs=true"
              - "--feature-gates=CSIVolumeGroupSnapshot={{.Values.provisioner.snapshotter.args.enableVolumeGroupSnapshots }}"
  {{- if and .Values.provisioner.snapshotter.args .Values.provisioner.snapshotter.args.httpEndpointPort }}
-             - "--http-endpoint=$(POD_IP):{{ .Values.provisioner.snapshotter.args.httpEndpointPort }}"
 --
 2.34.1

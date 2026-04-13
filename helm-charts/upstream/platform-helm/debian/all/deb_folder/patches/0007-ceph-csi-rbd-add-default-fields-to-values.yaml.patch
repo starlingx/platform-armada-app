@@ -1,22 +1,21 @@
-From 9c182af656810c748605f004da8451f5f6c2dfce Mon Sep 17 00:00:00 2001
+From baa6bf734c8a7b8d9723c81bdc5c2d50194a1ede Mon Sep 17 00:00:00 2001
 From: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
-Date: Thu, 27 Nov 2025 16:31:05 -0300
+Date: Mon, 13 Apr 2026 13:56:23 -0300
 Subject: [PATCH] ceph-csi-rbd: add default fields to values.yaml
 
 This patch adds fields and values necessary for the proper use
 of the rbd chart in the system.
 
-Signed-off-by: Heitor Farhat <heitor.farhat@windriver.com>
 Signed-off-by: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
 ---
  charts/ceph-csi-rbd/values.yaml | 37 +++++++++++++++++++++++++++++++--
  1 file changed, 35 insertions(+), 2 deletions(-)
 
 diff --git a/charts/ceph-csi-rbd/values.yaml b/charts/ceph-csi-rbd/values.yaml
-index 2593b97..2147ac6 100644
+index 39c616b..28773b8 100644
 --- a/charts/ceph-csi-rbd/values.yaml
 +++ b/charts/ceph-csi-rbd/values.yaml
-@@ -337,10 +337,10 @@ topology:
+@@ -343,10 +343,10 @@ topology:
    # - topology.kubernetes.io/region
    # - topology.kubernetes.io/zone
 
@@ -29,7 +28,7 @@ index 2593b97..2147ac6 100644
  # Define which node labels to use as CRUSH location.
  # This should correspond to the values set in the CRUSH map.
  # NOTE: the value here serves as an example
-@@ -526,6 +526,19 @@ storageClass:
+@@ -534,6 +534,19 @@ storageClass:
    # mountOptions:
    #   - discard
 
@@ -49,7 +48,7 @@ index 2593b97..2147ac6 100644
  volumeSnapshotClass:
    # Specifies whether the VolumeSnapshotClass should be created
    create: false
-@@ -650,6 +663,26 @@ externallyManagedConfigmap: false
+@@ -664,6 +677,26 @@ externallyManagedConfigmap: false
  cephConfConfigMapName: ceph-config
  # Name of the configmap used for encryption kms configuration
  kmsConfigMapName: ceph-csi-encryption-kms-config
@@ -72,7 +71,7 @@ index 2593b97..2147ac6 100644
 +storage_init:
 +  image:
 +    repository: docker.io/openstackhelm/ceph-config-helper
-+    tag: ubuntu_jammy_18.2.2-1-20241210
++    tag: ubuntu_jammy_18.2.2-1-20240312
  # Unique ID distinguishing this instance of Ceph CSI among other instances,
  # when sharing Ceph clusters across CSI instances for provisioning
  # instanceID: default
