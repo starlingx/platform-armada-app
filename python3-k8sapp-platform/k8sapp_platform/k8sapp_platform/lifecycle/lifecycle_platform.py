@@ -117,8 +117,7 @@ class PlatformAppLifecycleOperator(base.AppLifecycleOperator):
                 administrative=constants.ADMIN_UNLOCKED,
                 operational=constants.OPERATIONAL_ENABLED,
                 availability=[constants.AVAILABILITY_AVAILABLE,
-                              constants.AVAILABILITY_DEGRADED],
-                vim_progress_status=constants.VIM_SERVICES_ENABLED) < 1:
+                              constants.AVAILABILITY_DEGRADED]) < 1:
             raise exception.LifecycleSemanticCheckException(
                 "Not enough hosts in desired state")
 
