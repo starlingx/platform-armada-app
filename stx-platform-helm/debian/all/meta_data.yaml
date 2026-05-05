@@ -1,10 +1,10 @@
 ---
 debname: stx-platform-helm
-debver: 1.6-0
+debver: 1.7-0
 src_path: stx-platform-helm
 revision:
   stx_patch: 0
   dist: $STX_DIST
   GITREVCOUNT:
     SRC_DIR: ${MY_REPO}/stx/platform-armada-app
-    BASE_SRCREV: 0032f7269286c7335f4aa26674314bc047c51fc3
+    BASE_SRCREV: b51eebdb94592e037b9a6ba934984f06fb9cc35c

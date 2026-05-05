@@ -1,20 +1,20 @@
-From d9c0f98127938abcfb073cfc8d75645b90548a53 Mon Sep 17 00:00:00 2001
-From: Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>
-Date: Thu, 18 Apr 2024 08:36:28 -0300
+From 36e308ff15630e7789e25fa8ceb34468225308d4 Mon Sep 17 00:00:00 2001
+From: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
+Date: Mon, 13 Apr 2026 11:32:19 -0300
 Subject: [PATCH] ceph-csi-rbd: update storageclass
 
 This patch updates some fields and values for the rbd storage class.
 
-Signed-off-by: Gabriel de Araújo Cabral <gabriel.cabral@windriver.com>
+Signed-off-by: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
 ---
- .../ceph-csi-rbd/templates/storageclass.yaml  | 198 ++++++++++--------
- 1 file changed, 115 insertions(+), 83 deletions(-)
+ .../ceph-csi-rbd/templates/storageclass.yaml  | 210 ++++++++++--------
+ 1 file changed, 121 insertions(+), 89 deletions(-)
 
 diff --git a/charts/ceph-csi-rbd/templates/storageclass.yaml b/charts/ceph-csi-rbd/templates/storageclass.yaml
-index 188362fc0..d971ed1fe 100644
+index 77881ff..9b2f813 100644
 --- a/charts/ceph-csi-rbd/templates/storageclass.yaml
 +++ b/charts/ceph-csi-rbd/templates/storageclass.yaml
-@@ -1,96 +1,128 @@
+@@ -1,102 +1,134 @@
  {{- if .Values.storageClass.create -}}
 +{{- $cephCsiDefault := .Values.storageClass }}
 +{{- $defaults := .Values.classdefaults }}
@@ -132,6 +132,9 @@ index 188362fc0..d971ed1fe 100644
 +  encryptionKMSID: {{ $cephCsiDefault.encryptionKMSID }}
 +{{- end }}
 +{{- if $sc.topologyConstrainedPools }}
++  topologyConstrainedPools:
++  {{ toYaml $sc.topologyConstrainedPools | indent 4 -}}
++{{- else if $cephCsiDefault.topologyConstrainedPools }}
    topologyConstrainedPools:
 -  {{ toYaml .Values.storageClass.topologyConstrainedPools | indent 4 -}}
 -{{- end }}
@@ -162,6 +165,12 @@ index 188362fc0..d971ed1fe 100644
 -{{ else }}
 -  csi.storage.k8s.io/controller-expand-secret-namespace: {{ .Release.Namespace }}
 -{{- end }}
+-  csi.storage.k8s.io/controller-publish-secret-name: {{ .Values.storageClass.controllerPublishSecret }}
+-{{- if .Values.storageClass.controllerPublishSecretNamespace }}
+-  csi.storage.k8s.io/controller-publish-secret-namespace: {{ .Values.storageClass.controllerPublishSecretNamespace }}
+-{{ else }}
+-  csi.storage.k8s.io/controller-publish-secret-namespace: {{ .Release.Namespace }}
+-{{- end }}
 -  csi.storage.k8s.io/node-stage-secret-name: {{ .Values.storageClass.nodeStageSecret }}
 -{{- if .Values.storageClass.nodeStageSecretNamespace }}
 -  csi.storage.k8s.io/node-stage-secret-namespace: {{ .Values.storageClass.nodeStageSecretNamespace }}
@@ -172,9 +181,6 @@ index 188362fc0..d971ed1fe 100644
 -reclaimPolicy: {{ .Values.storageClass.reclaimPolicy }}
 -allowVolumeExpansion: {{ .Values.storageClass.allowVolumeExpansion }}
 -{{- if .Values.storageClass.mountOptions }}
-+  {{ toYaml $sc.topologyConstrainedPools | indent 4 -}}
-+{{- else if $cephCsiDefault.topologyConstrainedPools }}
-+  topologyConstrainedPools:
 +  {{ toYaml $cephCsiDefault.topologyConstrainedPools | indent 4 -}}
 +{{- end }}
 +{{- if $sc.mapOptions }}
@@ -202,29 +208,35 @@ index 188362fc0..d971ed1fe 100644
 +{{- else if $cephCsiDefault.objectSize }}
 +  objectSize: {{ $cephCsiDefault.objectSize | quote }}
 +{{- end }}
-+  csi.storage.k8s.io/provisioner-secret-name: {{ or $sc.provisionerSecret $defaults.adminSecretName }}
++  {{- $provisionerSecret := or $sc.provisionerSecret $defaults.adminSecretName }}
++  {{- $controllerExpandSecret := or $sc.controllerExpandSecret $defaults.adminSecretName }}
++  {{- $controllerPublishSecret := or $sc.controllerPublishSecret $controllerExpandSecret }}
++  {{- $nodeStageSecret := or $sc.nodeStageSecret $defaults.adminSecretName }}
++  csi.storage.k8s.io/provisioner-secret-name: {{ $provisionerSecret }}
 +  csi.storage.k8s.io/provisioner-secret-namespace: {{ or $sc.provisionerSecretNamespace $.Release.Namespace }}
-+  csi.storage.k8s.io/controller-expand-secret-name: {{ or $sc.controllerExpandSecret $defaults.adminSecretName }}
++  csi.storage.k8s.io/controller-expand-secret-name: {{ $controllerExpandSecret }}
 +  csi.storage.k8s.io/controller-expand-secret-namespace: {{ or $sc.controllerExpandSecretNamespace $.Release.Namespace }}
-+  csi.storage.k8s.io/node-stage-secret-name: {{ or $sc.nodeStageSecret $defaults.adminSecretName }}
++  csi.storage.k8s.io/controller-publish-secret-name: {{ $controllerPublishSecret }}
++  csi.storage.k8s.io/controller-publish-secret-namespace: {{ or $sc.controllerPublishSecretNamespace $.Release.Namespace }}
++  csi.storage.k8s.io/node-stage-secret-name: {{ $nodeStageSecret }}
 +  csi.storage.k8s.io/node-stage-secret-namespace: {{ or $sc.nodeStageSecretNamespace $.Release.Namespace }}
 +  csi.storage.k8s.io/fstype: {{ or $sc.fstype $cephCsiDefault.fstype }}
 +reclaimPolicy: {{ or $sc.reclaimPolicy $cephCsiDefault.reclaimPolicy }}
 +allowVolumeExpansion: {{ or $sc.allowVolumeExpansion $cephCsiDefault.allowVolumeExpansion }}
 +{{- if $sc.mountOptions }}
-+mountOptions:
-+  {{- range $sc.mountOptions }}
-+  - {{ . }}
-+  {{- end }}
-+{{- else if $cephCsiDefault.mountOptions }}
  mountOptions:
 -  {{- range .Values.storageClass.mountOptions }}
-+  {{- range $cephCsiDefault.mountOptions }}
++  {{- range $sc.mountOptions }}
    - {{ . }}
    {{- end }}
- {{- end }}
-+---
++{{- else if $cephCsiDefault.mountOptions }}
++mountOptions:
++  {{- range $cephCsiDefault.mountOptions }}
++  - {{ . }}
++  {{- end }}
 +{{- end }}
++---
+ {{- end }}
  {{- end -}}
 --
-2.25.1
+2.34.1

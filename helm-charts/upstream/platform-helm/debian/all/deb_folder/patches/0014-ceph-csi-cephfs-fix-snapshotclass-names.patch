@@ -1,6 +1,6 @@
-From 756415cca036cc140b4696127e061bc4f1945b6a Mon Sep 17 00:00:00 2001
+From 61ff9df312faceee0408e5c1a6f76228760d9bec Mon Sep 17 00:00:00 2001
 From: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
-Date: Thu, 27 Nov 2025 16:34:46 -0300
+Date: Tue, 21 Apr 2026 14:50:10 -0300
 Subject: [PATCH] ceph-csi-cephfs: fix snapshotclass names
 
 In cephcsi 3.15.0 the snapshotclass.yaml file already exists
@@ -9,15 +9,14 @@ but a few field names are different than what we used.
 We need to fix those names for backwards compatibility
 on upgrade and rollback.
 
-Signed-off-by: Heitor Farhat <heitor.farhat@windriver.com>
 Signed-off-by: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
 ---
- .../templates/snapshotclass.yaml              | 22 +++++++++----------
+ .../templates/snapshotclass.yaml              | 25 ++++++++++---------
  charts/ceph-csi-cephfs/values.yaml            |  6 ++---
- 2 files changed, 14 insertions(+), 14 deletions(-)
+ 2 files changed, 16 insertions(+), 15 deletions(-)
 
 diff --git a/charts/ceph-csi-cephfs/templates/snapshotclass.yaml b/charts/ceph-csi-cephfs/templates/snapshotclass.yaml
-index e603397..6ea6ca4 100644
+index 2126cb1..c698077 100644
 --- a/charts/ceph-csi-cephfs/templates/snapshotclass.yaml
 +++ b/charts/ceph-csi-cephfs/templates/snapshotclass.yaml
 @@ -1,11 +1,11 @@
@@ -36,8 +35,12 @@ index e603397..6ea6ca4 100644
  {{- end }}
    labels:
      app: {{ include "ceph-csi-cephfs.name" . }}
-@@ -15,15 +15,15 @@ metadata:
+@@ -13,18 +13,19 @@ metadata:
+     release: {{ .Release.Name }}
+     heritage: {{ .Release.Service }}
      {{- with .Values.commonLabels }}{{ toYaml . | trim | nindent 4 }}{{- end }}
+-    {{- with .Values.volumeSnapshotClass.labels }}{{ toYaml . | trim | nindent 4 }}{{- end }}
++    {{- with .Values.snapshotClass.labels }}{{ toYaml . | trim | nindent 4 }}{{- end }}
  driver: {{ .Values.driverName }}
  parameters:
 -  clusterID: {{ .Values.volumeSnapshotClass.clusterID }}
@@ -59,11 +62,12 @@ index e603397..6ea6ca4 100644
 -deletionPolicy: {{ .Values.volumeSnapshotClass.deletionPolicy }}
 +deletionPolicy: {{ .Values.snapshotClass.deletionPolicy }}
  {{- end -}}
++
 diff --git a/charts/ceph-csi-cephfs/values.yaml b/charts/ceph-csi-cephfs/values.yaml
-index 82249c2..8675bfc 100644
+index 8342ee0..7fe63d9 100644
 --- a/charts/ceph-csi-cephfs/values.yaml
 +++ b/charts/ceph-csi-cephfs/values.yaml
-@@ -407,7 +407,7 @@ storageClass:
+@@ -415,7 +415,7 @@ storageClass:
    # Ceph pools name
    metadata_pool: kube-cephfs-metadata
 
@@ -72,7 +76,7 @@ index 82249c2..8675bfc 100644
    # Specifies whether the VolumeSnapshotClass should be created
    create: false
    name: csi-cephfsplugin-snapclass
-@@ -433,10 +433,10 @@ volumeSnapshotClass:
+@@ -447,10 +447,10 @@ volumeSnapshotClass:
    snapshotNamePrefix: ""
 
    # The secrets have to contain user and/or Ceph admin credentials.

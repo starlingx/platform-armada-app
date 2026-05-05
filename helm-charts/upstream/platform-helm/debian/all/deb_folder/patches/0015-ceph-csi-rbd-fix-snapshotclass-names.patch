@@ -1,6 +1,6 @@
-From 88fe7e27ae5999e7cfbdebc4704416189b47d0b9 Mon Sep 17 00:00:00 2001
+From d2f338d85c720c397442b37e6d4f68b93e9e9eec Mon Sep 17 00:00:00 2001
 From: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
-Date: Thu, 27 Nov 2025 16:36:47 -0300
+Date: Tue, 21 Apr 2026 14:53:04 -0300
 Subject: [PATCH] ceph-csi-rbd: fix snapshotclass names
 
 In cephcsi 3.15.0 the snapshotclass.yaml file already exists
@@ -9,15 +9,14 @@ but a few field names are different than what we used.
 We need to fix those names for backwards compatibility
 on upgrade and rollback.
 
-Signed-off-by: Heitor Farhat <heitor.farhat@windriver.com>
 Signed-off-by: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
 ---
- .../ceph-csi-rbd/templates/snapshotclass.yaml | 22 +++++++++----------
+ .../ceph-csi-rbd/templates/snapshotclass.yaml | 25 ++++++++++---------
  charts/ceph-csi-rbd/values.yaml               |  6 ++---
- 2 files changed, 14 insertions(+), 14 deletions(-)
+ 2 files changed, 16 insertions(+), 15 deletions(-)
 
 diff --git a/charts/ceph-csi-rbd/templates/snapshotclass.yaml b/charts/ceph-csi-rbd/templates/snapshotclass.yaml
-index 4456b0e..c168f11 100644
+index d496816..dcdf445 100644
 --- a/charts/ceph-csi-rbd/templates/snapshotclass.yaml
 +++ b/charts/ceph-csi-rbd/templates/snapshotclass.yaml
 @@ -1,11 +1,11 @@
@@ -36,8 +35,12 @@ index 4456b0e..c168f11 100644
  {{- end }}
    labels:
      app: {{ include "ceph-csi-rbd.name" . }}
-@@ -15,15 +15,15 @@ metadata:
+@@ -13,18 +13,19 @@ metadata:
+     release: {{ .Release.Name }}
+     heritage: {{ .Release.Service }}
      {{- with .Values.commonLabels }}{{ toYaml . | trim | nindent 4 }}{{- end }}
+-    {{- with .Values.volumeSnapshotClass.labels }}{{ toYaml . | trim | nindent 4 }}{{- end }}
++    {{- with .Values.snapshotClass.labels }}{{ toYaml . | trim | nindent 4 }}{{- end }}
  driver: {{ .Values.driverName }}
  parameters:
 -  clusterID: {{ .Values.volumeSnapshotClass.clusterID }}
@@ -59,11 +62,12 @@ index 4456b0e..c168f11 100644
 -deletionPolicy: {{ .Values.volumeSnapshotClass.deletionPolicy }}
 +deletionPolicy: {{ .Values.snapshotClass.deletionPolicy }}
  {{- end -}}
++
 diff --git a/charts/ceph-csi-rbd/values.yaml b/charts/ceph-csi-rbd/values.yaml
-index 2147ac6..4c765ea 100644
+index 84b8ad9..8154bc6 100644
 --- a/charts/ceph-csi-rbd/values.yaml
 +++ b/charts/ceph-csi-rbd/values.yaml
-@@ -539,7 +539,7 @@ storageClass:
+@@ -547,7 +547,7 @@ storageClass:
    # Pool chunk size / PG_NUM
    chunk_size: 8
 
@@ -72,7 +76,7 @@ index 2147ac6..4c765ea 100644
    # Specifies whether the VolumeSnapshotClass should be created
    create: false
    name: csi-rbdplugin-snapclass
-@@ -565,10 +565,10 @@ volumeSnapshotClass:
+@@ -579,10 +579,10 @@ volumeSnapshotClass:
    snapshotNamePrefix: ""
 
    # The secrets have to contain user and/or Ceph admin credentials.

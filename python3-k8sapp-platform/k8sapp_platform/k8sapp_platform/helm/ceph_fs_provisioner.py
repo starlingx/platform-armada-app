@@ -171,6 +171,7 @@ class CephFSProvisionerHelm(base.FluxCDBaseHelm):
                 "volumeNamePrefix": app_constants.HELM_CEPH_FS_PROVISIONER_VOLUME_NAME_PREFIX,
                 "provisionerSecret": user_secret_name,
                 "controllerExpandSecret": user_secret_name,
+                "controllerPublishSecret": user_secret_name,
                 "nodeStageSecret": user_secret_name,
                 "userId": K8CephFSProvisioner.get_user_id(bk),
                 "userSecretName": user_secret_name or class_defaults["adminSecretName"],

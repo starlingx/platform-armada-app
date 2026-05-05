@@ -1,23 +1,23 @@
-From 27e6ed6be7146fd94175e9b43af874e9d7f93009 Mon Sep 17 00:00:00 2001
-From: Heitor Farhat <heitor.farhat@windriver.com>
-Date: Tue, 2 Sep 2025 11:32:43 -0300
+From 15064a208c3617721c9802b13a014e9142eda790 Mon Sep 17 00:00:00 2001
+From: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
+Date: Mon, 13 Apr 2026 13:28:33 -0300
 Subject: [PATCH] ceph-csi-cephfs: add conditional to enable leader election
 
 The rbd-provisioner and cephfs-provisioner pods use the K8s
 API to conduct leadership elections, but these elections
 should be disabled on AIO-SX, since they are not needed.
 
-Signed-off-by: Heitor Farhat <heitor.farhat@windriver.com>
+Signed-off-by: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
 ---
- .../ceph-csi-cephfs/templates/provisioner-deployment.yaml   | 6 ++++++
- charts/ceph-csi-cephfs/values.yaml                          | 3 +++
- 2 files changed, 9 insertions(+)
+ .../templates/provisioner-deployment.yaml                | 9 +++++++++
+ charts/ceph-csi-cephfs/values.yaml                       | 3 +++
+ 2 files changed, 12 insertions(+)
 
 diff --git a/charts/ceph-csi-cephfs/templates/provisioner-deployment.yaml b/charts/ceph-csi-cephfs/templates/provisioner-deployment.yaml
-index 0d2d77e..e3b786d 100644
+index fc83172..29ce6f5 100644
 --- a/charts/ceph-csi-cephfs/templates/provisioner-deployment.yaml
 +++ b/charts/ceph-csi-cephfs/templates/provisioner-deployment.yaml
-@@ -140,7 +140,9 @@ spec:
+@@ -147,7 +147,9 @@ spec:
              - "--csi-address=$(ADDRESS)"
              - "--v={{ .Values.sidecarLogLevel }}"
              - "--timeout={{ .Values.provisioner.timeout }}"
@@ -27,7 +27,7 @@ index 0d2d77e..e3b786d 100644
              - "--retry-interval-start=500ms"
              - "--extra-create-metadata=true"
              - "--feature-gates=HonorPVReclaimPolicy=true"
-@@ -177,7 +179,9 @@ spec:
+@@ -185,7 +187,9 @@ spec:
              - "--csi-address=$(ADDRESS)"
              - "--v={{ .Values.sidecarLogLevel }}"
              - "--timeout={{ .Values.provisioner.timeout }}"
@@ -35,9 +35,9 @@ index 0d2d77e..e3b786d 100644
              - "--leader-election=true"
 +{{- end }}
              - "--extra-create-metadata=false"
+             - "--automaxprocs=true"
              - "--feature-gates=CSIVolumeGroupSnapshot={{.Values.provisioner.snapshotter.args.enableVolumeGroupSnapshots }}"
- {{- if and .Values.provisioner.snapshotter.args .Values.provisioner.snapshotter.args.httpEndpointPort }}
-@@ -212,7 +216,9 @@ spec:
+@@ -221,7 +225,9 @@ spec:
            args:
              - "--v={{ .Values.sidecarLogLevel }}"
              - "--csi-address=$(ADDRESS)"
@@ -47,11 +47,21 @@ index 0d2d77e..e3b786d 100644
              - "--retry-interval-start=500ms"
  {{- if and .Values.provisioner.attacher.args .Values.provisioner.attacher.args.httpEndpointPort }}
              - "--http-endpoint=$(POD_IP):{{ .Values.provisioner.attacher.args.httpEndpointPort }}"
+@@ -257,6 +263,9 @@ spec:
+             - "--csi-address=$(ADDRESS)"
+             - "--timeout={{ .Values.provisioner.timeout }}"
+             - "--leader-election"
++{{- if .Values.provisioner.leaderElection.enabled }}
++            - "--leader-election"
++{{- end }}
+             - "--retry-interval-start=500ms"
+             - "--handle-volume-inuse-error=false"
+             - "--feature-gates=RecoverVolumeExpansionFailure=true"
 diff --git a/charts/ceph-csi-cephfs/values.yaml b/charts/ceph-csi-cephfs/values.yaml
-index e345d28..25059f4 100644
+index 47a26a3..b122016 100644
 --- a/charts/ceph-csi-cephfs/values.yaml
 +++ b/charts/ceph-csi-cephfs/values.yaml
-@@ -187,6 +187,9 @@ provisioner:
+@@ -190,6 +190,9 @@ provisioner:
    # useful for deployments where the podNetwork has no access to ceph
    enableHostNetwork: false
 
