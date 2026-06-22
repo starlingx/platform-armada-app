@@ -1,12 +1,12 @@
-From d29975e7ebb5e2e28cdd986382295a47b09910d4 Mon Sep 17 00:00:00 2001
+From 8a5f65c241c46cf33b3776fcb0041af33be43b06 Mon Sep 17 00:00:00 2001
 From: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
-Date: Thu, 27 Nov 2025 16:30:41 -0300
+Date: Mon, 22 Jun 2026 13:58:22 -0300
 Subject: [PATCH] ceph-csi-cephfs: add storage-init.yaml
 
 Signed-off-by: Erickson Silva de Oliveira <Erickson.SilvadeOliveira@windriver.com>
 ---
- .../templates/storage-init.yaml               | 346 ++++++++++++++++++
- 1 file changed, 346 insertions(+)
+ .../templates/storage-init.yaml               | 347 ++++++++++++++++++
+ 1 file changed, 347 insertions(+)
  create mode 100644 charts/ceph-csi-cephfs/templates/storage-init.yaml
 
 diff --git a/charts/ceph-csi-cephfs/templates/storage-init.yaml b/charts/ceph-csi-cephfs/templates/storage-init.yaml
@@ -14,7 +14,7 @@ new file mode 100644
 index 0000000..35f69aa
 --- /dev/null
 +++ b/charts/ceph-csi-cephfs/templates/storage-init.yaml
-@@ -0,0 +1,346 @@
+@@ -0,0 +1,347 @@
 +{{/*
 +#
 +# Copyright (c) 2020-2025 Wind River Systems, Inc.
@@ -307,6 +307,7 @@ index 0000000..35f69aa
 +    "meta.helm.sh/release-name": {{ .Release.Name }}
 +    "meta.helm.sh/release-namespace": {{ .Release.Namespace }}
 +    "helm.sh/hook": "post-install, pre-upgrade, pre-rollback"
++    "helm.sh/hook-weight": "-5"
 +    "helm.sh/hook-delete-policy": "before-hook-creation"
 +spec:
 +  backoffLimit: 5
