@@ -23,6 +23,8 @@ from sysinv.common import utils as cutils
 from sysinv.helm import lifecycle_base as base
 from sysinv.helm import lifecycle_utils as lifecycle_utils
 from sysinv.helm.lifecycle_constants import LifecycleConstants
+from sysinv.common.kube_utils import KubeUtils
+from sysinv.common.kube_utils import KubeResourceType
 
 LOG = logging.getLogger(__name__)
 
@@ -38,6 +40,9 @@ class PlatformAppLifecycleOperator(base.AppLifecycleOperator):
         :param hook_info: LifecycleHookInfo object
 
         """
+
+        self.kube_utils = KubeUtils()
+
         # Semantic checks
         if hook_info.lifecycle_type == LifecycleConstants.APP_LIFECYCLE_TYPE_SEMANTIC_CHECK:
             # The kube_app logic does not send the hook_info.relative_timing value
@@ -90,6 +95,25 @@ class PlatformAppLifecycleOperator(base.AppLifecycleOperator):
         if not storage_backend_list:
             raise exception.LifecycleSemanticCheckException(
                 "Ceph storage backend not configured")
+
+        # Check if a StorageClass named 'general' may already be present in the system that
+        # is not provided by platform-integ-apps iteself, installation will be rejected
+        general_storage_class = self.kube_utils.get_resource(
+            resource_type=KubeResourceType.storage_class, name="general")
+
+        # Only the platform ceph-csi RBD provisioner is allowed to own the
+        # 'general' storage class. The rook-ceph app uses a namespace-prefixed
+        # provisioner (e.g. "rook-ceph.rbd.csi.ceph.com") that must be blocked,
+        # since a plain substring match on "csi.ceph" would wrongly accept it.
+        ALLOWED_PROVISIONER = "rbd.csi.ceph.com"
+
+        if general_storage_class:
+            provisioner = general_storage_class.get("provisioner", "") or ""
+            if provisioner != ALLOWED_PROVISIONER:
+                raise exception.LifecycleSemanticCheckException(
+                    "Another Storage Backend already deployed a "
+                    "general storage class. It's not possible to continue."
+                )
 
         crushmap_flag_file = os.path.join(constants.SYSINV_CONFIG_PATH,
                                           constants.CEPH_CRUSH_MAP_APPLIED)
